@@ -1,0 +1,6 @@
+{
+  "name": "Conexión Migrante EC-CA",
+  "description": "A web application for Conexión Migrante EC-CA, an association supporting the Ecuadorian community in Canada. It provides information about benefits, events, resources, and a contact method.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

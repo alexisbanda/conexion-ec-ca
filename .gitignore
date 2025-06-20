@@ -1,0 +1,34 @@
+# Node modules (no subir la carpeta node_modules)
+node_modules/
+
+# Archivos de entorno locales que contienen variables sensibles
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Directorio de build o producción (si Vite lo genera)
+dist/
+.build/
+
+# Archivos de lock de otros gestores si no usas (ejemplo yarn.lock si usas npm, o viceversa)
+# En tu caso tienes package-lock.json, déjalo fuera del gitignore para control de versiones.
+
+# Archivos del sistema (Mac, Windows, Linux)
+.DS_Store
+Thumbs.db
+
+# Carpeta .netlify local que puede contener configuraciones o caches
+.netlify/
+
+# Cache de IDEs/editor de código, ejemplo VSCode
+.vscode/
+*.code-workspace
+
+# Otros temporales o caches
+*.tmp
+*.swp
