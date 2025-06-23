@@ -15,7 +15,7 @@ export const AboutUs: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           <div className="md:w-1/2">
             <img 
-              src="https://picsum.photos/seed/communityevent/600/400" 
+              src="/assets/images/quienes_somos.png"
               alt="Evento comunitario de ecuatorianos en Canadá" 
               className="rounded-lg shadow-xl w-full h-auto object-cover"
               loading="lazy"

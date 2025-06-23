@@ -1,8 +1,20 @@
-
 import React from 'react';
 
 export const ChatBubbleLeftRightIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3.696-3.696A4.503 4.503 0 0014.25 15H5.25c-2.485 0-4.5-2.015-4.5-4.5s2.015-4.5 4.5-4.5H12.75a4.5 4.5 0 014.47 4.088c.002.02.004.04.004.061v.005L16.5 9.75l3.75-1.239zM4.5 6a3 3 0 00-3 3v4.5c0 1.657 1.343 3 3 3h7.5c.983 0 1.865-.443 2.48-1.152L18 18.75v-2.189c.399-.077.785-.183 1.157-.323A3.003 3.003 0 0022.5 13.5V9.214a3.001 3.001 0 00-2.222-2.915M13.5 6.75L9.75 5.511m5.25 1.239L13.5 6.75m0 0L9.75 5.511M13.5 6.75v3.375c0 .621.504 1.125 1.125 1.125h1.5c.621 0 1.125-.504 1.125-1.125V6.75m-3.75 0h3.75" />
-  </svg>
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        {...props}
+    >
+        {/* Burbuja principal */}
+        <path d="M4 4h16v12H6l-4 4V4z" />
+        {/* Líneas internas simulando texto */}
+        <line x1="8" y1="9" x2="16" y2="9" />
+        <line x1="8" y1="13" x2="14" y2="13" />
+    </svg>
 );

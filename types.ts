@@ -4,6 +4,7 @@ export interface NavItem {
   label: string;
   href: string;
   target?: string;
+  isPremium?: boolean; // Para controlar la visibilidad en la navegación
 }
 
 export interface Benefit {
@@ -12,7 +13,9 @@ export interface Benefit {
   title: string;
   shortDescription: string;
   detailedDescription: string;
-  imageUrl?: string; 
+  imageUrl?: string;
+  resourceLink?: string; // Para enlazar con recursos
+  isPremium?: boolean; // Para marcar beneficios premium
 }
 
 export interface Testimonial {
@@ -29,6 +32,7 @@ export interface EventItem {
   date: string;
   description: string;
   imageUrl?: string;
+  isPremium?: boolean; // Para marcar eventos premium
 }
 
 export interface NewsItem {
@@ -36,6 +40,7 @@ export interface NewsItem {
   title: string;
   summary: string;
   link: string;
+  isPremium?: boolean; // Para marcar noticias premium
 }
 
 export interface Resource {
@@ -44,6 +49,7 @@ export interface Resource {
   title: string;
   description: string;
   details?: string; // For modal
+  isPremium?: boolean; // Para marcar recursos premium
 }
 
 export interface Tool {
@@ -52,6 +58,7 @@ export interface Tool {
   title: string;
   description: string;
   modalContent: React.ReactNode;
+  isPremium?: boolean; // Para marcar herramientas premium
 }
 
 export enum ModalContentType {
@@ -69,7 +76,7 @@ export interface ModalState {
   title?: string;
   content?: React.ReactNode;
   type?: ModalContentType;
-  fullWidth?: boolean; 
+  fullWidth?: boolean;
 }
 
 // Authentication Types
@@ -106,8 +113,8 @@ export interface CommunityServiceItem {
   id: string;
   serviceName: string;
   type: ServiceType;
-  contact: string; 
+  contact: string;
   city: string;
-  website?: string; 
+  website?: string;
   websiteText?: string;
 }

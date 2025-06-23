@@ -1,4 +1,3 @@
-
 import { NavItem } from './types';
 
 export const ECUADOR_COLORS = {
@@ -18,6 +17,8 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Eventos', href: '#events-news' },
   { label: 'Recursos', href: '#resources-tools' },
   { label: 'Contacto', href: '#contact' },
+  { label: 'Mi Espacio', href: '/dashboard', isPremium: true }, // <-- CAMBIAR A /dashboard
 ];
 
-export const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID_HERE"; // Replace with your Formspree endpoint
+// Asegúrate de reemplazar esto con tu endpoint real de Formspree
+export const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID_HERE";

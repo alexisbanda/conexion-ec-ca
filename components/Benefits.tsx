@@ -13,7 +13,7 @@ const benefitsData: Benefit[] = [
     title: 'Red de Contactos',
     shortDescription: 'Conecta con otros ecuatorianos, comparte experiencias y amplía tu red profesional y social.',
     detailedDescription: 'Nuestra comunidad es un crisol de talentos y experiencias. Participa en eventos de networking, únete a grupos de interés y encuentra mentores o colaboradores. Expandir tu red es crucial para tu desarrollo en Canadá.',
-    imageUrl: 'https://picsum.photos/seed/networking/400/300',
+    imageUrl: '/assets/images/red_contactos.png',
   },
   {
     id: '2',
@@ -21,7 +21,7 @@ const benefitsData: Benefit[] = [
     title: 'Oportunidades Laborales',
     shortDescription: 'Accede a ofertas de empleo, talleres de preparación y asesoramiento profesional.',
     detailedDescription: 'Te ayudamos a navegar el mercado laboral canadiense. Ofrecemos talleres para mejorar tu CV, prepararte para entrevistas y conectarte con empleadores que valoran el talento migrante. También compartimos ofertas de empleo exclusivas.',
-    imageUrl: 'https://picsum.photos/seed/jobsearch/400/300',
+    imageUrl: '/assets/images/oportunidades_laborales.png',
   },
   {
     id: '3',
@@ -29,7 +29,7 @@ const benefitsData: Benefit[] = [
     title: 'Apoyo Educativo',
     shortDescription: 'Información sobre estudios, becas y convalidación de títulos en Canadá.',
     detailedDescription: 'Canadá ofrece excelentes oportunidades educativas. Te guiamos en el proceso de selección de programas, solicitud de becas y el complejo proceso de convalidación de tus estudios previos para que puedas continuar tu formación.',
-    imageUrl: 'https://picsum.photos/seed/education/400/300',
+    imageUrl: '/assets/images/apoyo_educativo.png',
   },
   {
     id: '4',
@@ -37,7 +37,7 @@ const benefitsData: Benefit[] = [
     title: 'Asesoría en Vivienda',
     shortDescription: 'Orientación para encontrar alojamiento, entender contratos y derechos como inquilino.',
     detailedDescription: 'Encontrar un hogar es un paso fundamental. Te ofrecemos recursos y consejos para buscar vivienda, comprender los contratos de alquiler y conocer tus derechos y responsabilidades como inquilino en Canadá.',
-    imageUrl: 'https://picsum.photos/seed/housing/400/300',
+    imageUrl: '/assets/images/apoyo_vivienda.png',
   },
   {
     id: '5',
@@ -45,7 +45,7 @@ const benefitsData: Benefit[] = [
     title: 'Integración y Cultura',
     shortDescription: 'Eventos culturales, talleres de adaptación y un espacio para sentirte como en casa.',
     detailedDescription: 'Celebramos nuestras raíces ecuatorianas y te ayudamos a adaptarte a la vida en Canadá. Organizamos eventos culturales, festivales, talleres de idiomas y grupos de conversación para que te sientas conectado y apoyado.',
-    imageUrl: 'https://picsum.photos/seed/culture/400/300',
+    imageUrl: '/assets/images/integracion_cultural.png',
   },
 ];
 
