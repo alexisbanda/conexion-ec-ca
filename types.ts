@@ -1,10 +1,66 @@
+// /home/alexis/Sites/Landings/conexion-ec-ca/types.ts
 import React from 'react';
+import { Timestamp } from 'firebase/firestore';
 
+// --- TIPOS DE AUTENTICACIÓN Y USUARIO (Unificados) ---
+export interface User {
+  id: string; // Firebase UID
+  name: string | null; // Firebase displayName
+  email: string | null; // Firebase email
+  role?: 'admin' | 'member'; // Rol del usuario (admin o member)
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  loading: boolean;
+}
+
+export interface AuthContextType extends AuthState {
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  openLoginModal: () => void;
+  openRegisterModal: () => void;
+  openUserProfileModal: () => void;
+  closeAuthModal: () => void;
+  authModalState: ModalState;
+}
+
+// --- TIPOS DE CONTENIDO ---
 export interface NavItem {
   label: string;
   href: string;
   target?: string;
-  isPremium?: boolean; // Para controlar la visibilidad en la navegación
+  isPremium?: boolean;
+  adminOnly?: boolean; // <-- AÑADIR ESTA LÍNEA
+}
+
+export enum ServiceType {
+  OFERTA = 'Oferta',
+  DEMANDA = 'Demanda',
+}
+
+export enum ServiceStatus {
+  PENDIENTE = 'Pendiente',
+  APROBADO = 'Aprobado',
+  RECHAZADO = 'Rechazado',
+}
+
+// --- INTERFAZ CommunityServiceItem (Unificada) ---
+export interface CommunityServiceItem {
+  id: string;
+  serviceName: string;
+  type: ServiceType;
+  contact: string;
+  contactName: string;
+  city: string;
+  website?: string;
+  websiteText?: string;
+  userId: string;
+  createdAt: Timestamp;
+  status: ServiceStatus;
 }
 
 export interface Benefit {
@@ -14,8 +70,8 @@ export interface Benefit {
   shortDescription: string;
   detailedDescription: string;
   imageUrl?: string;
-  resourceLink?: string; // Para enlazar con recursos
-  isPremium?: boolean; // Para marcar beneficios premium
+  resourceLink?: string;
+  isPremium?: boolean;
 }
 
 export interface Testimonial {
@@ -32,7 +88,7 @@ export interface EventItem {
   date: string;
   description: string;
   imageUrl?: string;
-  isPremium?: boolean; // Para marcar eventos premium
+  isPremium?: boolean;
 }
 
 export interface NewsItem {
@@ -40,7 +96,7 @@ export interface NewsItem {
   title: string;
   summary: string;
   link: string;
-  isPremium?: boolean; // Para marcar noticias premium
+  isPremium?: boolean;
 }
 
 export interface Resource {
@@ -48,8 +104,8 @@ export interface Resource {
   icon: React.ReactNode;
   title: string;
   description: string;
-  details?: string; // For modal
-  isPremium?: boolean; // Para marcar recursos premium
+  details?: string;
+  isPremium?: boolean;
 }
 
 export interface Tool {
@@ -58,9 +114,10 @@ export interface Tool {
   title: string;
   description: string;
   modalContent: React.ReactNode;
-  isPremium?: boolean; // Para marcar herramientas premium
+  isPremium?: boolean;
 }
 
+// --- TIPOS DE MODAL ---
 export enum ModalContentType {
   BENEFIT_DETAILS,
   RESOURCE_DETAILS,
@@ -77,44 +134,4 @@ export interface ModalState {
   content?: React.ReactNode;
   type?: ModalContentType;
   fullWidth?: boolean;
-}
-
-// Authentication Types
-export interface User {
-  id: string; // Firebase UID
-  name: string | null; // Firebase displayName
-  email: string | null; // Firebase email
-}
-
-export interface AuthState {
-  isAuthenticated: boolean;
-  user: User | null;
-  loading: boolean;
-}
-
-export interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  openLoginModal: () => void;
-  openRegisterModal: () => void;
-  openUserProfileModal: () => void;
-  closeAuthModal: () => void;
-  authModalState: ModalState;
-}
-
-// Community Directory Types
-export enum ServiceType {
-  OFERTA = 'Oferta',
-  DEMANDA = 'Demanda',
-}
-
-export interface CommunityServiceItem {
-  id: string;
-  serviceName: string;
-  type: ServiceType;
-  contact: string;
-  city: string;
-  website?: string;
-  websiteText?: string;
 }

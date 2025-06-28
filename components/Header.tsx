@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
+// /home/alexis/Sites/Landings/conexion-ec-ca/components/Header.tsx
+import React, { useState, useEffect, useContext, useMemo } from 'react'; // <-- Importar useMemo
 import { NAV_ITEMS } from '../constants';
 import { NavItem } from '../types';
 import { AuthContext } from '../contexts/AuthContext';
@@ -13,15 +14,32 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
   const [isSticky, setIsSticky] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const auth = useContext(AuthContext);
-  const location = useLocation(); // Hook para obtener la ubicación actual
-  const navigate = useNavigate(); // Hook para navegar programáticamente
+  const location = useLocation();
+  const navigate = useNavigate();
 
   if (!auth) {
     console.error("AuthContext is not available");
     return <header>Error loading header: AuthContext missing.</header>;
   }
 
-  const { isAuthenticated, logout, openLoginModal, openRegisterModal } = auth;
+  const { isAuthenticated, user, logout, openLoginModal, openRegisterModal } = auth;
+
+  // --- INICIO DE LA MODIFICACIÓN: LÓGICA DE FILTRADO DE ENLACES ---
+  const visibleNavItems = useMemo(() => {
+    return NAV_ITEMS.filter(item => {
+      // Ocultar si es solo para admin y el usuario no es admin
+      if (item.adminOnly && user?.role !== 'admin') {
+        return false;
+      }
+      // Ocultar si es premium y el usuario no está autenticado
+      if (item.isPremium && !isAuthenticated) {
+        return false;
+      }
+      // En todos los demás casos, mostrar el item
+      return true;
+    });
+  }, [isAuthenticated, user?.role]); // Recalcular solo si cambia la autenticación o el rol
+  // --- FIN DE LA MODIFICACIÓN ---
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,7 +48,6 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
     if (!isDashboardPage) {
       window.addEventListener('scroll', handleScroll);
     } else {
-      // Si estamos en el dashboard, el header siempre es "sticky"
       setIsSticky(true);
     }
     return () => {
@@ -41,31 +58,25 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
   }, [isDashboardPage]);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
-    // Si no es un enlace de ancla (no empieza con #), deja que el componente Link haga su trabajo
     if (!href.startsWith('#')) {
       setMobileMenuOpen(false);
       return;
     }
-
-    e.preventDefault(); // Previene el comportamiento por defecto del ancla
-
+    e.preventDefault();
     const targetId = href.substring(1);
-
-    // Si ya estamos en la página de inicio, solo haz scroll
     if (location.pathname === '/') {
       const targetElement = document.getElementById(targetId);
       if (targetElement) {
         targetElement.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
-      // Si estamos en otra página (ej. /dashboard), navega a la home y luego haz scroll
       navigate('/');
       setTimeout(() => {
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
           targetElement.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100); // Un pequeño delay para asegurar que la página haya cambiado
+      }, 100);
     }
     setMobileMenuOpen(false);
   };
@@ -98,19 +109,20 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
             Conexión<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>Migrante</span>
           </Link>
           <div className="flex items-center">
+            {/* Usamos visibleNavItems en lugar de NAV_ITEMS */}
             <nav className="hidden md:flex space-x-6 items-center">
-              {NAV_ITEMS.map((item: NavItem) => {
-                if (item.isPremium && !isAuthenticated) {
-                  return null;
-                }
+              {visibleNavItems.map((item: NavItem) => {
                 const isDashboardLink = isAuthenticated && item.href === '/dashboard';
+                // --- MODIFICACIÓN: Estilo para el enlace de admin ---
+                const isAdminLink = item.href === '/admin';
                 const linkClasses = `
                     font-medium transition-colors
                     ${isDashboardLink
                     ? 'bg-ecuador-red text-white py-2 px-4 rounded-md shadow-md hover:bg-red-700'
                     : (headerIsSolid ? 'text-white' : 'text-white text-shadow-sm')
                 }
-                    ${!isDashboardLink ? 'hover:text-ecuador-yellow' : ''}
+                    ${!isDashboardLink && !isAdminLink ? 'hover:text-ecuador-yellow' : ''}
+                    ${isAdminLink ? 'text-ecuador-yellow font-semibold hover:brightness-110' : ''}
                 `;
 
                 return (
@@ -169,22 +181,21 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
             </div>
           </div>
         </div>
-        {/* Mobile Menu */}
+        {/* Mobile Menu: Usamos visibleNavItems también aquí */}
         {mobileMenuOpen && (
             <div className="md:hidden absolute top-full left-0 right-0 bg-ecuador-blue shadow-lg py-3">
               <nav className="flex flex-col items-center space-y-3">
-                {NAV_ITEMS.map((item: NavItem) => {
-                  if (item.isPremium && !isAuthenticated) {
-                    return null;
-                  }
+                {visibleNavItems.map((item: NavItem) => {
                   const isDashboardLink = isAuthenticated && item.href === '/dashboard';
+                  const isAdminLink = item.href === '/admin';
                   const linkClasses = `
                       font-medium transition-colors
                       ${isDashboardLink
                       ? 'bg-ecuador-red text-white py-2 px-4 rounded-md shadow-md hover:bg-red-700'
                       : 'text-white'
                   }
-                      ${!isDashboardLink ? 'hover:text-ecuador-yellow' : ''}
+                      ${!isDashboardLink && !isAdminLink ? 'hover:text-ecuador-yellow' : ''}
+                      ${isAdminLink ? 'text-ecuador-yellow font-semibold' : ''}
                   `;
 
                   return (

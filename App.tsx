@@ -1,9 +1,9 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/App.tsx
-import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Importa useLocation
+import React, { useContext, useEffect } from 'react'; // Importa useEffect
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 
-// Importa tus componentes de sección como componentes de página
+// Importa tus componentes
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { AboutUs } from './components/AboutUs';
@@ -15,6 +15,8 @@ import { Footer } from './components/Footer';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { AuthModals } from './components/AuthModals';
 import { MemberDashboard } from './components/MemberDashboard';
+import { AdminDashboard } from './components/AdminDashboard';
+import AdminRoute from './components/AdminRoute';
 
 // Componente para la página principal (Landing Page)
 const LandingPage: React.FC = () => (
@@ -29,43 +31,53 @@ const LandingPage: React.FC = () => (
     </>
 );
 
+// --- INICIO DE LA CORRECCIÓN ---
 // Componente para proteger rutas que requieren autenticación
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const auth = useContext(AuthContext);
 
-    if (!auth) return <div>Cargando...</div>;
-    if (auth.loading) return <div>Verificando autenticación...</div>; // Muestra un loader mientras se verifica
-
-    // Si no está autenticado, puedes redirigir a la home y abrir el modal de login
-    if (!auth.isAuthenticated) {
-        React.useEffect(() => {
+    // Los Hooks siempre deben llamarse en el nivel superior.
+    // La lógica condicional va DENTRO del Hook.
+    useEffect(() => {
+        // Solo queremos abrir el modal si la carga ha terminado y el usuario NO está autenticado.
+        if (auth && !auth.loading && !auth.isAuthenticated) {
             auth.openLoginModal();
-        }, [auth]);
+        }
+    }, [auth?.loading, auth?.isAuthenticated, auth?.openLoginModal]); // Dependencias específicas
+
+    if (!auth) {
+        return <div>Cargando...</div>;
+    }
+    if (auth.loading) {
+        return <div>Verificando autenticación...</div>; // Muestra un loader mientras se verifica
+    }
+
+    // Si no está autenticado, redirigimos. El useEffect de arriba se encargará de abrir el modal.
+    if (!auth.isAuthenticated) {
         return <Navigate to="/" replace />;
     }
 
     return <>{children}</>;
 };
+// --- FIN DE LA CORRECCIÓN ---
 
 
 const App: React.FC = () => {
     return (
         <AuthProvider>
             <Router>
-                <AppContentWithHeader /> {/* Nuevo componente envoltorio para usar useLocation */}
+                <AppContentWithHeader />
             </Router>
         </AuthProvider>
     );
 };
 
-// Nuevo componente para envolver el contenido principal y pasar props basadas en la ubicación
 const AppContentWithHeader: React.FC = () => {
-    const location = useLocation(); // Obtiene la ubicación actual
-    const isDashboardPage = location.pathname === '/dashboard'; // Verifica si es la página del dashboard
-
+    const location = useLocation();
+    const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin');
     return (
         <div className="flex flex-col min-h-screen">
-            <Header isDashboardPage={isDashboardPage} /> {/* Pasa la prop */}
+            <Header isDashboardPage={isDashboardPage} />
             <main className="flex-grow">
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
@@ -77,8 +89,15 @@ const AppContentWithHeader: React.FC = () => {
                             </ProtectedRoute>
                         }
                     />
-                    {/* Puedes añadir más rutas aquí, como /perfil, /eventos, etc. */}
-                    <Route path="*" element={<Navigate to="/" />} /> {/* Redirige cualquier ruta no encontrada a la home */}
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminRoute>
+                                <AdminDashboard />
+                            </AdminRoute>
+                        }
+                    />
+                    <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
             </main>
             <Footer />
