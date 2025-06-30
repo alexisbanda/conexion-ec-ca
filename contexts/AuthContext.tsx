@@ -6,6 +6,7 @@ import { auth } from '../firebaseConfig';
 import { User, AuthContextType, AuthState, ModalState, ModalContentType, RegistrationData, UserStatus } from '../types';
 import { getUserData, createUserDocument } from '../services/userService';
 import toast from 'react-hot-toast';
+import { sendWelcomeEmail } from '../services/emailService'; // <-- 1. IMPORTAR
 
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
@@ -71,13 +72,25 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw new Error("Nombre, email y contraseña son requeridos.");
     }
 
+    // 1. Crear el usuario en Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
     if (userCredential.user) {
       const { user } = userCredential;
+
+      // 2. Actualizar el perfil de Firebase (nombre visible)
       await updateProfile(user, { displayName: name });
+
+      // 3. Crear nuestro documento de usuario personalizado en Firestore
       await createUserDocument(user.uid, registrationData);
 
+      // --- ¡AQUÍ ESTÁ LA INTEGRACIÓN! ---
+      // 4. Enviar el correo de bienvenida a través de nuestra Netlify Function.
+      // Se ejecuta de forma asíncrona y no bloquea el flujo del usuario.
+      await sendWelcomeEmail({ name, email });
+      // --- FIN DE LA INTEGRACIÓN ---
+
+      // 5. Cerrar el modal y notificar al usuario del éxito
       closeAuthModal();
       toast.success(
           '¡Registro exitoso! Tu cuenta está pendiente de aprobación.',

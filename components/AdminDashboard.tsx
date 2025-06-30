@@ -5,7 +5,7 @@ import { getAllServicesForAdmin, updateServiceStatus } from '../services/directo
 // --- CAMBIO: Importamos getAllUsers en lugar de getPendingUsers ---
 import { getAllUsers, updateUserStatus as updateUserStatusService } from '../services/userService';
 import { CheckCircleIcon, XCircleIcon } from './icons';
-
+import { sendApprovalEmail } from '../services/emailService'; // <-- 1. IMPORTAR EL NUEVO SERVICIO
 // --- COMPONENTES REUTILIZABLES ---
 
 const ActionButton: React.FC<{ onClick: () => void; className: string; children: React.ReactNode; disabled?: boolean }> = ({ onClick, className, children, disabled }) => (
@@ -107,7 +107,20 @@ export const AdminDashboard: React.FC = () => {
     const handleUserStatusUpdate = async (userId: string, newStatus: UserStatus) => {
         try {
             await updateUserStatusService(userId, newStatus);
-            setAllUsers(prev => prev.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+
+            // Actualizar el estado local de la UI
+            const updatedUsers = allUsers.map(u => u.id === userId ? { ...u, status: newStatus } : u);
+            setAllUsers(updatedUsers);
+
+            // --- 2. ENVIAR CORREO SI SE APRUEBA ---
+            if (newStatus === UserStatus.APROBADO) {
+                const userToNotify = updatedUsers.find(u => u.id === userId);
+                if (userToNotify && userToNotify.email && userToNotify.name) {
+                    await sendApprovalEmail({ name: userToNotify.name, email: userToNotify.email });
+                }
+            }
+            // --- FIN DE LA INTEGRACIÓN ---
+
         } catch (err) {
             alert(`Error al actualizar el estado del usuario.`);
             console.error(err);
