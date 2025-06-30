@@ -1,6 +1,14 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/types.ts
+
 import React from 'react';
 import { Timestamp } from 'firebase/firestore';
+
+// --- AÑADIR ENUM PARA EL ESTADO DEL USUARIO ---
+export enum UserStatus {
+  PENDIENTE = 'Pendiente',
+  APROBADO = 'Aprobado',
+  RECHAZADO = 'Rechazado',
+}
 
 // --- TIPOS DE AUTENTICACIÓN Y USUARIO (Unificados) ---
 export interface User {
@@ -8,18 +16,42 @@ export interface User {
   name: string | null; // Firebase displayName
   email: string | null; // Firebase email
   role?: 'admin' | 'member'; // Rol del usuario (admin o member)
+  status?: UserStatus; // <-- Usar el enum
+  // Campos adicionales del registro
+  arrivalDateCanada?: Timestamp;
+  city?: string;
+  immigrationStatus?: string;
+  supportNeeded?: string[];
+  message?: string;
+  newsletterSubscription?: boolean;
+  createdAt?: Timestamp; // Fecha de creación del perfil
 }
 
+// ... (el resto del archivo no necesita cambios, pero asegúrate de que esté así)
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   loading: boolean;
 }
 
+// Datos que se pasarán a la función de registro
+export interface RegistrationData {
+  name: string;
+  email: string;
+  password?: string; // Hacer la contraseña opcional aquí
+  arrivalDateCanada?: Date;
+  city?: string;
+  immigrationStatus?: string;
+  supportNeeded?: string[];
+  message?: string;
+  newsletterSubscription?: boolean;
+}
+
+
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (registrationData: RegistrationData) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   openLoginModal: () => void;
   openRegisterModal: () => void;
@@ -28,13 +60,13 @@ export interface AuthContextType extends AuthState {
   authModalState: ModalState;
 }
 
-// --- TIPOS DE CONTENIDO ---
+// ... (resto de tipos sin cambios)
 export interface NavItem {
   label: string;
   href: string;
   target?: string;
   isPremium?: boolean;
-  adminOnly?: boolean; // <-- AÑADIR ESTA LÍNEA
+  adminOnly?: boolean;
 }
 
 export enum ServiceType {
@@ -48,7 +80,6 @@ export enum ServiceStatus {
   RECHAZADO = 'Rechazado',
 }
 
-// --- INTERFAZ CommunityServiceItem (Unificada) ---
 export interface CommunityServiceItem {
   id: string;
   serviceName: string;
@@ -63,61 +94,6 @@ export interface CommunityServiceItem {
   status: ServiceStatus;
 }
 
-export interface Benefit {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  shortDescription: string;
-  detailedDescription: string;
-  imageUrl?: string;
-  resourceLink?: string;
-  isPremium?: boolean;
-}
-
-export interface Testimonial {
-  id: string;
-  quote: string;
-  author: string;
-  role: string;
-  imageUrl?: string;
-}
-
-export interface EventItem {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  imageUrl?: string;
-  isPremium?: boolean;
-}
-
-export interface NewsItem {
-  id: string;
-  title: string;
-  summary: string;
-  link: string;
-  isPremium?: boolean;
-}
-
-export interface Resource {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  details?: string;
-  isPremium?: boolean;
-}
-
-export interface Tool {
-  id: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  modalContent: React.ReactNode;
-  isPremium?: boolean;
-}
-
-// --- TIPOS DE MODAL ---
 export enum ModalContentType {
   BENEFIT_DETAILS,
   RESOURCE_DETAILS,

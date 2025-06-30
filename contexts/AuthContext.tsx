@@ -1,9 +1,11 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/contexts/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User as FirebaseUserType, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import { User, AuthContextType, AuthState, ModalState, ModalContentType } from '../types';
-import { getUserData } from '../services/userService';
+import { User, AuthContextType, AuthState, ModalState, ModalContentType, RegistrationData, UserStatus } from '../types';
+import { getUserData, createUserDocument } from '../services/userService';
+import toast from 'react-hot-toast';
 
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
@@ -18,6 +20,7 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const navigate = useNavigate();
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const [authModalState, setAuthModalState] = useState<ModalState>({ isOpen: false });
 
@@ -30,25 +33,27 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUserType | null) => {
       if (firebaseUser) {
-        // --- INICIO DE LA CORRECCIÓN ---
-        // Mantenemos el estado de carga mientras buscamos datos adicionales.
-        let appUser: User = {
+        const additionalData = await getUserData(firebaseUser.uid);
+        const appUser: User = {
           id: firebaseUser.uid,
           name: firebaseUser.displayName,
           email: firebaseUser.email,
+          ...additionalData,
         };
 
-        const additionalData = await getUserData(firebaseUser.uid);
-        if (additionalData) {
-          appUser = { ...appUser, ...additionalData };
+        const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
+
+        // Este efecto ahora solo se encarga de mantener la sesión al recargar la página.
+        // La actualización de estado inmediata la hace la función de login.
+        setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
+
+        if (isApproved) {
+          console.log("Auth Provider: User session restored and approved.", appUser);
+        } else {
+          console.log(`Auth Provider: User session restored but not approved. Status: ${appUser.status}`);
         }
 
-        // Solo cuando tenemos toda la información, actualizamos el estado y ponemos loading en false.
-        setAuthState({ user: appUser, isAuthenticated: true, loading: false });
-        console.log("Auth Provider: User is signed in with all data.", appUser);
-        // --- FIN DE LA CORRECCIÓN ---
       } else {
-        // Si no hay usuario, la carga ha terminado.
         setAuthState({ user: null, isAuthenticated: false, loading: false });
         console.log("Auth Provider: User is signed out.");
       }
@@ -57,58 +62,93 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // ... (el resto de las funciones: login, register, logout, etc. no necesitan cambios)
+  const register = async (registrationData: RegistrationData): Promise<void> => {
+    if (!auth) throw new Error("Firebase auth is not initialized.");
+
+    const { email, password, name } = registrationData;
+
+    if (!email || !password || !name) {
+      throw new Error("Nombre, email y contraseña son requeridos.");
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+    if (userCredential.user) {
+      const { user } = userCredential;
+      await updateProfile(user, { displayName: name });
+      await createUserDocument(user.uid, registrationData);
+
+      closeAuthModal();
+      toast.success(
+          '¡Registro exitoso! Tu cuenta está pendiente de aprobación.',
+          {
+            duration: 6000,
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+          }
+      );
+    }
+  };
+
+  // --- INICIO DE LA CORRECCIÓN ---
   const login = async (email: string, password: string): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
-    console.log("Auth Provider: Attempting login for", email);
-    await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged will handle setting user state
-    closeAuthModal();
-    console.log("Auth Provider: Login successful trigger for", email);
-  };
 
-  const register = async (name: string, email: string, password: string): Promise<void> => {
-    if (!auth) throw new Error("Firebase auth is not initialized.");
-    console.log("Auth Provider: Attempting registration for", name, email);
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    if (userCredential.user) {
-      // 1. Actualiza el perfil en Firebase (esto ya lo hacías)
-      await updateProfile(userCredential.user, { displayName: name });
-      console.log("Auth Provider: Registration successful, user profile updated with name.");
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
 
-      // 2. Actualiza el estado local INMEDIATAMENTE para que la UI refleje el cambio.
-      //    onAuthStateChanged ya se disparó, pero sin el 'displayName'.
-      //    Esta actualización manual sincroniza el estado de la app.
-      const updatedUser: User = {
-        id: userCredential.user.uid,
-        name: name, // Usamos el nombre que acabamos de establecer
-        email: userCredential.user.email,
+    if (firebaseUser) {
+      const additionalData = await getUserData(firebaseUser.uid);
+
+      // 1. Construimos el objeto de usuario completo
+      const appUser: User = {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName,
+        email: firebaseUser.email,
+        ...additionalData,
       };
-      setAuthState({ user: updatedUser, isAuthenticated: true, loading: false });
-      console.log("Auth Provider: Local state updated manually with user name.", updatedUser);
+
+      // 2. Determinamos si está aprobado
+      const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
+
+      // 3. ¡LA CLAVE! Actualizamos el estado de la aplicación INMEDIATAMENTE
+      setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
+
+      // 4. Cerramos el modal
+      closeAuthModal();
+
+      // 5. Ahora navegamos, con el estado ya actualizado
+      if (appUser.role === 'admin') {
+        navigate('/admin');
+      } else if (appUser.status === UserStatus.APROBADO) {
+        navigate('/dashboard');
+      } else if (appUser.status === UserStatus.PENDIENTE) {
+        navigate('/pending-approval');
+      } else {
+        // Caso para usuarios rechazados o con estado inválido
+        toast.error('Tu cuenta no tiene acceso. Contacta a un administrador.');
+        // Lo dejamos en la página de inicio
+        navigate('/');
+      }
     }
-    // onAuthStateChanged will handle setting user state
-    closeAuthModal();
   };
+  // --- FIN DE LA CORRECCIÓN ---
 
   const logout = async (): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
-    console.log("Auth Provider: Logging out...");
     await signOut(auth);
-    // onAuthStateChanged will handle setting user state to null
-    closeAuthModal(); // Close any open auth modals
-    console.log("Auth Provider: Logout successful.");
+    closeAuthModal();
+    navigate('/');
   };
 
   const sendPasswordReset = async (email: string): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
-    console.log("Auth Provider: Sending password reset email to", email);
     await sendPasswordResetEmail(auth, email);
-    // The component calling this will handle the UI update (e.g., showing a success message).
   };
 
   const openLoginModal = () => {
-    console.log("Auth Provider: Opening login modal");
     setAuthModalState({
       isOpen: true,
       title: 'Iniciar Sesión',
@@ -117,7 +157,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const openRegisterModal = () => {
-    console.log("Auth Provider: Opening register modal");
     setAuthModalState({
       isOpen: true,
       title: 'Crear Cuenta',
@@ -127,7 +166,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const openUserProfileModal = () => {
     if (authState.isAuthenticated && authState.user) {
-      console.log("Auth Provider: Opening user profile modal for", authState.user.name);
       setAuthModalState({
         isOpen: true,
         title: `Perfil de ${authState.user.name || 'Usuario'}`,
@@ -137,7 +175,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const closeAuthModal = () => {
-    console.log("Auth Provider: Closing auth modal");
     setAuthModalState({ isOpen: false });
   };
 

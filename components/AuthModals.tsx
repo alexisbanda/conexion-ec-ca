@@ -172,10 +172,23 @@ const RegisterForm: React.FC<{
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [arrivalDateCanada, setArrivalDateCanada] = useState('');
+    const [city, setCity] = useState('');
+    const [immigrationStatus, setImmigrationStatus] = useState('');
+    const [supportNeeded, setSupportNeeded] = useState<string[]>([]);
+    const [message, setMessage] = useState('');
+    const [newsletterSubscription, setNewsletterSubscription] = useState(false);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!auth) return <p>Error: Auth context no disponible.</p>;
+
+    const handleSupportNeededChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = e.target;
+        setSupportNeeded(prev => 
+            checked ? [...prev, value] : prev.filter(item => item !== value)
+        );
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -186,7 +199,17 @@ const RegisterForm: React.FC<{
         }
         setIsSubmitting(true);
         try {
-            await auth.register(name, email, password);
+            await auth.register({
+                name,
+                email,
+                password,
+                arrivalDateCanada: arrivalDateCanada ? new Date(arrivalDateCanada) : undefined,
+                city,
+                immigrationStatus,
+                supportNeeded,
+                message,
+                newsletterSubscription
+            });
             // Modal will be closed by AuthContext on successful registration
         } catch (err) {
             console.error("Registration error:", err);
@@ -209,78 +232,65 @@ const RegisterForm: React.FC<{
                     {error}
                 </div>
             )}
+            {/* Campos existentes */}
             <div>
                 <label htmlFor="register-name" className="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <IdentificationIcon className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                        id="register-name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        className="mt-1 block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                        placeholder="Tu Nombre Completo"
-                        autoComplete="name"
-                    />
-                </div>
+                <input id="register-name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm" />
             </div>
             <div>
                 <label htmlFor="register-email" className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                        id="register-email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="mt-1 block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                        placeholder="tu@correo.com"
-                        autoComplete="email"
-                    />
-                </div>
+                <input id="register-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm" />
             </div>
             <div>
                 <label htmlFor="register-password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <LockClosedIcon className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                        id="register-password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="mt-1 block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                        placeholder="Mínimo 6 caracteres"
-                        autoComplete="new-password"
-                    />
-                </div>
+                <input id="register-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm" />
             </div>
             <div>
                 <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <LockClosedIcon className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                        id="confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        className="mt-1 block w-full pl-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                        placeholder="Repite tu contraseña"
-                        autoComplete="new-password"
-                    />
+                <input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm" />
+            </div>
+
+            {/* Nuevos campos */}
+            <div>
+                <label htmlFor="arrival-date" className="block text-sm font-medium text-gray-700 mb-1">¿Cuándo llegaste a Canadá?</label>
+                <input id="arrival-date" type="date" value={arrivalDateCanada} onChange={(e) => setArrivalDateCanada(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm" />
+            </div>
+            <div>
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">Ciudad donde vives</label>
+                <input id="city" type="text" value={city} onChange={(e) => setCity(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm" />
+            </div>
+            <div>
+                <label htmlFor="immigration-status" className="block text-sm font-medium text-gray-700 mb-1">Estatus migratorio</label>
+                <select id="immigration-status" value={immigrationStatus} onChange={(e) => setImmigrationStatus(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm">
+                    <option value="">Selecciona...</option>
+                    <option value="residente-permanente">Residente Permanente</option>
+                    <option value="ciudadano">Ciudadano</option>
+                    <option value="trabajador-temporal">Trabajador Temporal</option>
+                    <option value="estudiante-internacional">Estudiante Internacional</option>
+                    <option value="refugiado">Refugiado</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">¿Qué tipo de apoyo necesitas?</label>
+                <div className="space-y-2">
+                    {['Empleo', 'Vivienda', 'Idioma', 'Comunidad', 'Asesoría', 'Otro'].map(item => (
+                        <div key={item} className="flex items-center">
+                            <input id={`support-${item}`} type="checkbox" value={item} onChange={handleSupportNeededChange} className="h-4 w-4 text-ecuador-blue focus:ring-ecuador-yellow border-gray-300 rounded" />
+                            <label htmlFor={`support-${item}`} className="ml-3 block text-sm text-gray-900">{item}</label>
+                        </div>
+                    ))}
                 </div>
             </div>
+            <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Mensaje o comentario</label>
+                <textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} rows={3} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"></textarea>
+            </div>
+            <div className="flex items-center">
+                <input id="newsletter" type="checkbox" checked={newsletterSubscription} onChange={(e) => setNewsletterSubscription(e.target.checked)} className="h-4 w-4 text-ecuador-blue focus:ring-ecuador-yellow border-gray-300 rounded" />
+                <label htmlFor="newsletter" className="ml-3 block text-sm text-gray-900">Deseo recibir noticias y eventos de la comunidad por correo</label>
+            </div>
+
             <button
                 type="submit"
                 disabled={isSubmitting}

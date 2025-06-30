@@ -121,3 +121,43 @@ export const updateService = async (serviceId: string, data: Partial<CommunitySe
         throw error;
     }
 };
+
+/**
+ * Obtiene todos los servicios para el panel de administración, sin importar su estado.
+ */
+export const getAllServicesForAdmin = async (): Promise<CommunityServiceItem[]> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    try {
+        const servicesCollection = collection(db, 'services');
+        const q = query(
+            servicesCollection,
+            // where('status', '==', ServiceStatus.PENDIENTE), // Temporalmente comentado para pruebas
+            orderBy('createdAt', 'asc')
+        );
+        const querySnapshot = await getDocs(q);
+
+        const services: CommunityServiceItem[] = [];
+        querySnapshot.forEach((doc) => {
+            services.push({ id: doc.id, ...doc.data() } as CommunityServiceItem);
+        });
+        return services;
+    } catch (error) {
+        console.error("Error al obtener los servicios pendientes: ", error);
+        return [];
+    }
+};
+
+/**
+ * Actualiza el estado de un servicio (ej. para aprobar o rechazar).
+ */
+export const updateServiceStatus = async (serviceId: string, status: ServiceStatus): Promise<void> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    try {
+        const serviceDocRef = doc(db, 'services', serviceId);
+        await updateDoc(serviceDocRef, { status });
+        console.log(`Estado del servicio ${serviceId} actualizado a ${status}.`);
+    } catch (error) {
+        console.error("Error al actualizar el estado del servicio: ", error);
+        throw error;
+    }
+};

@@ -22,3 +22,4 @@ export { LockClosedIcon } from './LockClosedIcon';
 export { EnvelopeIcon } from './EnvelopeIcon';
 export { IdentificationIcon } from './IdentificationIcon';
 export { PlusCircleIcon } from './PlusCircleIcon'; // Added export
+export { XCircleIcon } from './XCircleIcon.tsx';
