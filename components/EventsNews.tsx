@@ -1,68 +1,67 @@
-import React, { useState, useContext } from 'react'; // Import useContext
-import { EventItem, NewsItem as NewsItemType } from '../types';
-import { ECUADOR_COLORS } from '../constants';
+// /home/alexis/Sites/Landings/conexion-ec-ca/components/EventsNews.tsx
+import React, { useState, useContext, useEffect } from 'react';
+import { EventItem, NewsItem } from '../types';
 import { EventCarousel } from './EventCarousel';
 import { MagnifyingGlassIcon, NewspaperIcon, LinkIcon, CalendarDaysIcon } from './icons';
-import { AuthContext } from '../contexts/AuthContext'; // Import AuthContext
-
-const upcomingEventsData: EventItem[] = [
-  {
-    id: 'ev1',
-    title: 'Festival Gastronómico Ecuatoriano',
-    date: '15 Agosto, 2024',
-    description: 'Disfruta de la auténtica comida ecuatoriana, música en vivo y actividades culturales para toda la familia.',
-    imageUrl: '/assets/images/evento_gastronomico.png'
-  },
-  {
-    id: 'ev2',
-    title: 'Taller: Emprende en Canadá (Exclusivo Miembros)',
-    date: '22 Agosto, 2024',
-    description: 'Aprende los pasos clave para iniciar tu propio negocio en Canadá, con expertos y casos de éxito. Acceso exclusivo para miembros.',
-    imageUrl: '/assets/images/evento_taller.png',
-    isPremium: true // <-- MARCADO COMO PREMIUM
-  },
-  {
-    id: 'ev3',
-    title: 'Noche de Cine Latino',
-    date: '05 Septiembre, 2024',
-    description: 'Proyección de una película latinoamericana aclamada, seguida de un debate ameno.',
-    imageUrl: '/assets/images/evento_cine.png'
-  },
-  {
-    id: 'ev4',
-    title: 'Networking con Reclutadores (Exclusivo Miembros)',
-    date: '10 Septiembre, 2024',
-    description: 'Sesión privada de networking con reclutadores de empresas locales. Una oportunidad única para miembros de la comunidad.',
-    imageUrl: '/assets/images/evento_networking.png',
-    isPremium: true // <-- MARCADO COMO PREMIUM
-  },
-];
-
-const newsData: NewsItemType[] = [
-  { id: 'n1', title: 'Nuevas políticas migratorias para 2024', summary: 'Canadá anuncia actualizaciones en sus programas de inmigración que podrían beneficiar a...', link: '#' },
-  { id: 'n2', title: 'Comunidad ecuatoriana celebra éxito en torneo deportivo local', summary: 'El equipo "Los Cóndores" se alza con la victoria en el campeonato de fútbol...', link: '#' },
-  { id: 'n3', title: 'Guía actualizada de recursos para recién llegados', summary: 'Conexión Migrante lanza una nueva versión de su guía con información vital para...', link: '#' },
-];
+import { AuthContext } from '../contexts/AuthContext';
+import { getPublicEvents } from '../services/eventService';
+// --- CORRECCIÓN: Limpiamos las importaciones de newsService ---
+import { getPaginatedPublicNews, NEWS_PAGE_SIZE } from '../services/newsService';
+import { DocumentSnapshot } from 'firebase/firestore';
 
 export const EventsNews: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const authContext = useContext(AuthContext); // Usar AuthContext
+  const authContext = useContext(AuthContext);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleEventClick = (event: EventItem) => {
-    if (event.isPremium && !authContext?.isAuthenticated) {
-      authContext?.openLoginModal();
-    } else {
-      // En un futuro, esto podría abrir un modal con más detalles del evento.
-      alert(`Mostrando más información para: ${event.title}`);
+  const [lastNewsDoc, setLastNewsDoc] = useState<DocumentSnapshot | null>(null);
+  const [hasMoreNews, setHasMoreNews] = useState(true);
+  const [isMoreNewsLoading, setIsMoreNewsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        setLoading(true);
+        const [eventsData, initialNewsData] = await Promise.all([
+          getPublicEvents(),
+          getPaginatedPublicNews()
+        ]);
+        setEvents(eventsData);
+        setNews(initialNewsData.news);
+        setLastNewsDoc(initialNewsData.lastVisible);
+        setHasMoreNews(initialNewsData.news.length === NEWS_PAGE_SIZE);
+      } catch (err) {
+        console.error("Error fetching content:", err);
+        setError("No se pudo cargar el contenido. Inténtalo de nuevo más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitialData();
+  }, []);
+
+  const handleLoadMoreNews = async () => {
+    if (!lastNewsDoc || !hasMoreNews) return;
+
+    setIsMoreNewsLoading(true);
+    try {
+      const newNewsData = await getPaginatedPublicNews(lastNewsDoc);
+      setNews(prevNews => [...prevNews, ...newNewsData.news]);
+      setLastNewsDoc(newNewsData.lastVisible);
+      setHasMoreNews(newNewsData.news.length === NEWS_PAGE_SIZE);
+    } catch (err) {
+      console.error("Error fetching more news:", err);
+      setError("No se pudieron cargar más noticias.");
+    } finally {
+      setIsMoreNewsLoading(false);
     }
   };
 
-  // Basic filtering example (case-insensitive)
-  const filteredEvents = upcomingEventsData.filter(event =>
+  const filteredEvents = events.filter(event =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -77,7 +76,7 @@ export const EventsNews: React.FC = () => {
             </p>
           </div>
 
-          {/* Eventos */}
+          {/* --- INICIO DEL CÓDIGO RESTAURADO --- */}
           <div className="mb-16">
             <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
               <h3 className="text-2xl font-semibold text-ecuador-blue mb-4 sm:mb-0 font-montserrat flex items-center">
@@ -88,49 +87,65 @@ export const EventsNews: React.FC = () => {
                     type="text"
                     placeholder="Buscar eventos..."
                     value={searchTerm}
-                    onChange={handleSearchChange}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ecuador-yellow focus:border-transparent w-full sm:w-64"
                     aria-label="Buscar eventos por palabra clave"
                 />
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               </div>
             </div>
-            <EventCarousel
-                events={searchTerm ? filteredEvents : upcomingEventsData}
-                onEventClick={handleEventClick} // <-- Pasar el manejador de clics
-            />
-            <div className="text-center mt-8">
-              <a
-                  href="#calendar"
-                  className="text-ecuador-red font-semibold hover:underline"
-                  aria-label="Ver calendario completo de eventos"
-              >
-                Ver Calendario Completo &rarr;
-              </a>
-            </div>
+            {loading ? (
+                <p className="text-center text-gray-500">Cargando eventos...</p>
+            ) : error ? (
+                <p className="text-center text-red-500">{error}</p>
+            ) : (
+                <EventCarousel events={searchTerm ? filteredEvents : events} />
+            )}
           </div>
+          {/* --- FIN DEL CÓDIGO RESTAURADO --- */}
 
           {/* Noticias */}
           <div>
             <h3 className="text-2xl font-semibold text-ecuador-blue mb-8 font-montserrat flex items-center">
               <NewspaperIcon className="w-7 h-7 mr-3 text-ecuador-red"/>Noticias Destacadas
             </h3>
-            <div className="space-y-6">
-              {newsData.map((news) => (
-                  <div key={news.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <h4 className="text-xl font-semibold text-ecuador-blue mb-2">{news.title}</h4>
-                    <p className="text-gray-600 text-sm mb-3">{news.summary}</p>
-                    <a
-                        href={news.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold text-ecuador-red hover:text-red-700 transition-colors flex items-center"
-                        aria-label={`Leer más sobre ${news.title}`}
-                    >
-                      Leer más <LinkIcon className="w-4 h-4 ml-1" />
-                    </a>
-                  </div>
-              ))}
+            {loading ? (
+                <p className="text-center text-gray-500">Cargando noticias...</p>
+            ) : error ? (
+                <p className="text-center text-red-500">{error}</p>
+            ) : (
+                <div className="space-y-6">
+                  {news.map((newsItem) => (
+                      <div key={newsItem.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                        <h4 className="text-xl font-semibold text-ecuador-blue mb-2">{newsItem.title}</h4>
+                        <p className="text-gray-600 text-sm mb-3">{newsItem.summary}</p>
+                        <a
+                            href={newsItem.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-semibold text-ecuador-red hover:text-red-700 transition-colors flex items-center"
+                            aria-label={`Leer más sobre ${newsItem.title}`}
+                        >
+                          Leer más <LinkIcon className="w-4 h-4 ml-1" />
+                        </a>
+                      </div>
+                  ))}
+                </div>
+            )}
+
+            <div className="text-center mt-8">
+              {hasMoreNews && !loading && (
+                  <button
+                      onClick={handleLoadMoreNews}
+                      disabled={isMoreNewsLoading}
+                      className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition-colors disabled:opacity-50"
+                  >
+                    {isMoreNewsLoading ? 'Cargando...' : 'Cargar más noticias'}
+                  </button>
+              )}
+              {!hasMoreNews && !loading && news.length > 0 && (
+                  <p className="text-gray-500 text-sm">Has llegado al final de las noticias.</p>
+              )}
             </div>
           </div>
         </div>

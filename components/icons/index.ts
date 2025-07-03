@@ -23,3 +23,4 @@ export { EnvelopeIcon } from './EnvelopeIcon';
 export { IdentificationIcon } from './IdentificationIcon';
 export { PlusCircleIcon } from './PlusCircleIcon'; // Added export
 export { XCircleIcon } from './XCircleIcon.tsx';
+export { InformationCircleIcon } from './InformationCircleIcon'; // <-- AÑADIR ESTA LÍNEA

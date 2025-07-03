@@ -1,44 +1,62 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/types.ts
-
 import React from 'react';
 import { Timestamp } from 'firebase/firestore';
 
-// --- AÑADIR ENUM PARA EL ESTADO DEL USUARIO ---
+// --- INICIO DE LA CORRECCIÓN ---
+// Se ha unificado la interfaz EventItem en una sola definición.
+export interface EventItem {
+  id: string;
+  title: string;
+  date: Timestamp;
+  description: string;
+  imageUrl?: string;
+  isPremium?: boolean;
+  published: boolean;
+  createdAt: Timestamp;
+  rsvps?: string[]; // Campo para RSVP añadido aquí
+}
+
+export interface NewsItem {
+  id: string;
+  title: string;
+  summary: string;
+  link: string;
+  publishedAt: Timestamp;
+  published: boolean;
+}
+// --- FIN DE LA CORRECCIÓN ---
+
 export enum UserStatus {
   PENDIENTE = 'Pendiente',
   APROBADO = 'Aprobado',
   RECHAZADO = 'Rechazado',
 }
 
-// --- TIPOS DE AUTENTICACIÓN Y USUARIO (Unificados) ---
 export interface User {
-  id: string; // Firebase UID
-  name: string | null; // Firebase displayName
-  email: string | null; // Firebase email
-  role?: 'admin' | 'member'; // Rol del usuario (admin o member)
-  status?: UserStatus; // <-- Usar el enum
-  // Campos adicionales del registro
+  id: string;
+  name: string | null;
+  email: string | null;
+  role?: 'admin' | 'member';
+  status?: UserStatus;
   arrivalDateCanada?: Timestamp;
   city?: string;
   immigrationStatus?: string;
   supportNeeded?: string[];
   message?: string;
   newsletterSubscription?: boolean;
-  createdAt?: Timestamp; // Fecha de creación del perfil
+  createdAt?: Timestamp;
 }
 
-// ... (el resto del archivo no necesita cambios, pero asegúrate de que esté así)
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   loading: boolean;
 }
 
-// Datos que se pasarán a la función de registro
 export interface RegistrationData {
   name: string;
   email: string;
-  password?: string; // Hacer la contraseña opcional aquí
+  password?: string;
   arrivalDateCanada?: Date;
   city?: string;
   immigrationStatus?: string;
@@ -46,7 +64,6 @@ export interface RegistrationData {
   message?: string;
   newsletterSubscription?: boolean;
 }
-
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
@@ -58,9 +75,9 @@ export interface AuthContextType extends AuthState {
   openUserProfileModal: () => void;
   closeAuthModal: () => void;
   authModalState: ModalState;
+  refreshUserData: () => Promise<void>;
 }
 
-// ... (resto de tipos sin cambios)
 export interface NavItem {
   label: string;
   href: string;

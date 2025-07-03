@@ -77,3 +77,31 @@ export const updateUserStatus = async (userId: string, status: UserStatus): Prom
     await updateDoc(userDocRef, { status });
     console.log(`Estado del usuario ${userId} actualizado a ${status}.`);
 };
+
+/**
+ * Actualiza los datos de un perfil de usuario en Firestore.
+ * El usuario solo puede modificar los campos permitidos.
+ * @param uid - El ID del usuario a actualizar.
+ * @param data - Un objeto con los campos a actualizar (ej. { city: 'Nueva Ciudad', message: 'Nuevo mensaje' }).
+ */
+export const updateUserProfile = async (uid:string, data: Partial<Pick<User, 'city' | 'message' | 'immigrationStatus' | 'supportNeeded'>>): Promise<void> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const userDocRef = doc(db, 'users', uid);
+    try {
+        // Creamos un objeto con solo los campos que el usuario puede actualizar para evitar que modifiquen su rol o estado.
+        const updatableData: { [key: string]: any } = {};
+
+        if (data.city !== undefined) updatableData.city = data.city;
+        if (data.message !== undefined) updatableData.message = data.message;
+        if (data.immigrationStatus !== undefined) updatableData.immigrationStatus = data.immigrationStatus;
+        if (data.supportNeeded !== undefined) updatableData.supportNeeded = data.supportNeeded;
+        if (data.arrivalDateCanada !== undefined) updatableData.arrivalDateCanada = data.arrivalDateCanada;
+        if (Object.keys(updatableData).length > 0) {
+            await updateDoc(userDocRef, updatableData);
+            console.log(`Perfil del usuario ${uid} actualizado.`);
+        }
+    } catch (error) {
+        console.error("Error al actualizar el perfil del usuario: ", error);
+        throw error;
+    }
+};

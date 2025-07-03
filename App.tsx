@@ -18,6 +18,7 @@ import { AuthModals } from './components/AuthModals';
 import { MemberDashboard } from './components/MemberDashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
+import { EventDetailPage } from './components/EventDetailPage'; // <-- NUEVO
 
 // --- NUEVO COMPONENTE PARA LA PÁGINA DE ESPERA ---
 const PendingApprovalPage: React.FC = () => (
@@ -90,6 +91,7 @@ const App: React.FC = () => {
                     <Route path="/" element={<LandingPage />} />
                     {/* AÑADIR LA NUEVA RUTA */}
                     <Route path="/pending-approval" element={<PendingApprovalPage />} />
+                    <Route path="/events/:eventId" element={<EventDetailPage />} />
                     <Route
                         path="/dashboard"
                         element={

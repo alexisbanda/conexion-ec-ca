@@ -1,10 +1,10 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/MemberDashboard.tsx
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import { BriefcaseIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon, UserCircleIcon, MapPinIcon, PlusCircleIcon } from './icons';
+import { BriefcaseIcon, UserCircleIcon, MapPinIcon, PlusCircleIcon } from './icons';
 import { useNavigate } from 'react-router-dom';
 import { CommunityServiceItem, ServiceStatus } from '../types';
-import { getUserServices, deleteService } from '../services/directoryService'; // Import deleteService
+import { getUserServices, deleteService } from '../services/directoryService';
 import { Modal } from './Modal';
 import { AddServiceForm } from './AddServiceForm';
 
@@ -14,13 +14,11 @@ export const MemberDashboard: React.FC = () => {
     const [userServices, setUserServices] = useState<CommunityServiceItem[]>([]);
     const [isLoadingServices, setIsLoadingServices] = useState(true);
 
-    // --- INICIO DE LA LÓGICA DE EDICIÓN Y BORRADO ---
     const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
     const [serviceToEdit, setServiceToEdit] = useState<CommunityServiceItem | null>(null);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [serviceToDelete, setServiceToDelete] = useState<CommunityServiceItem | null>(null);
-    // --- FIN DE LA LÓGICA DE EDICIÓN Y BORRADO ---
 
     const fetchUserServices = useCallback(async () => {
         if (auth?.user?.id) {
@@ -35,9 +33,8 @@ export const MemberDashboard: React.FC = () => {
         fetchUserServices();
     }, [fetchUserServices]);
 
-    // --- MANEJADORES DE ACCIONES ---
     const handleOpenAddModal = () => {
-        setServiceToEdit(null); // Nos aseguramos de que no haya datos de edición
+        setServiceToEdit(null);
         setIsServiceModalOpen(true);
     };
 
@@ -45,7 +42,6 @@ export const MemberDashboard: React.FC = () => {
         setServiceToEdit(service);
         setIsServiceModalOpen(true);
     };
-
 
     const handleOpenDeleteModal = (service: CommunityServiceItem) => {
         setServiceToDelete(service);
@@ -58,7 +54,7 @@ export const MemberDashboard: React.FC = () => {
             await deleteService(serviceToDelete.id);
             setIsDeleteModalOpen(false);
             setServiceToDelete(null);
-            fetchUserServices(); // Refrescar la lista
+            fetchUserServices();
         } catch (error) {
             console.error("Error al eliminar el servicio:", error);
             alert("No se pudo eliminar el servicio. Inténtalo de nuevo.");
@@ -68,9 +64,8 @@ export const MemberDashboard: React.FC = () => {
     const handleSuccess = () => {
         setIsServiceModalOpen(false);
         setServiceToEdit(null);
-        fetchUserServices(); // Refrescar la lista
+        fetchUserServices();
     };
-    // --- FIN DE MANEJADORES DE ACCIONES ---
 
     if (!auth || !auth.isAuthenticated || !auth.user) {
         return (
@@ -116,9 +111,44 @@ export const MemberDashboard: React.FC = () => {
                         Este es tu espacio exclusivo como miembro de Conexión Migrante EC-CA. Aquí encontrarás recursos y oportunidades diseñadas solo para ti.
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {/* ... (Tarjetas de acceso rápido sin cambios) ... */}
+
+                {/* --- INICIO DE LA MODIFICACIÓN --- */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:-translate-y-1 cursor-pointer" onClick={handleOpenAddModal}>
+                        <div className="flex items-center">
+                            <div className="p-3 rounded-full bg-ecuador-blue-light mr-4">
+                                <BriefcaseIcon className="w-6 h-6 text-ecuador-blue" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-lg text-gray-800">Publicar un Servicio</h4>
+                                <p className="text-sm text-gray-600">Ofrece tu ayuda a la comunidad.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:-translate-y-1 cursor-pointer" onClick={() => handleNavigateToSection('resources-tools')}>
+                        <div className="flex items-center">
+                            <div className="p-3 rounded-full bg-ecuador-blue-light mr-4">
+                                <MapPinIcon className="w-6 h-6 text-ecuador-blue" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-lg text-gray-800">Ver Directorio</h4>
+                                <p className="text-sm text-gray-600">Explora los servicios de otros.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:-translate-y-1 cursor-pointer" onClick={auth?.openUserProfileModal}>
+                        <div className="flex items-center">
+                            <div className="p-3 rounded-full bg-ecuador-blue-light mr-4">
+                                <UserCircleIcon className="w-6 h-6 text-ecuador-blue" />
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-lg text-gray-800">Mi Perfil</h4>
+                                <p className="text-sm text-gray-600">Ver y editar tu información.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                {/* --- FIN DE LA MODIFICACIÓN --- */}
 
                 <div className="mt-16 bg-white p-6 rounded-lg shadow-md">
                     <div className="flex justify-between items-center mb-6">

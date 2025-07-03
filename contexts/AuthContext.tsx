@@ -6,8 +6,9 @@ import { auth } from '../firebaseConfig';
 import { User, AuthContextType, AuthState, ModalState, ModalContentType, RegistrationData, UserStatus } from '../types';
 import { getUserData, createUserDocument } from '../services/userService';
 import toast from 'react-hot-toast';
-import { sendWelcomeEmail } from '../services/emailService'; // <-- 1. IMPORTAR
+import { sendWelcomeEmail } from '../services/emailService';
 
+// ... (defaultAuthState y la creación del contexto no cambian)
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
   user: null,
@@ -15,6 +16,7 @@ const defaultAuthState: AuthState = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -25,6 +27,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const [authModalState, setAuthModalState] = useState<ModalState>({ isOpen: false });
 
+  // ... (useEffect y la función register no cambian)
   useEffect(() => {
     if (!auth) {
       console.error("AuthContext: Firebase auth is not initialized.");
@@ -43,9 +46,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         };
 
         const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
-
-        // Este efecto ahora solo se encarga de mantener la sesión al recargar la página.
-        // La actualización de estado inmediata la hace la función de login.
         setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
 
         if (isApproved) {
@@ -65,74 +65,39 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (registrationData: RegistrationData): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
-
     const { email, password, name } = registrationData;
-
     if (!email || !password || !name) {
       throw new Error("Nombre, email y contraseña son requeridos.");
     }
-
-    // 1. Crear el usuario en Firebase Authentication
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
     if (userCredential.user) {
       const { user } = userCredential;
-
-      // 2. Actualizar el perfil de Firebase (nombre visible)
       await updateProfile(user, { displayName: name });
-
-      // 3. Crear nuestro documento de usuario personalizado en Firestore
       await createUserDocument(user.uid, registrationData);
-
-      // --- ¡AQUÍ ESTÁ LA INTEGRACIÓN! ---
-      // 4. Enviar el correo de bienvenida a través de nuestra Netlify Function.
-      // Se ejecuta de forma asíncrona y no bloquea el flujo del usuario.
       await sendWelcomeEmail({ name, email });
-      // --- FIN DE LA INTEGRACIÓN ---
-
-      // 5. Cerrar el modal y notificar al usuario del éxito
       closeAuthModal();
       toast.success(
           '¡Registro exitoso! Tu cuenta está pendiente de aprobación.',
-          {
-            duration: 6000,
-            style: {
-              background: '#333',
-              color: '#fff',
-            },
-          }
+          { duration: 6000, style: { background: '#333', color: '#fff' } }
       );
     }
   };
 
-  // --- INICIO DE LA CORRECCIÓN ---
   const login = async (email: string, password: string): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
-
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const firebaseUser = userCredential.user;
-
     if (firebaseUser) {
       const additionalData = await getUserData(firebaseUser.uid);
-
-      // 1. Construimos el objeto de usuario completo
       const appUser: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName,
         email: firebaseUser.email,
         ...additionalData,
       };
-
-      // 2. Determinamos si está aprobado
       const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
-
-      // 3. ¡LA CLAVE! Actualizamos el estado de la aplicación INMEDIATAMENTE
       setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
-
-      // 4. Cerramos el modal
       closeAuthModal();
-
-      // 5. Ahora navegamos, con el estado ya actualizado
       if (appUser.role === 'admin') {
         navigate('/admin');
       } else if (appUser.status === UserStatus.APROBADO) {
@@ -140,14 +105,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else if (appUser.status === UserStatus.PENDIENTE) {
         navigate('/pending-approval');
       } else {
-        // Caso para usuarios rechazados o con estado inválido
         toast.error('Tu cuenta no tiene acceso. Contacta a un administrador.');
-        // Lo dejamos en la página de inicio
         navigate('/');
       }
     }
   };
-  // --- FIN DE LA CORRECCIÓN ---
 
   const logout = async (): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
@@ -161,35 +123,42 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await sendPasswordResetEmail(auth, email);
   };
 
-  const openLoginModal = () => {
-    setAuthModalState({
-      isOpen: true,
-      title: 'Iniciar Sesión',
-      type: ModalContentType.LOGIN_FORM
-    });
-  };
+  // --- INICIO DE LA MODIFICACIÓN ---
 
-  const openRegisterModal = () => {
-    setAuthModalState({
-      isOpen: true,
-      title: 'Crear Cuenta',
-      type: ModalContentType.REGISTER_FORM
-    });
-  };
-
-  const openUserProfileModal = () => {
-    if (authState.isAuthenticated && authState.user) {
-      setAuthModalState({
-        isOpen: true,
-        title: `Perfil de ${authState.user.name || 'Usuario'}`,
-        type: ModalContentType.USER_PROFILE,
-      });
+  /**
+   * Refresca los datos del usuario actual desde Firestore y actualiza el estado global.
+   */
+  const refreshUserData = async (): Promise<void> => {
+    if (auth.currentUser) {
+      const updatedData = await getUserData(auth.currentUser.uid);
+      if (updatedData) {
+        // Reconstruimos el objeto de usuario con los datos más recientes
+        const appUser: User = {
+          id: auth.currentUser.uid,
+          name: auth.currentUser.displayName,
+          email: auth.currentUser.email,
+          ...updatedData,
+        };
+        // Actualizamos el estado del contexto
+        setAuthState(prevState => ({
+          ...prevState,
+          user: appUser,
+        }));
+        console.log("Datos del usuario refrescados en el contexto.");
+      }
     }
   };
 
-  const closeAuthModal = () => {
-    setAuthModalState({ isOpen: false });
+  // ... (funciones de abrir/cerrar modales no cambian)
+  const openLoginModal = () => setAuthModalState({ isOpen: true, title: 'Iniciar Sesión', type: ModalContentType.LOGIN_FORM });
+  const openRegisterModal = () => setAuthModalState({ isOpen: true, title: 'Crear Cuenta', type: ModalContentType.REGISTER_FORM });
+  const openUserProfileModal = () => {
+    if (authState.isAuthenticated && authState.user) {
+      setAuthModalState({ isOpen: true, title: `Perfil de ${authState.user.name || 'Usuario'}`, type: ModalContentType.USER_PROFILE });
+    }
   };
+  const closeAuthModal = () => setAuthModalState({ isOpen: false });
+
 
   const contextValue: AuthContextType = {
     ...authState,
@@ -202,7 +171,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     openUserProfileModal,
     closeAuthModal,
     authModalState,
+    refreshUserData, // <-- AÑADIR LA FUNCIÓN AL VALOR DEL CONTEXTO
   };
+
+  // --- FIN DE LA MODIFICACIÓN ---
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
