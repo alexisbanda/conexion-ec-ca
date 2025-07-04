@@ -2,8 +2,7 @@
 import React from 'react';
 import { Timestamp } from 'firebase/firestore';
 
-// --- INICIO DE LA CORRECCIÓN ---
-// Se ha unificado la interfaz EventItem en una sola definición.
+// --- Contenido General ---
 export interface EventItem {
   id: string;
   title: string;
@@ -13,7 +12,7 @@ export interface EventItem {
   isPremium?: boolean;
   published: boolean;
   createdAt: Timestamp;
-  rsvps?: string[]; // Campo para RSVP añadido aquí
+  rsvps?: string[];
 }
 
 export interface NewsItem {
@@ -24,7 +23,54 @@ export interface NewsItem {
   publishedAt: Timestamp;
   published: boolean;
 }
-// --- FIN DE LA CORRECCIÓN ---
+
+export interface NavItem {
+  label: string;
+  href: string;
+  target?: string;
+  isPremium?: boolean;
+  adminOnly?: boolean;
+}
+
+// --- Tipos para Beneficios y Recursos ---
+export interface Benefit {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  shortDescription: string;
+  detailedDescription: string;
+  imageUrl?: string;
+  isPremium?: boolean;
+}
+
+export interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  role: string;
+  imageUrl?: string;
+}
+
+export interface Resource {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  details?: string;
+  isPremium?: boolean;
+}
+
+export interface Tool {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  modalContent: React.ReactNode;
+  isPremium?: boolean;
+}
+
+
+// --- Tipos de Usuario y Autenticación ---
 
 export enum UserStatus {
   PENDIENTE = 'Pendiente',
@@ -32,27 +78,73 @@ export enum UserStatus {
   RECHAZADO = 'Rechazado',
 }
 
+export enum EducationLevel {
+  SECUNDARIA = 'Secundaria',
+  TERCER_NIVEL = 'Tercer Nivel',
+  CUARTO_NIVEL = 'Cuarto Nivel',
+}
+
+export enum FamilyComposition {
+  SOLO = 'Solo(a)',
+  PAREJA = 'En pareja',
+  CON_HIJOS = 'Con Hijos',
+  OTRO = 'Otro',
+}
+
+export enum RemittanceUsage {
+  EC_TO_CA = 'Ecuador a Canadá',
+  CA_TO_EC = 'Canadá a Ecuador',
+  NO_ENVIO = 'No envío dinero',
+}
+
+/**
+ * Representa la estructura completa de un usuario en Firestore.
+ * Combina datos del registro inicial y del wizard de onboarding.
+ */
 export interface User {
   id: string;
-  name: string | null;
+  name: string | null; // Nombre completo del registro
   email: string | null;
   role?: 'admin' | 'member';
   status?: UserStatus;
+  createdAt?: Timestamp;
+  onboardingCompleted?: boolean;
+
+  // --- Datos del Registro Inicial ---
   arrivalDateCanada?: Timestamp;
   city?: string;
   immigrationStatus?: string;
   supportNeeded?: string[];
   message?: string;
   newsletterSubscription?: boolean;
-  createdAt?: Timestamp;
+
+  // --- Datos del Onboarding Wizard ---
+  lastName?: string; // Apellidos
+  phone?: string;
+  birthDate?: Timestamp;
+  educationLevel?: EducationLevel;
+  profession?: string;
+  familyComposition?: FamilyComposition[];
+  spouseName?: string;
+  hasChildren?: boolean;
+  childrenAges?: string[];
+  studiesInCanada?: string;
+  educationalInstitution?: string;
+  remittanceUsage?: RemittanceUsage[];
+  isEmployed?: boolean;
+  currentEmployer?: string;
+  currentPosition?: string;
+  isWorkRelatedToStudies?: 'Sí' | 'No' | 'No tengo trabajo';
+  servicesOffered?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
 }
 
-export interface AuthState {
-  isAuthenticated: boolean;
-  user: User | null;
-  loading: boolean;
-}
-
+/**
+ * Representa los datos que se envían desde el formulario de registro.
+ */
 export interface RegistrationData {
   name: string;
   email: string;
@@ -63,6 +155,12 @@ export interface RegistrationData {
   supportNeeded?: string[];
   message?: string;
   newsletterSubscription?: boolean;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  loading: boolean;
 }
 
 export interface AuthContextType extends AuthState {
@@ -78,13 +176,7 @@ export interface AuthContextType extends AuthState {
   refreshUserData: () => Promise<void>;
 }
 
-export interface NavItem {
-  label: string;
-  href: string;
-  target?: string;
-  isPremium?: boolean;
-  adminOnly?: boolean;
-}
+// --- Tipos para el Directorio de Servicios ---
 
 export enum ServiceType {
   OFERTA = 'Oferta',
@@ -110,6 +202,8 @@ export interface CommunityServiceItem {
   createdAt: Timestamp;
   status: ServiceStatus;
 }
+
+// --- Tipos para Modales ---
 
 export enum ModalContentType {
   BENEFIT_DETAILS,

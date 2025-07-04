@@ -1,3 +1,4 @@
+// /home/alexis/Sites/Landings/conexion-ec-ca/constants.ts
 import { NavItem } from './types';
 
 export const ECUADOR_COLORS = {
@@ -17,7 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Eventos', href: '#events-news' },
   { label: 'Recursos', href: '#resources-tools' },
   { label: 'Contacto', href: '#contact' },
-  { label: 'Mi Espacio', href: '/dashboard', isPremium: true }, // <-- CAMBIAR A /dashboard
+  { label: 'Mi Espacio', href: '/dashboard', isPremium: true },
   { label: 'Panel Admin', href: '/admin', adminOnly: true },
 ];
 

@@ -8,7 +8,6 @@ import { getUserData, createUserDocument } from '../services/userService';
 import toast from 'react-hot-toast';
 import { sendWelcomeEmail } from '../services/emailService';
 
-// ... (defaultAuthState y la creación del contexto no cambian)
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
   user: null,
@@ -16,7 +15,6 @@ const defaultAuthState: AuthState = {
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -27,7 +25,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const [authModalState, setAuthModalState] = useState<ModalState>({ isOpen: false });
 
-  // ... (useEffect y la función register no cambian)
   useEffect(() => {
     if (!auth) {
       console.error("AuthContext: Firebase auth is not initialized.");
@@ -38,6 +35,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUserType | null) => {
       if (firebaseUser) {
         const additionalData = await getUserData(firebaseUser.uid);
+        if (!additionalData) {
+          await signOut(auth);
+          setAuthState({ user: null, isAuthenticated: false, loading: false });
+          return;
+        }
+
         const appUser: User = {
           id: firebaseUser.uid,
           name: firebaseUser.displayName,
@@ -48,15 +51,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
         setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
 
-        if (isApproved) {
-          console.log("Auth Provider: User session restored and approved.", appUser);
-        } else {
-          console.log(`Auth Provider: User session restored but not approved. Status: ${appUser.status}`);
-        }
-
       } else {
         setAuthState({ user: null, isAuthenticated: false, loading: false });
-        console.log("Auth Provider: User is signed out.");
       }
     });
 
@@ -73,7 +69,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (userCredential.user) {
       const { user } = userCredential;
       await updateProfile(user, { displayName: name });
+
+      // --- MODIFICACIÓN CLAVE: Pasamos TODOS los datos del formulario de registro ---
       await createUserDocument(user.uid, registrationData);
+
       await sendWelcomeEmail({ name, email });
       closeAuthModal();
       toast.success(
@@ -89,6 +88,13 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const firebaseUser = userCredential.user;
     if (firebaseUser) {
       const additionalData = await getUserData(firebaseUser.uid);
+      if (!additionalData) {
+        toast.error('No se encontraron datos para este usuario. Contacta a soporte.');
+        await signOut(auth);
+        setAuthState({ user: null, isAuthenticated: false, loading: false });
+        return;
+      }
+
       const appUser: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName,
@@ -98,14 +104,27 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
       setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
       closeAuthModal();
+
+      // --- LÓGICA DE REDIRECCIÓN MEJORADA ---
       if (appUser.role === 'admin') {
         navigate('/admin');
-      } else if (appUser.status === UserStatus.APROBADO) {
-        navigate('/dashboard');
+        toast.success(`¡Bienvenido de nuevo, ${appUser.name}!`);
+      } else if (isApproved) {
+        // El usuario está aprobado, ahora verificamos si completó el onboarding
+        if (appUser.onboardingCompleted) {
+          navigate('/dashboard');
+          toast.success(`¡Bienvenido de nuevo, ${appUser.name}!`);
+        } else {
+          // Si no, lo redirigimos al wizard
+          navigate('/onboarding');
+          toast.success(`¡Bienvenido, ${appUser.name}! Ayúdanos a completar tu perfil.`);
+        }
       } else if (appUser.status === UserStatus.PENDIENTE) {
         navigate('/pending-approval');
+        toast.error('Tu cuenta aún está pendiente de aprobación.');
       } else {
         toast.error('Tu cuenta no tiene acceso. Contacta a un administrador.');
+        await signOut(auth);
         navigate('/');
       }
     }
@@ -123,23 +142,16 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await sendPasswordResetEmail(auth, email);
   };
 
-  // --- INICIO DE LA MODIFICACIÓN ---
-
-  /**
-   * Refresca los datos del usuario actual desde Firestore y actualiza el estado global.
-   */
   const refreshUserData = async (): Promise<void> => {
     if (auth.currentUser) {
       const updatedData = await getUserData(auth.currentUser.uid);
       if (updatedData) {
-        // Reconstruimos el objeto de usuario con los datos más recientes
         const appUser: User = {
           id: auth.currentUser.uid,
           name: auth.currentUser.displayName,
           email: auth.currentUser.email,
           ...updatedData,
         };
-        // Actualizamos el estado del contexto
         setAuthState(prevState => ({
           ...prevState,
           user: appUser,
@@ -149,7 +161,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // ... (funciones de abrir/cerrar modales no cambian)
   const openLoginModal = () => setAuthModalState({ isOpen: true, title: 'Iniciar Sesión', type: ModalContentType.LOGIN_FORM });
   const openRegisterModal = () => setAuthModalState({ isOpen: true, title: 'Crear Cuenta', type: ModalContentType.REGISTER_FORM });
   const openUserProfileModal = () => {
@@ -158,7 +169,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
   const closeAuthModal = () => setAuthModalState({ isOpen: false });
-
 
   const contextValue: AuthContextType = {
     ...authState,
@@ -171,10 +181,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     openUserProfileModal,
     closeAuthModal,
     authModalState,
-    refreshUserData, // <-- AÑADIR LA FUNCIÓN AL VALOR DEL CONTEXTO
+    refreshUserData,
   };
-
-  // --- FIN DE LA MODIFICACIÓN ---
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };

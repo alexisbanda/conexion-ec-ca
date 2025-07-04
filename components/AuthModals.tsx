@@ -3,9 +3,9 @@ import React, { useContext, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { Modal } from './Modal';
 import { ModalContentType, User, RegistrationData } from '../types';
-import { EnvelopeIcon, LockClosedIcon, UserCircleIcon, CheckCircleIcon, IdentificationIcon, CalendarDaysIcon } from './icons';
+import { EnvelopeIcon, LockClosedIcon, UserCircleIcon } from './icons';
 import { FirebaseError } from 'firebase/app';
-import { UserProfileForm } from './UserProfileForm'; // <-- Importamos el nuevo formulario
+import { UserProfileForm } from './UserProfileForm';
 
 // --- FUNCIÓN DE AYUDA PARA ERRORES ---
 const getFirebaseAuthErrorMessage = (errorCode: string): string => {
@@ -97,7 +97,7 @@ const LoginForm: React.FC<{ onSwitchToRegister: () => void; }> = ({ onSwitchToRe
     );
 };
 
-// --- FORMULARIO DE REGISTRO ---
+// --- FORMULARIO DE REGISTRO (CORREGIDO) ---
 const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLogin }) => {
     const auth = useContext(AuthContext);
     const [formData, setFormData] = useState<Omit<RegistrationData, 'password'>>({
@@ -114,6 +114,13 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // --- INICIO DE LA CORRECCIÓN: Definición de estilos reutilizables ---
+    const labelStyle = "block text-sm font-medium text-gray-700";
+    const inputStyle = "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm";
+    const checkboxStyle = "h-4 w-4 rounded text-ecuador-blue focus:ring-ecuador-yellow border-gray-300";
+    const btnPrimary = "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-ecuador-blue hover:bg-blue-700 disabled:opacity-50";
+    // --- FIN DE LA CORRECCIÓN ---
 
     if (!auth) return <p>Error: Auth context no disponible.</p>;
 
@@ -133,8 +140,8 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
         setFormData(prev => ({
             ...prev,
             supportNeeded: checked
-                ? [...prev.supportNeeded, value]
-                : prev.supportNeeded.filter(item => item !== value)
+                ? [...(prev.supportNeeded || []), value]
+                : (prev.supportNeeded || []).filter(item => item !== value)
         }));
     };
 
@@ -142,6 +149,7 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
         e.preventDefault();
         setError('');
         if (password !== confirmPassword) { setError('Las contraseñas no coinciden.'); return; }
+        if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return; }
         setIsSubmitting(true);
         try {
             await auth.register({
@@ -166,34 +174,34 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label htmlFor="register-name" className="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                    <input id="register-name" name="name" type="text" value={formData.name} onChange={handleChange} required className="mt-1 w-full input-style" />
+                    <label htmlFor="register-name" className={labelStyle}>Nombre Completo</label>
+                    <input id="register-name" name="name" type="text" value={formData.name} onChange={handleChange} required className={inputStyle} />
                 </div>
                 <div>
-                    <label htmlFor="register-email" className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                    <input id="register-email" name="email" type="email" value={formData.email} onChange={handleChange} required className="mt-1 w-full input-style" />
+                    <label htmlFor="register-email" className={labelStyle}>Correo Electrónico</label>
+                    <input id="register-email" name="email" type="email" value={formData.email} onChange={handleChange} required className={inputStyle} />
                 </div>
                 <div>
-                    <label htmlFor="register-password">Contraseña</label>
-                    <input id="register-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 w-full input-style" />
+                    <label htmlFor="register-password" className={labelStyle}>Contraseña</label>
+                    <input id="register-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className={inputStyle} />
                 </div>
                 <div>
-                    <label htmlFor="register-confirmPassword">Confirmar Contraseña</label>
-                    <input id="register-confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="mt-1 w-full input-style" />
+                    <label htmlFor="register-confirmPassword" className={labelStyle}>Confirmar Contraseña</label>
+                    <input id="register-confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className={inputStyle} />
                 </div>
                 <div>
-                    <label htmlFor="register-arrivalDate" className="block text-sm font-medium text-gray-700">¿Cuándo llegaste a Canadá?</label>
-                    <input id="register-arrivalDate" name="arrivalDateCanada" type="date" value={formData.arrivalDateCanada ? new Date(formData.arrivalDateCanada).toISOString().split('T')[0] : ''} onChange={handleChange} className="mt-1 w-full input-style" />
+                    <label htmlFor="register-arrivalDate" className={labelStyle}>¿Cuándo llegaste a Canadá?</label>
+                    <input id="register-arrivalDate" name="arrivalDateCanada" type="date" value={formData.arrivalDateCanada ? new Date(formData.arrivalDateCanada).toISOString().split('T')[0] : ''} onChange={handleChange} className={inputStyle} />
                 </div>
                 <div>
-                    <label htmlFor="register-city" className="block text-sm font-medium text-gray-700">Ciudad donde vives</label>
-                    <input id="register-city" name="city" type="text" value={formData.city} onChange={handleChange} className="mt-1 w-full input-style" />
+                    <label htmlFor="register-city" className={labelStyle}>Ciudad donde vives</label>
+                    <input id="register-city" name="city" type="text" value={formData.city} onChange={handleChange} className={inputStyle} />
                 </div>
             </div>
 
             <div>
-                <label htmlFor="register-immigrationStatus" className="block text-sm font-medium text-gray-700">Estatus migratorio</label>
-                <select id="register-immigrationStatus" name="immigrationStatus" value={formData.immigrationStatus} onChange={handleChange} className="mt-1 w-full input-style">
+                <label htmlFor="register-immigrationStatus" className={labelStyle}>Estatus migratorio</label>
+                <select id="register-immigrationStatus" name="immigrationStatus" value={formData.immigrationStatus} onChange={handleChange} className={inputStyle}>
                     <option value="">Selecciona una opción</option>
                     <option value="Residente Permanente">Residente Permanente</option>
                     <option value="Estudiante">Estudiante</option>
@@ -205,11 +213,11 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700">¿Qué tipo de apoyo necesitas?</label>
+                <label className={labelStyle}>¿Qué tipo de apoyo necesitas?</label>
                 <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {supportOptions.map(option => (
                         <label key={option} className="flex items-center space-x-2 text-sm">
-                            <input type="checkbox" value={option} checked={formData.supportNeeded.includes(option)} onChange={handleSupportChange} className="rounded text-ecuador-blue focus:ring-ecuador-yellow" />
+                            <input type="checkbox" value={option} checked={formData.supportNeeded?.includes(option)} onChange={handleSupportChange} className={checkboxStyle} />
                             <span>{option}</span>
                         </label>
                     ))}
@@ -217,22 +225,22 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
             </div>
 
             <div>
-                <label htmlFor="register-message" className="block text-sm font-medium text-gray-700">Mensaje o comentario (Opcional)</label>
-                <textarea id="register-message" name="message" value={formData.message} onChange={handleChange} rows={3} className="mt-1 w-full input-style"></textarea>
+                <label htmlFor="register-message" className={labelStyle}>Mensaje o comentario (Opcional)</label>
+                <textarea id="register-message" name="message" value={formData.message} onChange={handleChange} rows={3} className={inputStyle}></textarea>
             </div>
 
             <div className="flex items-center">
-                <input id="newsletter" name="newsletterSubscription" type="checkbox" checked={formData.newsletterSubscription} onChange={handleChange} className="h-4 w-4 text-ecuador-blue focus:ring-ecuador-yellow border-gray-300 rounded" />
+                <input id="newsletter" name="newsletterSubscription" type="checkbox" checked={formData.newsletterSubscription} onChange={handleChange} className={checkboxStyle} />
                 <label htmlFor="newsletter" className="ml-2 block text-sm text-gray-900">Deseo recibir noticias y eventos de la comunidad por correo</label>
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-ecuador-blue hover:bg-blue-700 disabled:opacity-50">{isSubmitting ? 'Registrando...' : 'Crear Cuenta'}</button>
+            <button type="submit" disabled={isSubmitting} className={btnPrimary}>{isSubmitting ? 'Registrando...' : 'Crear Cuenta'}</button>
             <p className="text-sm text-center text-gray-600">¿Ya tienes cuenta?{' '}<button type="button" onClick={onSwitchToLogin} className="font-medium text-ecuador-red hover:text-red-700">Inicia sesión</button></p>
         </form>
     );
 };
 
-// --- CONTENEDOR DEL PERFIL DE USUARIO (MODIFICADO) ---
+// --- CONTENEDOR DEL PERFIL DE USUARIO ---
 const UserProfileContainer: React.FC<{ user: User; onSuccess: () => void }> = ({ user, onSuccess }) => {
     return (
         <div className="space-y-6">
@@ -243,7 +251,6 @@ const UserProfileContainer: React.FC<{ user: User; onSuccess: () => void }> = ({
                     <p className="text-sm text-gray-500">{user.email || 'Email no disponible'}</p>
                 </div>
             </div>
-            {/* Aquí renderizamos el formulario de edición en lugar de la info estática */}
             <UserProfileForm user={user} onSuccess={onSuccess} />
         </div>
     );
@@ -279,7 +286,6 @@ export const AuthModals: React.FC = () => {
             break;
         case ModalContentType.USER_PROFILE:
             if (user) {
-                // La clave: renderizamos el contenedor que tiene el formulario de edición
                 modalContentNode = <UserProfileContainer user={user} onSuccess={closeAuthModal} />;
             } else {
                 modalContentNode = <p>Cargando perfil...</p>;
