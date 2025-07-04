@@ -1,19 +1,24 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/CommunityDirectory.tsx
 import React, { useState, useMemo, useContext, useEffect } from 'react';
-import { CommunityServiceItem, ServiceType } from '../types';
-import { LockClosedIcon, ExclamationCircleIcon } from './icons'; // Ya no necesitamos PlusCircleIcon
+import { CommunityServiceItem, ServiceType, ServiceCategory } from '../types';
+import { LockClosedIcon, ExclamationCircleIcon, MagnifyingGlassIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
 import { getServices } from '../services/directoryService';
+import { ServiceCard } from './ServiceCard'; // <-- Importamos la nueva tarjeta
 
 export const CommunityDirectory: React.FC = () => {
   const [services, setServices] = useState<CommunityServiceItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // --- NUEVOS ESTADOS PARA FILTROS ---
+  const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('Todos');
-  const [filterCity, setFilterCity] = useState<string>('Todas las ciudades');
+  const [filterCategory, setFilterCategory] = useState<string>('Todas');
+  const [filterCity, setFilterCity] = useState<string>('Todas');
 
   const authContext = useContext(AuthContext);
-  const isAuthenticated = authContext?.isAuthenticated;
+  const isAuthenticated = !!authContext?.isAuthenticated;
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -30,65 +35,80 @@ export const CommunityDirectory: React.FC = () => {
       }
     };
     fetchServices();
-  }, []); // El efecto solo se ejecuta una vez al montar
+  }, []);
 
-  const cities = useMemo(() => {
-    const uniqueCities = Array.from(new Set(services.map(s => s.city))).sort();
-    return ['Todas las ciudades', ...uniqueCities];
-  }, [services]);
-
+  // --- LISTAS DINÁMICAS PARA FILTROS ---
+  const cities = useMemo(() => ['Todas', ...Array.from(new Set(services.map(s => s.city))).sort()], [services]);
+  const categories = useMemo(() => ['Todas', ...Object.values(ServiceCategory)], []);
   const serviceTypes = ['Todos', ServiceType.OFERTA, ServiceType.DEMANDA];
 
+  // --- LÓGICA DE FILTRADO MEJORADA ---
   const filteredServices = useMemo(() => {
+    const lowercasedTerm = searchTerm.toLowerCase();
     return services.filter(service => {
       const typeMatch = filterType === 'Todos' || service.type === filterType;
-      const cityMatch = filterCity === 'Todas las ciudades' || service.city === filterCity;
-      return typeMatch && cityMatch;
+      const cityMatch = filterCity === 'Todas' || service.city === filterCity;
+      const categoryMatch = filterCategory === 'Todas' || service.category === filterCategory;
+      const searchMatch = searchTerm === '' ||
+          service.serviceName.toLowerCase().includes(lowercasedTerm) ||
+          service.shortDescription.toLowerCase().includes(lowercasedTerm) ||
+          service.contactName.toLowerCase().includes(lowercasedTerm);
+
+      return typeMatch && cityMatch && categoryMatch && searchMatch;
     });
-  }, [services, filterType, filterCity]);
+  }, [services, filterType, filterCity, filterCategory, searchTerm]);
 
   const handleLoginPrompt = () => {
     authContext?.openLoginModal();
   };
 
   return (
-      <div className="p-4 sm:p-6 bg-white rounded-lg shadow-sm w-full max-w-4xl mx-auto my-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 font-montserrat">Directorio de Servicios Comunitarios</h2>
+      <div className="p-4 sm:p-6 bg-gray-50 rounded-lg shadow-sm w-full max-w-6xl mx-auto my-4">
+        <h2 className="text-2xl font-bold text-gray-800 mb-2 font-montserrat">Directorio de Servicios Comunitarios</h2>
+        <p className="text-sm text-gray-600 mb-6">Encuentra servicios y profesionales recomendados por la comunidad.</p>
 
         {!isAuthenticated && (
             <div className="bg-ecuador-yellow-light border-l-4 border-ecuador-yellow text-gray-700 p-4 mb-6 rounded-md flex items-center">
               <LockClosedIcon className="w-6 h-6 mr-3 text-ecuador-blue" />
               <p className="text-sm">
-                Para ver la información de contacto completa, por favor{' '}
-                <button onClick={handleLoginPrompt} className="font-semibold text-ecuador-red hover:underline">
-                  inicia sesión
-                </button>
+                Para ver la información de contacto, por favor{' '}
+                <button onClick={handleLoginPrompt} className="font-semibold text-ecuador-red hover:underline">inicia sesión</button>
                 {' '}o{' '}
-                <button onClick={authContext?.openRegisterModal} className="font-semibold text-ecuador-red hover:underline">
-                  regístrate
-                </button>
-                {' '}como miembro.
+                <button onClick={authContext?.openRegisterModal} className="font-semibold text-ecuador-red hover:underline">regístrate</button>.
               </p>
             </div>
         )}
 
-        {/* --- INICIO DE LA CORRECCIÓN: FILTROS SIMPLIFICADOS --- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label htmlFor="serviceTypeFilter" className="block text-sm font-medium text-gray-700 mb-1">Tipo de Servicio</label>
-            <select id="serviceTypeFilter" value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow bg-gray-50 text-sm" aria-label="Filtrar por tipo de servicio">
-              {serviceTypes.map(type => (<option key={type} value={type}>{type}</option>))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="cityFilter" className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-            <select id="cityFilter" value={filterCity} onChange={(e) => setFilterCity(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow bg-gray-50 text-sm" aria-label="Filtrar por ciudad">
-              {cities.map(city => (<option key={city} value={city}>{city}</option>))}
-            </select>
+        {/* --- NUEVA SECCIÓN DE FILTROS --- */}
+        <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative">
+              <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+              <input id="searchTerm" type="text" placeholder="Ej: 'contabilidad', 'clases'..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full p-2 pl-9 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow text-sm" />
+              <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-2.5 top-[34px]" />
+            </div>
+            <div>
+              <label htmlFor="serviceTypeFilter" className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+              <select id="serviceTypeFilter" value={filterType} onChange={e => setFilterType(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow text-sm">
+                {serviceTypes.map(type => (<option key={type} value={type}>{type}</option>))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="categoryFilter" className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+              <select id="categoryFilter" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow text-sm">
+                {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="cityFilter" className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+              <select id="cityFilter" value={filterCity} onChange={e => setFilterCity(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow text-sm">
+                {cities.map(city => (<option key={city} value={city}>{city}</option>))}
+              </select>
+            </div>
           </div>
         </div>
-        {/* --- FIN DE LA CORRECCIÓN --- */}
 
+        {/* --- VISTA DE TARJETAS --- */}
         {loading ? (
             <div className="text-center py-10"><p className="text-gray-500">Cargando servicios...</p></div>
         ) : error ? (
@@ -97,46 +117,17 @@ export const CommunityDirectory: React.FC = () => {
               <p>{error}</p>
             </div>
         ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                {/* ... (código de la tabla sin cambios) ... */}
-                <thead className="bg-ecuador-blue">
-                <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Servicio</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Tipo</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Contacto</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Ciudad</th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-bold text-white uppercase tracking-wider">Sitio / Red</th>
-                </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200 text-sm">
-                {filteredServices.length > 0 ? (
-                    filteredServices.map((service) => (
-                        <tr key={service.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 whitespace-nowrap text-gray-700">{service.serviceName}</td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${service.type === ServiceType.OFERTA ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                              {service.type}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-gray-600">
-                            {isAuthenticated ? (service.contactName || service.contact) : (<span className="text-gray-400 flex items-center"><LockClosedIcon className="w-4 h-4 mr-1" /> Solo Miembros</span>)}
-                          </td>
-                          <td className="px-4 py-3 whitespace-nowrap text-gray-600">{service.city}</td>
-                          <td className="px-4 py-3 whitespace-nowrap">
-                            {isAuthenticated ? (
-                                service.website ? (<a href={service.website} target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:text-blue-700 hover:underline">{service.websiteText || 'Visitar'}</a>) : (<span className="text-gray-400">No disponible</span>)
-                            ) : (
-                                <span className="text-gray-400 flex items-center"><LockClosedIcon className="w-4 h-4 mr-1" /> Solo Miembros</span>
-                            )}
-                          </td>
-                        </tr>
-                    ))
-                ) : (
-                    <tr><td colSpan={5} className="px-4 py-10 text-center text-gray-500">No se encontraron servicios que coincidan con los filtros seleccionados.</td></tr>
-                )}
-                </tbody>
-              </table>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredServices.length > 0 ? (
+                  filteredServices.map((service) => (
+                      <ServiceCard key={service.id} service={service} isAuthenticated={isAuthenticated} />
+                  ))
+              ) : (
+                  <div className="col-span-full text-center py-16 bg-white rounded-lg border border-dashed">
+                    <p className="text-gray-500">No se encontraron servicios que coincidan con tu búsqueda.</p>
+                    <p className="text-sm text-gray-400 mt-2">Intenta ajustar los filtros.</p>
+                  </div>
+              )}
             </div>
         )}
       </div>

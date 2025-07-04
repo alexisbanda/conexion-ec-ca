@@ -189,11 +189,31 @@ export enum ServiceStatus {
   RECHAZADO = 'Rechazado',
 }
 
+export enum ServiceCategory {
+  COMIDA = 'Comida y Alimentos',
+  LEGAL = 'Asesoría Legal y Migratoria',
+  TECNOLOGIA = 'Tecnología y Soporte',
+  BELLEZA = 'Salud y Belleza',
+  DELIVERY = 'Envíos y Delivery',
+  EDUCACION = 'Educación y Clases',
+  EVENTOS = 'Eventos y Social',
+  HOGAR = 'Servicios del Hogar',
+  OTRO = 'Otro',
+}
+
 export interface CommunityServiceItem {
   id: string;
   serviceName: string;
   type: ServiceType;
-  contact: string;
+  // --- CAMPOS NUEVOS ---
+  shortDescription: string; // Descripción corta para la tarjeta
+  category: ServiceCategory; // Categoría para filtrar y agrupar
+  icon?: string; // Opcional: para un ícono representativo
+  whatsapp?: string; // Número de WhatsApp
+  instagram?: string; // Usuario de Instagram sin @
+  isRecommended?: boolean; // Para que el admin pueda destacar un servicio
+  // --- FIN DE CAMPOS NUEVOS ---
+  contact: string; // Email del usuario (se mantiene como fallback)
   contactName: string;
   city: string;
   website?: string;
