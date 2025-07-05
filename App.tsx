@@ -20,7 +20,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
 import { EventDetailPage } from './components/EventDetailPage';
 import { OnboardingPage } from './pages/OnboardingPage';
-
+import { Chatbot } from './components/Chatbot'; // <-- 1. IMPORTAR EL CHATBOT
 const PendingApprovalPage: React.FC = () => (
     <section className="py-16 md:py-24 bg-gray-100 text-center min-h-screen flex flex-col justify-center items-center">
         <h2 className="text-3xl font-bold text-ecuador-blue mb-4 font-montserrat">Cuenta en Revisión</h2>
@@ -37,8 +37,8 @@ const LandingPage: React.FC = () => (
         <Hero />
         <AboutUs />
         <Benefits />
-        <EventsNews />
         <ResourcesTools />
+        <EventsNews />
         <ContactForm />
     </>
 );
@@ -130,6 +130,7 @@ const App: React.FC = () => {
             </main>
             <Footer />
             <AuthModals />
+            <Chatbot /> {/* <-- 2. AÑADIR EL COMPONENTE AQUÍ */}
         </div>
     );
 };

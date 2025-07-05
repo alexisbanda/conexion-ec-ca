@@ -9,13 +9,6 @@ import { AuthContext } from '../contexts/AuthContext'; // Import AuthContext
 // Datos de Recursos
 const resourcesData: Resource[] = [
   {
-    id: 'res1',
-    icon: <BriefcaseIcon className="w-10 h-10" />,
-    title: 'Guía de Migración',
-    description: 'Información esencial sobre visas, permisos de trabajo y residencia en Canadá.',
-    details: 'Nuestra guía completa cubre los diferentes caminos migratorios, requisitos, procesos de solicitud y consejos útiles para navegar el sistema canadiense. Incluye enlaces a fuentes oficiales y checklists.'
-  },
-  {
     id: 'res2',
     icon: <AcademicCapIcon className="w-10 h-10" />,
     title: 'Recursos Educativos',
@@ -28,13 +21,6 @@ const resourcesData: Resource[] = [
     title: 'Búsqueda de Vivienda',
     description: 'Consejos y plataformas para encontrar tu nuevo hogar en Canadá.',
     details: 'Te ofrecemos estrategias para buscar alquileres, entender los tipos de vivienda, interpretar contratos de arrendamiento y conocer tus derechos como inquilino. Incluye enlaces a sitios web populares de búsqueda de vivienda.'
-  },
-  {
-    id: 'res4',
-    icon: <LinkIcon className="w-10 h-10" />,
-    title: 'Servicios de Asentamiento',
-    description: 'Conecta con organizaciones que ofrecen apoyo gratuito a recién llegados.',
-    details: 'Un directorio de agencias de asentamiento financiadas por el gobierno que proporcionan servicios gratuitos como orientación, clases de idiomas, talleres de empleo y más.'
   },
   {
     id: 'res5',
@@ -151,38 +137,8 @@ export const ResourcesTools: React.FC = () => {
             </p>
           </div>
 
-          {/* Recursos */}
-          <div className="mb-16">
-            <h3 className="text-2xl font-semibold text-ecuador-blue mb-8 text-center md:text-left font-montserrat">Recursos Útiles</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {resourcesData.map((resource) => (
-                  <div
-                      key={resource.id}
-                      className={`bg-ecuador-yellow-light p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center relative ${resource.isPremium && !authContext?.isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`} // <-- Clases condicionales
-                      onClick={() => openResourceModal(resource)}
-                      role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
-                      aria-label={`Abrir detalles de ${resource.title}`}
-                  >
-                    {/* Overlay para contenido premium */}
-                    {resource.isPremium && !authContext?.isAuthenticated && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold rounded-lg">
-                          <LockClosedIcon className="w-8 h-8 mr-2" />
-                          Miembros
-                        </div>
-                    )}
-                    <div className="text-ecuador-red mb-4">{resource.icon}</div>
-                    <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{resource.title}</h4>
-                    <p className="text-gray-600 text-sm flex-grow">{resource.description}</p>
-                    <button className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
-                      {resource.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Saber más'} &rarr; {/* <-- Texto de botón condicional */}
-                    </button>
-                  </div>
-              ))}
-            </div>
-          </div>
-
           {/* Herramientas */}
-          <div>
+          <div className="mb-16">
             <h3 className="text-2xl font-semibold text-ecuador-blue mb-8 text-center md:text-left font-montserrat">Herramientas Prácticas</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {toolsData.map((tool) => (
@@ -205,6 +161,36 @@ export const ResourcesTools: React.FC = () => {
                     <p className="text-gray-600 text-sm flex-grow">{tool.description}</p>
                     <button className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
                       {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Abrir herramienta'} &rarr; {/* <-- Texto de botón condicional */}
+                    </button>
+                  </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recursos */}
+          <div>
+            <h3 className="text-2xl font-semibold text-ecuador-blue mb-8 text-center md:text-left font-montserrat">Recursos Útiles</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {resourcesData.map((resource) => (
+                  <div
+                      key={resource.id}
+                      className={`bg-ecuador-yellow-light p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center relative ${resource.isPremium && !authContext?.isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`} // <-- Clases condicionales
+                      onClick={() => openResourceModal(resource)}
+                      role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
+                      aria-label={`Abrir detalles de ${resource.title}`}
+                  >
+                    {/* Overlay para contenido premium */}
+                    {resource.isPremium && !authContext?.isAuthenticated && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold rounded-lg">
+                          <LockClosedIcon className="w-8 h-8 mr-2" />
+                          Miembros
+                        </div>
+                    )}
+                    <div className="text-ecuador-red mb-4">{resource.icon}</div>
+                    <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{resource.title}</h4>
+                    <p className="text-gray-600 text-sm flex-grow">{resource.description}</p>
+                    <button className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
+                      {resource.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Saber más'} &rarr; {/* <-- Texto de botón condicional */}
                     </button>
                   </div>
               ))}

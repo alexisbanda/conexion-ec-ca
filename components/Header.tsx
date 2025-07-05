@@ -106,7 +106,7 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
       >
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" onClick={(e) => handleNavClick(e, '#hero')} className={`text-2xl font-bold font-montserrat ${headerIsSolid ? 'text-ecuador-yellow' : 'text-white'}`}>
-            Conexión<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>Migrante</span>
+            Ecuatorianos<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>BC</span>
           </Link>
           <div className="flex items-center">
             {/* Usamos visibleNavItems en lugar de NAV_ITEMS */}

@@ -40,3 +40,5 @@ export { UserGroupIcon } from './UserGroupIcon';
 // --- Iconos de Redes Sociales ---
 export { InstagramIcon } from './InstagramIcon';
 export { WhatsAppIcon } from './WhatsAppIcon';
+export { ChatBubbleOvalLeftEllipsisIcon } from './ChatBubbleOvalLeftEllipsisIcon';
+export { PaperAirplaneIcon } from './PaperAirplaneIcon';

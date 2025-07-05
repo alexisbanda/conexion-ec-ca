@@ -242,3 +242,8 @@ export interface ModalState {
   type?: ModalContentType;
   fullWidth?: boolean;
 }
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
