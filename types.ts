@@ -16,7 +16,7 @@ export interface EventItem {
 }
 
 export interface NewsItem {
-  id: string;
+  id:string;
   title: string;
   summary: string;
   link: string;
@@ -140,6 +140,9 @@ export interface User {
   linkedinUrl?: string;
   facebookUrl?: string;
   twitterUrl?: string;
+
+  // --- NUEVO CAMPO PARA SUSCRIPCIONES ---
+  subscribedServiceCategories?: ServiceCategory[];
 }
 
 /**
@@ -171,6 +174,7 @@ export interface AuthContextType extends AuthState {
   openLoginModal: () => void;
   openRegisterModal: () => void;
   openUserProfileModal: () => void;
+  openDirectoryModal: () => void;
   closeAuthModal: () => void;
   authModalState: ModalState;
   refreshUserData: () => Promise<void>;
@@ -189,13 +193,19 @@ export enum ServiceStatus {
   RECHAZADO = 'Rechazado',
 }
 
+// --- ENUM ACTUALIZADO CON NUEVAS CATEGORÍAS ---
 export enum ServiceCategory {
   COMIDA = 'Comida y Alimentos',
   LEGAL = 'Asesoría Legal y Migratoria',
-  TECNOLOGIA = 'Tecnología y Soporte',
+  VIVIENDA = 'Búsqueda de Vivienda',
+  EMPLEO = 'Oportunidades de Empleo',
+  SALUD_MENTAL = 'Salud Mental',
   BELLEZA = 'Salud y Belleza',
-  DELIVERY = 'Envíos y Delivery',
+  CUIDADO_INFANTIL = 'Cuidado Infantil',
   EDUCACION = 'Educación y Clases',
+  TRADUCCION = 'Traducción e Interpretación',
+  TECNOLOGIA = 'Tecnología y Soporte',
+  DELIVERY = 'Envíos y Delivery',
   EVENTOS = 'Eventos y Social',
   HOGAR = 'Servicios del Hogar',
   OTRO = 'Otro',

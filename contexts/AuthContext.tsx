@@ -1,4 +1,4 @@
-// /home/alexis/Sites/Landings/conexion-ec-ca/contexts/AuthContext.tsx
+// /home/alexis/Sites/Landings/conexion-ec-ca/contexts/AuthProvider.tsx
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User as FirebaseUserType, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
@@ -7,6 +7,8 @@ import { User, AuthContextType, AuthState, ModalState, ModalContentType, Registr
 import { getUserData, createUserDocument } from '../services/userService';
 import toast from 'react-hot-toast';
 import { sendWelcomeEmail } from '../services/emailService';
+// 1. Importar el componente del Directorio
+import { CommunityDirectory } from '../components/CommunityDirectory';
 
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
@@ -69,10 +71,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (userCredential.user) {
       const { user } = userCredential;
       await updateProfile(user, { displayName: name });
-
-      // --- MODIFICACIÓN CLAVE: Pasamos TODOS los datos del formulario de registro ---
       await createUserDocument(user.uid, registrationData);
-
       await sendWelcomeEmail({ name, email });
       closeAuthModal();
       toast.success(
@@ -105,17 +104,14 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
       closeAuthModal();
 
-      // --- LÓGICA DE REDIRECCIÓN MEJORADA ---
       if (appUser.role === 'admin') {
         navigate('/admin');
         toast.success(`¡Bienvenido de nuevo, ${appUser.name}!`);
       } else if (isApproved) {
-        // El usuario está aprobado, ahora verificamos si completó el onboarding
         if (appUser.onboardingCompleted) {
           navigate('/dashboard');
           toast.success(`¡Bienvenido de nuevo, ${appUser.name}!`);
         } else {
-          // Si no, lo redirigimos al wizard
           navigate('/onboarding');
           toast.success(`¡Bienvenido, ${appUser.name}! Ayúdanos a completar tu perfil.`);
         }
@@ -165,9 +161,21 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const openRegisterModal = () => setAuthModalState({ isOpen: true, title: 'Crear Cuenta', type: ModalContentType.REGISTER_FORM });
   const openUserProfileModal = () => {
     if (authState.isAuthenticated && authState.user) {
-      setAuthModalState({ isOpen: true, title: `Perfil de ${authState.user.name || 'Usuario'}`, type: ModalContentType.USER_PROFILE });
+      setAuthModalState({ isOpen: true, title: `Mi Espacio`, type: ModalContentType.USER_PROFILE, fullWidth: true });
     }
   };
+
+  // 2. Definir la nueva función para abrir el modal del directorio
+  const openDirectoryModal = () => {
+    setAuthModalState({
+      isOpen: true,
+      title: 'Directorio Comunitario',
+      content: <CommunityDirectory />,
+      type: ModalContentType.COMMUNITY_DIRECTORY,
+      fullWidth: true, // Usamos fullWidth para dar más espacio al directorio
+    });
+  };
+
   const closeAuthModal = () => setAuthModalState({ isOpen: false });
 
   const contextValue: AuthContextType = {
@@ -179,6 +187,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     openLoginModal,
     openRegisterModal,
     openUserProfileModal,
+    openDirectoryModal, // 3. Añadir la función al valor del contexto
     closeAuthModal,
     authModalState,
     refreshUserData,

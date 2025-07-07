@@ -18,6 +18,7 @@ export const createUserDocument = async (uid: string, data: RegistrationData): P
     try {
         // Preparamos los datos para guardar, incluyendo todos los campos del registro.
         const dataToSave: Partial<User> = {
+            id: uid,
             name: userData.name,
             email: userData.email,
             city: userData.city || '',
@@ -152,6 +153,25 @@ export const updateUserProfile = async (uid: string, data: Partial<Pick<User, 'c
         }
     } catch (error) {
         console.error("Error al actualizar el perfil del usuario: ", error);
+        throw error;
+    }
+};
+
+/**
+ * Actualiza las suscripciones de servicio de un usuario.
+ * @param uid El ID del usuario.
+ * @param subscriptions Un array con las categorías de servicio a las que el usuario está suscrito.
+ */
+export const updateUserSubscriptions = async (uid: string, subscriptions: ServiceCategory[]): Promise<void> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const userDocRef = doc(db, 'users', uid);
+    try {
+        await updateDoc(userDocRef, {
+            subscribedServiceCategories: subscriptions
+        });
+        console.log(`Suscripciones del usuario ${uid} actualizadas.`);
+    } catch (error) {
+        console.error("Error al actualizar las suscripciones del usuario: ", error);
         throw error;
     }
 };

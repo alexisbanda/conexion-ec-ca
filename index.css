@@ -1,13 +1,10 @@
-/* /home/alexis/Sites/Landings/conexion-ec-ca/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* /home/alexis/Sites/Landings/conexion-ec-ca/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- ESTILOS PARA EL CHATBOT DE IA --- */
 @keyframes chat-window-in {
     from {
         opacity: 0;
@@ -38,7 +35,6 @@
     animation: pulse-fast 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Utilidad para ocultar la barra de scroll (ya la tienes en index.html, pero es bueno tenerla aquí) */
 .scrollbar-hide::-webkit-scrollbar {
     display: none;
 }
