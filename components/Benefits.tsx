@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Benefit, Testimonial as TestimonialType, ModalState, ModalContentType } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon } from './icons';
 import { BenefitCard } from './BenefitCard';
@@ -10,7 +10,7 @@ const benefitsData: Benefit[] = [
     icon: <UserGroupIcon className="w-12 h-12" />,
     title: 'Red de Contactos Exclusiva',
     shortDescription: 'Accede a nuestro Directorio Comunitario y conecta con profesionales y emprendedores ecuatorianos.',
-    detailedDescription: 'Nuestra comunidad es un crisol de talentos. Usa nuestro Directorio Comunitario para encontrar servicios ofrecidos por compatriotas, desde asesoría legal hasta gastronomía. Participa en eventos de networking exclusivos para miembros, únete a grupos de interés y encuentra mentores o colaboradores.',
+    detailedDescription: '¿Imaginas tener a tu alcance una red de profesionales y emprendedores ecuatorianos listos para colaborar? Conviértete en miembro y obtén acceso privilegiado a nuestro Directorio Comunitario. Encuentra desde un abogado de confianza hasta el mejor sabor de casa. Participa en eventos de networking exclusivos, únete a grupos de interés y descubre a tu próximo socio, mentor o amigo. Aquí, las conexiones se convierten en oportunidades reales.',
     imageUrl: '/assets/images/red_contactos.png',
   },
   {
@@ -18,7 +18,7 @@ const benefitsData: Benefit[] = [
     icon: <BriefcaseIcon className="w-12 h-12" />,
     title: 'Oportunidades Laborales',
     shortDescription: 'Bolsa de trabajo, talleres y acceso a plantillas de CV en formato canadiense (Premium).',
-    detailedDescription: 'Te ayudamos a navegar el mercado laboral canadiense. Como miembro, tendrás acceso a ofertas de empleo exclusivas, talleres para mejorar tu CV, prepararte para entrevistas y plantillas de currículum adaptadas al estándar canadiense. Conéctate con empleadores que valoran el talento migrante.',
+    detailedDescription: 'Tu próximo gran paso profesional empieza aquí. Te damos las herramientas para conquistar el mercado laboral canadiense: acceso a una bolsa de trabajo con ofertas exclusivas, talleres prácticos para perfeccionar tu CV y brillar en las entrevistas, y plantillas de currículum premium diseñadas para impresionar. Conéctate directamente con empleadores que buscan tu talento. ¡Deja de buscar y empieza a ser encontrado!',
     imageUrl: '/assets/images/oportunidades_laborales.png',
   },
   {
@@ -26,7 +26,7 @@ const benefitsData: Benefit[] = [
     icon: <CurrencyDollarIcon className="w-12 h-12" />,
     title: 'Impulso a Emprendedores',
     shortDescription: 'Promociona tu negocio en nuestro Directorio y accede a una red de clientes potenciales.',
-    detailedDescription: '¿Tienes un emprendimiento? Nuestra plataforma te da la visibilidad que necesitas. Publica tus servicios en el Directorio Comunitario, llega a cientos de ecuatorianos en Canadá y participa en ferias y eventos de networking diseñados para impulsar tu negocio.',
+    detailedDescription: 'Tu negocio merece brillar. Te ofrecemos la plataforma perfecta para que toda la comunidad ecuatoriana en Canadá conozca tu talento. Al publicar en nuestro Directorio Comunitario, no solo ganas visibilidad, sino que te conectas con una red de clientes que confían en ti. Participa en ferias y eventos de networking exclusivos donde tu emprendimiento será el protagonista. ¡Es hora de crecer juntos!',
     imageUrl: '/assets/images/emprendedores.png', // Sugerencia: crear una nueva imagen para este beneficio
   },
   {
@@ -34,7 +34,7 @@ const benefitsData: Benefit[] = [
     icon: <HomeIcon className="w-12 h-12" />,
     title: 'Asesoría en Vivienda',
     shortDescription: 'Recursos para encontrar alojamiento y contactos de confianza dentro de la comunidad.',
-    detailedDescription: 'Encontrar un hogar es un paso fundamental. Te ofrecemos recursos y consejos para buscar vivienda, comprender los contratos de alquiler y conocer tus derechos. Además, a través de nuestro Directorio Comunitario, puedes encontrar recomendaciones y contactos de confianza.',
+    detailedDescription: 'Sabemos que encontrar tu primer hogar en Canadá puede ser un desafío. ¡No estás solo! Te acompañamos en cada paso con guías claras para buscar vivienda, entender los contratos de alquiler y conocer tus derechos como inquilino. Accede a recomendaciones y contactos de confianza dentro de nuestra comunidad para que te sientas seguro y en casa desde el primer día.',
     imageUrl: '/assets/images/apoyo_vivienda.png',
   },
   {
@@ -42,7 +42,7 @@ const benefitsData: Benefit[] = [
     icon: <AcademicCapIcon className="w-12 h-12" />,
     title: 'Apoyo Educativo',
     shortDescription: 'Guías sobre estudios, becas y seminarios web exclusivos sobre convalidación de títulos.',
-    detailedDescription: 'Canadá ofrece excelentes oportunidades educativas. Te guiamos en el proceso de selección de programas, solicitud de becas y el complejo proceso de convalidación de tus estudios. Accede a seminarios web con expertos y guías detalladas, un beneficio clave de nuestra comunidad.',
+    detailedDescription: 'Tu futuro académico en Canadá está a tu alcance. Te proporcionamos el mapa para navegar el sistema educativo: desde elegir el programa perfecto y postular a becas, hasta el crucial proceso de convalidación de tus títulos. Como miembro, tendrás acceso a seminarios web exclusivos con expertos y guías paso a paso que te ahorrarán tiempo y esfuerzo. ¡Invierte en tu futuro con el apoyo de tu comunidad!',
     imageUrl: '/assets/images/apoyo_educativo.png',
   },
   {
@@ -50,21 +50,38 @@ const benefitsData: Benefit[] = [
     icon: <ChatBubbleLeftRightIcon className="w-12 h-12" />,
     title: 'Integración y Cultura',
     shortDescription: 'Eventos culturales exclusivos y asistencia 24/7 con nuestro asistente virtual "Conex".',
-    detailedDescription: 'Celebramos nuestras raíces y te ayudamos a adaptarte. Organizamos eventos culturales y festivales exclusivos para miembros. Además, nuestro asistente virtual "Conex" está disponible 24/7 para responder tus dudas migratorias y ayudarte a navegar nuestros recursos.',
+    detailedDescription: 'Siéntete más cerca de casa mientras construyes tu futuro. Organizamos eventos culturales, festivales y celebraciones que mantienen vivas nuestras tradiciones y nos unen como familia. Y para tus dudas del día a día, nuestro asistente virtual "Conex" está disponible 24/7 para darte respuestas al instante. Es lo mejor de dos mundos: el calor de nuestra gente y la ayuda que necesitas, cuando la necesitas.',
     imageUrl: '/assets/images/integracion_cultural.png',
   },
 ];
 
-const testimonialData: TestimonialType = {
-  id: 't1',
-  quote: 'Gracias al Directorio Comunitario, conseguí mis primeros clientes en Toronto. Los talleres de CV me ayudaron a conseguir mi trabajo actual. Conexión Migrante no es solo un grupo, es una plataforma de lanzamiento.',
-  author: 'Javier Mendoza',
-  role: 'Ingeniero de Software y Emprendedor',
-  imageUrl: 'https://picsum.photos/seed/testimonialuser2/100/100',
-};
+const testimonialsData: TestimonialType[] = [
+  {
+    id: 't1',
+    quote: 'Llegué a Toronto con un sueño y muchas dudas. Gracias al Directorio Comunitario, no solo conseguí mis primeros clientes como freelancer, sino que los talleres de CV fueron clave para obtener mi trabajo actual en una empresa de tecnología. Conexión Migrante no es solo un grupo, es una verdadera plataforma de lanzamiento.',
+    author: 'Javier Mendoza',
+    role: 'Ingeniero de Software y Emprendedor',
+    imageUrl: 'https://picsum.photos/seed/testimonialuser2/100/100',
+  },
+  {
+    id: 't2',
+    quote: 'Como recién llegada, me sentía perdida con el tema de la vivienda. Los recursos y el apoyo de la comunidad fueron vitales para encontrar un lugar seguro para mi familia. ¡La asesoría que recibí no tiene precio!',
+    author: 'Ana Lucía Paredes',
+    role: 'Diseñadora Gráfica',
+    imageUrl: 'https://picsum.photos/seed/testimonialuser3/100/100',
+  },
+  {
+    id: 't3',
+    quote: 'Los eventos culturales son mi parte favorita. Me han permitido conocer gente increíble, reconectar con mis raíces y sentirme menos sola en un país nuevo. Es el calor de Ecuador en pleno Canadá.',
+    author: 'Carlos Benítez',
+    role: 'Estudiante de Postgrado',
+    imageUrl: 'https://picsum.photos/seed/testimonialuser4/100/100',
+  }
+];
 
 export const Benefits: React.FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
 
   const openModal = (benefit: Benefit) => {
     setModalState({
@@ -78,6 +95,15 @@ export const Benefits: React.FC = () => {
   const closeModal = () => {
     setModalState({ isOpen: false });
   };
+
+  // Efecto para el carrusel automático de testimonios
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveTestimonial((prevActive) => (prevActive + 1) % testimonialsData.length);
+    }, 7000); // Cambia de testimonio cada 7 segundos
+
+    return () => clearInterval(timer); // Limpia el intervalo al desmontar el componente
+  }, []);
 
   return (
       <section id="benefits" className="py-16 md:py-24 bg-white">
@@ -100,20 +126,35 @@ export const Benefits: React.FC = () => {
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-ecuador-red text-white rounded-full p-3 shadow-md">
                 <ChatBubbleLeftRightIcon className="w-8 h-8"/>
               </div>
-              <p className="text-gray-700 italic text-lg mb-6 text-center">"{testimonialData.quote}"</p>
-              <div className="flex items-center justify-center">
-                {testimonialData.imageUrl && (
-                    <img
-                        src={testimonialData.imageUrl}
-                        alt={testimonialData.author}
-                        className="w-16 h-16 rounded-full mr-4 border-2 border-ecuador-yellow object-cover"
-                        loading="lazy"
-                    />
-                )}
-                <div>
-                  <p className="font-bold text-ecuador-blue">{testimonialData.author}</p>
-                  <p className="text-sm text-gray-600">{testimonialData.role}</p>
+              <div className="min-h-[180px] md:min-h-[150px] flex flex-col justify-center">
+                <p className="text-gray-700 italic text-lg mb-6 text-center">"{testimonialsData[activeTestimonial].quote}"</p>
+                <div className="flex items-center justify-center">
+                  {testimonialsData[activeTestimonial].imageUrl && (
+                      <img
+                          src={testimonialsData[activeTestimonial].imageUrl}
+                          alt={testimonialsData[activeTestimonial].author}
+                          className="w-16 h-16 rounded-full mr-4 border-2 border-ecuador-yellow object-cover"
+                          loading="lazy"
+                      />
+                  )}
+                  <div>
+                    <p className="font-bold text-ecuador-blue">{testimonialsData[activeTestimonial].author}</p>
+                    <p className="text-sm text-gray-600">{testimonialsData[activeTestimonial].role}</p>
+                  </div>
                 </div>
+              </div>
+              {/* Navegación por puntos (bullets) */}
+              <div className="flex justify-center space-x-3 mt-6">
+                {testimonialsData.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setActiveTestimonial(index)}
+                        className={`w-3 h-3 rounded-full transition-colors ${
+                            activeTestimonial === index ? 'bg-ecuador-red' : 'bg-gray-300 hover:bg-gray-400'
+                        }`}
+                        aria-label={`Ir al testimonio ${index + 1}`}
+                    />
+                ))}
               </div>
             </div>
           </div>

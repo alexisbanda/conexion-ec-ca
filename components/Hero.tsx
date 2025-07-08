@@ -1,16 +1,8 @@
 import React, { useContext } from 'react';
-import { ECUADOR_COLORS } from '../constants';
 import { ArrowDownIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
 export const Hero: React.FC = () => {
   const auth = useContext(AuthContext);
-  const scrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   return (
     <section id="hero" className="relative h-screen flex items-center justify-center text-center text-white bg-cover bg-center"
@@ -27,7 +19,7 @@ export const Hero: React.FC = () => {
           <button
             // Llama a la función para abrir el modal de registro desde el contexto
             className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
-            onClick={() => auth?.openRegisterModal()}yellow
+            onClick={() => auth?.openRegisterModal()}
         >
           Únete a la Comunidad
         </button>

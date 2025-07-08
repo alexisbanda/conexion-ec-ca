@@ -254,48 +254,54 @@ export const MemberDashboard: React.FC = () => {
     ];
 
     return (
-        <section id="member-dashboard" className="bg-gray-100 py-12 md:py-20 min-h-screen">
-            <div className="container mx-auto px-4">
-                <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-10">
-                    <div className="mb-8 border-b border-gray-200 pb-6">
-                        <h2 className="text-3xl md:text-4xl font-extrabold text-ecuador-blue font-montserrat">
+        <section
+            id="member-dashboard"
+            className="bg-gradient-to-b from-ecuador-blue-light via-gray-100 to-white py-8 md:py-16 min-h-screen"
+            style={{ paddingTop: '80px' }} // Ajusta el valor según la altura real de tu header
+        >
+            <div className="container mx-auto px-2 sm:px-4">
+                <div className="max-w-6xl mx-auto bg-white/95 rounded-2xl shadow-2xl p-4 sm:p-6 md:p-10 border border-gray-100">
+                    <div className="mb-8 border-b border-gray-100 pb-6">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-ecuador-blue font-montserrat drop-shadow-sm">
                             ¡Bienvenido, {user.name || user.email}!
                         </h2>
-                        <p className="text-gray-600 mt-2">
+                        <p className="text-gray-800 mt-2 text-base sm:text-lg">
                             Gestiona tu perfil, publicaciones y preferencias desde aquí.
                         </p>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-                        {/* Navegación de Pestañas (Sidebar en desktop) */}
-                        <aside className="md:w-1/4">
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+                        {/* Navegación de Pestañas */}
+                        <aside className="w-full md:w-1/4 mb-4 md:mb-0">
                             <nav className="flex flex-row md:flex-col gap-2">
                                 {TABS_CONFIG.map(tab => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`w-full text-left font-semibold p-3 rounded-lg transition-all duration-200 text-sm md:text-base flex items-center space-x-3 ${
+                                        className={`w-full text-left font-semibold p-3 rounded-xl transition-all duration-200 text-sm md:text-base flex items-center space-x-3 border
+                                        ${
                                             activeTab === tab.id
-                                                ? 'bg-ecuador-blue text-white shadow-md transform md:scale-105'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-ecuador-yellow-light hover:text-ecuador-blue'
+                                                ? 'bg-ecuador-blue text-white shadow-lg border-ecuador-blue'
+                                                : 'bg-gray-50 text-gray-800 hover:bg-ecuador-yellow-light hover:text-ecuador-blue border-gray-200'
                                         }`}
+                                        style={{ minWidth: 0 }}
                                     >
-                                        <tab.icon className="w-5 h-5 flex-shrink-0" />
-                                        <span>{tab.label}</span>
+                                        <tab.icon className={`w-5 h-5 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-ecuador-blue'}`} />
+                                        <span className="truncate">{tab.label}</span>
                                     </button>
                                 ))}
                             </nav>
                         </aside>
 
                         {/* Contenido de la Pestaña */}
-                        <main className="md:w-3/4">
-                            {renderContent()}
+                        <main className="w-full md:w-3/4">
+                            <div className="min-h-[350px]">{renderContent()}</div>
                         </main>
                     </div>
                 </div>
             </div>
 
-            {/* MODALES (se mantienen fuera de la estructura de pestañas para que funcionen globalmente) */}
+            {/* MODALES */}
             <Modal isOpen={isServiceModalOpen} onClose={() => setIsServiceModalOpen(false)} title={serviceToEdit ? "Editar Servicio" : "Agregar Nuevo Servicio"}>
                 <AddServiceForm
                     onSuccess={handleSuccess}
@@ -306,7 +312,7 @@ export const MemberDashboard: React.FC = () => {
 
             <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirmar Eliminación">
                 <div className="p-4">
-                    <p className="text-gray-700">¿Estás seguro de que quieres eliminar el servicio "<strong>{serviceToDelete?.serviceName}</strong>"? Esta acción no se puede deshacer.</p>
+                    <p className="text-gray-800">¿Estás seguro de que quieres eliminar el servicio "<strong>{serviceToDelete?.serviceName}</strong>"? Esta acción no se puede deshacer.</p>
                     <div className="flex justify-end space-x-3 mt-6">
                         <button onClick={() => setIsDeleteModalOpen(false)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md text-sm transition-colors">
                             Cancelar

@@ -48,17 +48,31 @@ export const EventDetailPage: React.FC = () => {
     if (!event) return null;
 
     return (
-        // --- INICIO DE LA CORRECCIÓN ---
-        // 1. Envolvemos todo en un div que ocupa toda la pantalla y tiene el color de fondo.
         <div className="bg-gray-50 min-h-screen">
-            {/* 2. La sección interior ahora solo necesita el padding para empujar el contenido hacia abajo. */}
-            <section className="pt-24 md:pt-32 pb-24 md:pb-32">
+            {/* HERO: Imagen de evento a todo el ancho */}
+            <div className="relative w-full h-64 md:h-96">
+                <img
+                    src={event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/400`}
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                />
+                {/* Overlay oscuro para contraste */}
+                <div className="absolute inset-0 bg-black/40" />
+                {/* Título y fecha sobre la imagen (opcional, puedes quitar si prefieres abajo) */}
+                {/* 
+                <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white">
+                    <h1 className="text-3xl md:text-5xl font-bold font-montserrat drop-shadow-lg">{event.title}</h1>
+                    <div className="flex items-center justify-center text-lg mt-4 font-semibold">
+                        <CalendarDaysIcon className="w-6 h-6 mr-2" />
+                        <span>{formatDate(event.date)}</span>
+                    </div>
+                </div>
+                */}
+            </div>
+            {/* Contenido principal debajo del hero */}
+            <section className="pt-8 md:pt-12 pb-24 md:pb-32">
                 <div className="container mx-auto px-6">
-                    <img
-                        src={event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/400`}
-                        alt={event.title}
-                        className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg mb-8"
-                    />
+                    {/* Si no usas el título en el hero, muéstralo aquí */}
                     <h1 className="text-4xl md:text-5xl font-bold text-ecuador-blue mb-4 font-montserrat">{event.title}</h1>
                     <div className="flex items-center text-lg text-ecuador-red mb-6 font-semibold">
                         <CalendarDaysIcon className="w-6 h-6 mr-2" />
@@ -67,13 +81,10 @@ export const EventDetailPage: React.FC = () => {
                     <div className="prose max-w-none text-gray-700 mb-8">
                         <p>{event.description}</p>
                     </div>
-
                     <RsvpSection event={event} onRsvpUpdate={fetchEvent} />
-
                     {/* Aquí irá la Galería de Fotos en el futuro */}
                 </div>
             </section>
         </div>
-        // --- FIN DE LA CORRECCIÓN ---
     );
 };
