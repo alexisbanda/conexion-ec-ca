@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useContext } from 'react';
 import { ECUADOR_COLORS } from '../constants';
 import { ArrowDownIcon } from './icons';
-
+import { AuthContext } from '../contexts/AuthContext';
 export const Hero: React.FC = () => {
+  const auth = useContext(AuthContext);
   const scrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const contactSection = document.getElementById('contact');
@@ -20,19 +20,23 @@ export const Hero: React.FC = () => {
         <h1 className="text-5xl md:text-7xl font-extrabold mb-4 font-montserrat text-shadow-md">
           <span className="text-ecuador-yellow">Conectando</span> Corazones, <span className="text-ecuador-yellow">Construyendo</span> Futuros
         </h1>
-        <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto text-shadow-sm">
-          Tu comunidad ecuatoriana en Canadá. Apoyo, cultura y oportunidades para crecer juntos, lejos de casa pero cerca de nuestras raíces.
+        <p className="mt-6 text-lg md:text-xl max-w-3xl mx-auto text-blue-100 text-shadow-sm">
+          Conectando, apoyando y creciendo juntos. Accede a recursos, eventos y una red de contactos invaluable para facilitar tu vida en Canadá.
         </p>
-        <a
-          href="#contact"
-          onClick={scrollToContact}
-          className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
-          aria-label="Únete a nuestra comunidad ahora"
+        <div className="mt-10">
+          <button
+            // Llama a la función para abrir el modal de registro desde el contexto
+            className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
+            onClick={() => auth?.openRegisterModal()}yellow
         >
-          Únete Ahora
-        </a>
+          Únete a la Comunidad
+        </button>
+          <p className="mt-4 text-sm text-white opacity-80">
+            ¡Es gratis y toma menos de un minuto!
+          </p>
+        </div>
       </div>
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 text-center animate-bounce">
+      <div className="absolute bottom-10 transform -translate-x-1/2 z-10 text-center animate-bounce">
         <p className="text-sm text-shadow-sm">↓ Desplázate para descubrir más ↓</p>
         <ArrowDownIcon className="w-6 h-6 mx-auto mt-1 text-ecuador-yellow" />
       </div>

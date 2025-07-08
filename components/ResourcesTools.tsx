@@ -131,9 +131,9 @@ export const ResourcesTools: React.FC = () => {
       <section id="resources-tools" className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Recursos y Herramientas</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Tu Caja de Herramientas en Canadá</h2>
             <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-              Accede a información valiosa y herramientas prácticas diseñadas para ayudarte en tu día a día.
+              Hemos creado estas guías y utilidades para que tu camino sea más sencillo. Son para ti, úsalas cuando las necesites.
             </p>
           </div>
 

@@ -85,8 +85,7 @@ export const Benefits: React.FC = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Beneficios de Ser Parte</h2>
             <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-              Descubre todo lo que nuestra comunidad puede ofrecerte para facilitar tu vida y crecimiento en Canadá.
-            </p>
+              Al unirte a nuestra comunidad, desbloqueas ventajas exclusivas pensadas para ti y tu familia.            </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {benefitsData.map((benefit) => (

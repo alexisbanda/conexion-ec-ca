@@ -31,15 +31,29 @@ const PendingApprovalPage: React.FC = () => (
     </section>
 );
 
+
 const LandingPage: React.FC = () => (
     <>
         <ScrollProgressBar />
-        <Hero />
-        <AboutUs />
-        <Benefits />
-        <ResourcesTools />
-        <EventsNews />
-        <ContactForm />
+        {/* Usamos <section> para cada bloque temático. El id permite la navegación por ancla. */}
+        <section id="hero">
+            <Hero />
+        </section>
+        <section id="about-us">
+            <AboutUs />
+        </section>
+        <section id="benefits">
+            <Benefits />
+        </section>
+        <section id="resources-tools">
+            <ResourcesTools />
+        </section>
+        <section id="events-news">
+            <EventsNews />
+        </section>
+        <section id="contact">
+            <ContactForm />
+        </section>
     </>
 );
 
