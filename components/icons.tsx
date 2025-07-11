@@ -11,6 +11,7 @@ import {
     faListUl, // Equivalente a ListBulletIcon
     faChevronLeft,
     faChevronRight,
+    faChevronDown,
     faCalendarDays,
     faLock, // Equivalente a LockClosedIcon
     faUsers, // Equivalente a UserGroupIcon
@@ -53,6 +54,7 @@ library.add(
     faListUl,
     faChevronLeft,
     faChevronRight,
+    faChevronDown,
     faCalendarDays,
     faLock,
     faUsers,
@@ -124,6 +126,10 @@ export const ChevronLeftIcon: React.FC<IconProps> = (props) => (
 
 export const ChevronRightIcon: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faChevronRight} {...props} />
+);
+
+export const ChevronDownIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faChevronDown} {...props} />
 );
 
 export const CalendarDaysIcon: React.FC<IconProps> = (props) => (

@@ -135,7 +135,6 @@ const PublicationsSection: React.FC<{
 // --- Componente Principal del Dashboard ---
 export const MemberDashboard: React.FC = () => {
     const auth = useContext(AuthContext);
-    const navigate = useNavigate();
 
     // Estado para la pestaña activa
     const [activeTab, setActiveTab] = useState(TABS.PROFILE);

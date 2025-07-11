@@ -58,6 +58,7 @@ export interface Resource {
   description: string;
   details?: string;
   isPremium?: boolean;
+  knowledgePoints?: { question: string }[];
 }
 
 export interface Tool {

@@ -1,39 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Benefit, Testimonial as TestimonialType, ModalState, ModalContentType } from '../types';
+import React, { useState, useEffect, useContext } from 'react';
+import { Benefit, Testimonial as TestimonialType } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon } from './icons';
 import { BenefitCard } from './BenefitCard';
-import { Modal } from './Modal';
+import { AuthContext } from '../contexts/AuthContext';
 
 const benefitsData: Benefit[] = [
   {
     id: '1',
     icon: <UserGroupIcon className="w-12 h-12" />,
-    title: 'Red de Contactos Exclusiva',
-    shortDescription: 'Accede a nuestro Directorio Comunitario y conecta con profesionales y emprendedores ecuatorianos.',
+    title: 'Encuentra a tu Gente',
+    shortDescription: 'Conecta con profesionales, emprendedores y amigos que entienden tu camino. Nunca más te sentirás solo.',
     detailedDescription: '¿Imaginas tener a tu alcance una red de profesionales y emprendedores ecuatorianos listos para colaborar? Conviértete en miembro y obtén acceso privilegiado a nuestro Directorio Comunitario. Encuentra desde un abogado de confianza hasta el mejor sabor de casa. Participa en eventos de networking exclusivos, únete a grupos de interés y descubre a tu próximo socio, mentor o amigo. Aquí, las conexiones se convierten en oportunidades reales.',
     imageUrl: '/assets/images/red_contactos.png',
   },
   {
     id: '2',
     icon: <BriefcaseIcon className="w-12 h-12" />,
-    title: 'Oportunidades Laborales',
-    shortDescription: 'Bolsa de trabajo, talleres y acceso a plantillas de CV en formato canadiense (Premium).',
+    title: 'Impulsa tu Carrera',
+    shortDescription: 'Accede a nuestra bolsa de trabajo y talleres para adaptar tu CV al formato canadiense. ¡Consigue el trabajo que mereces!',
     detailedDescription: 'Tu próximo gran paso profesional empieza aquí. Te damos las herramientas para conquistar el mercado laboral canadiense: acceso a una bolsa de trabajo con ofertas exclusivas, talleres prácticos para perfeccionar tu CV y brillar en las entrevistas, y plantillas de currículum premium diseñadas para impresionar. Conéctate directamente con empleadores que buscan tu talento. ¡Deja de buscar y empieza a ser encontrado!',
     imageUrl: '/assets/images/oportunidades_laborales.png',
   },
   {
     id: '3',
     icon: <CurrencyDollarIcon className="w-12 h-12" />,
-    title: 'Impulso a Emprendedores',
-    shortDescription: 'Promociona tu negocio en nuestro Directorio y accede a una red de clientes potenciales.',
+    title: 'Haz Crecer tu Negocio',
+    shortDescription: 'Promociona tu emprendimiento en nuestro directorio y llega a una comunidad que confía en ti.',
     detailedDescription: 'Tu negocio merece brillar. Te ofrecemos la plataforma perfecta para que toda la comunidad ecuatoriana en Canadá conozca tu talento. Al publicar en nuestro Directorio Comunitario, no solo ganas visibilidad, sino que te conectas con una red de clientes que confían en ti. Participa en ferias y eventos de networking exclusivos donde tu emprendimiento será el protagonista. ¡Es hora de crecer juntos!',
-    imageUrl: '/assets/images/emprendedores.png', // Sugerencia: crear una nueva imagen para este beneficio
+    imageUrl: '/assets/images/evento_networking.png', // Sugerencia: crear una nueva imagen para este beneficio
   },
   {
     id: '4',
     icon: <HomeIcon className="w-12 h-12" />,
-    title: 'Asesoría en Vivienda',
-    shortDescription: 'Recursos para encontrar alojamiento y contactos de confianza dentro de la comunidad.',
+    title: 'Tu Hogar en Canadá',
+    shortDescription: 'Te guiamos para encontrar alojamiento seguro y entender tus derechos como inquilino. Siéntete en casa desde el día uno.',
     detailedDescription: 'Sabemos que encontrar tu primer hogar en Canadá puede ser un desafío. ¡No estás solo! Te acompañamos en cada paso con guías claras para buscar vivienda, entender los contratos de alquiler y conocer tus derechos como inquilino. Accede a recomendaciones y contactos de confianza dentro de nuestra comunidad para que te sientas seguro y en casa desde el primer día.',
     imageUrl: '/assets/images/apoyo_vivienda.png',
   },
@@ -80,20 +80,13 @@ const testimonialsData: TestimonialType[] = [
 ];
 
 export const Benefits: React.FC = () => {
-  const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
+  const [flippedCardId, setFlippedCardId] = useState<string | null>(null);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const auth = useContext(AuthContext);
 
-  const openModal = (benefit: Benefit) => {
-    setModalState({
-      isOpen: true,
-      title: benefit.title,
-      content: <p className="text-gray-600 whitespace-pre-line">{benefit.detailedDescription}</p>,
-      type: ModalContentType.BENEFIT_DETAILS,
-    });
-  };
-
-  const closeModal = () => {
-    setModalState({ isOpen: false });
+  const handleCardFlip = (benefitId: string) => {
+    // Si se hace clic en la tarjeta ya volteada, se cierra. Si no, se abre la nueva.
+    setFlippedCardId(prevId => (prevId === benefitId ? null : benefitId));
   };
 
   // Efecto para el carrusel automático de testimonios
@@ -105,6 +98,14 @@ export const Benefits: React.FC = () => {
     return () => clearInterval(timer); // Limpia el intervalo al desmontar el componente
   }, []);
 
+  // Función para hacer scroll al formulario de contacto
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
       <section id="benefits" className="py-16 md:py-24 bg-white">
         <div className="container mx-auto px-6">
@@ -115,7 +116,14 @@ export const Benefits: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             {benefitsData.map((benefit) => (
-                <BenefitCard key={benefit.id} benefit={benefit} onOpenModal={openModal} />
+                <BenefitCard
+                    key={benefit.id}
+                    benefit={benefit}
+                    isFlipped={flippedCardId === benefit.id}
+                    onFlip={() => handleCardFlip(benefit.id)}
+                    onRegisterClick={auth?.openRegisterModal}
+                    onContactClick={scrollToContact}
+                />
             ))}
           </div>
 
@@ -159,9 +167,6 @@ export const Benefits: React.FC = () => {
             </div>
           </div>
         </div>
-        <Modal isOpen={modalState.isOpen} onClose={closeModal} title={modalState.title}>
-          {modalState.content}
-        </Modal>
       </section>
   );
 };
