@@ -301,7 +301,7 @@ export const MemberDashboard: React.FC = () => {
             </div>
 
             {/* MODALES */}
-            <Modal isOpen={isServiceModalOpen} onClose={() => setIsServiceModalOpen(false)} title={serviceToEdit ? "Editar Servicio" : "Agregar Nuevo Servicio"}>
+            <Modal isOpen={isServiceModalOpen} onClose={() => setIsServiceModalOpen(false)} title={serviceToEdit ? "Editar Servicio" : "Agregar Nuevo Servicio"} fullWidth={true}>
                 <AddServiceForm
                     onSuccess={handleSuccess}
                     onCancel={() => setIsServiceModalOpen(false)}

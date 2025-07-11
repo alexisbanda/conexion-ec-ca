@@ -296,7 +296,7 @@ export const AuthModals: React.FC = () => {
     }
 
     return (
-        <Modal isOpen={authModalState.isOpen} onClose={closeAuthModal} title={modalTitle}>
+        <Modal isOpen={authModalState.isOpen} onClose={closeAuthModal} title={modalTitle} fullWidth={authModalState.fullWidth}>
             {modalContentNode}
         </Modal>
     );

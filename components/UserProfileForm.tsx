@@ -95,9 +95,9 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
         <button
             type="button"
             onClick={() => setActiveTab(tabKey)}
-            className={`py-2 px-4 text-sm font-medium rounded-t-lg transition-colors ${
+            className={`py-3 px-4 text-sm font-medium transition-colors text-center w-full rounded-md sm:rounded-t-lg sm:rounded-b-none ${
                 activeTab === tabKey
-                    ? 'bg-white text-ecuador-blue border-b-2 border-ecuador-blue'
+                    ? 'bg-ecuador-blue text-white sm:bg-white sm:text-ecuador-blue sm:border-b-2 sm:border-ecuador-blue'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
         >
@@ -107,19 +107,20 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-2" aria-label="Tabs">
-                    <TabButton tabKey="personal" label="Personal" />
-                    <TabButton tabKey="family" label="Familia y Estatus" />
-                    <TabButton tabKey="work" label="Estudios y Trabajo" />
-                    <TabButton tabKey="professional" label="Profesional" />
+            <div className="sm:border-b sm:border-gray-200">
+                <nav className="flex flex-col gap-y-1 sm:flex-row sm:-mb-px sm:space-x-2" aria-label="Tabs">
+                    <TabButton tabKey="personal" label="Información Personal" />
+                    <TabButton tabKey="family" label="Estatus y Familia" />
+                    <TabButton tabKey="work" label="Educación y Trabajo" />
+                    <TabButton tabKey="professional" label="Perfil Profesional" />
                 </nav>
             </div>
 
-            <div className="pt-4">
+            <div className="p-4 min-h-[300px]">
                 {activeTab === 'personal' && (
-                    <div className="space-y-4 animate-fade-in">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-6 animate-fade-in">
+                        <h4 className="text-lg font-semibold text-gray-800 border-b pb-2">Datos de Contacto</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label className={labelStyle}>Nombre</label><input name="name" type="text" value={formData.name || ''} onChange={handleChange} className={inputStyle} /></div>
                             <div><label className={labelStyle}>Apellidos</label><input name="lastName" type="text" value={formData.lastName || ''} onChange={handleChange} className={inputStyle} /></div>
                             <div><label className={labelStyle}>Teléfono</label><input name="phone" type="tel" value={formData.phone || ''} onChange={handleChange} className={inputStyle} /></div>
@@ -131,30 +132,37 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
                 )}
 
                 {activeTab === 'family' && (
-                    <div className="space-y-4 animate-fade-in">
-                        <div><label className={labelStyle}>Núcleo familiar en Canadá</label>
-                            <div className="grid grid-cols-2 gap-2 mt-2">{Object.values(FamilyComposition).map(comp => (<label key={comp} className="flex items-center"><input type="checkbox" name="familyComposition" value={comp} checked={formData.familyComposition?.includes(comp)} onChange={handleChange} className={checkboxRadioStyle} />{comp}</label>))}</div>
-                        </div>
-                        <div><label className={labelStyle}>Estatus actual en Canadá</label>
-                            <div className="flex flex-wrap gap-2 mt-2">{['Ciudadano', 'Residente Permanente', 'Study Permit', 'Work Permit', 'Refugiado', 'Visitante', 'Otro'].map(status => (<label key={status} className="flex items-center"><input type="radio" name="immigrationStatus" value={status} checked={formData.immigrationStatus === status} onChange={handleChange} className={checkboxRadioStyle} />{status}</label>))}</div>
+                    <div className="space-y-6 animate-fade-in">
+                         <h4 className="text-lg font-semibold text-gray-800 border-b pb-2">Situación Actual</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2"><label className={labelStyle}>Estatus actual en Canadá</label>
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{['Ciudadano', 'Residente Permanente', 'Study Permit', 'Work Permit', 'Refugiado', 'Visitante', 'Otro'].map(status => (<label key={status} className="flex items-center text-sm"><input type="radio" name="immigrationStatus" value={status} checked={formData.immigrationStatus === status} onChange={handleChange} className={checkboxRadioStyle} />{status}</label>))}</div>
+                            </div>
+                            <div className="md:col-span-2"><label className={labelStyle}>Núcleo familiar en Canadá</label>
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{Object.values(FamilyComposition).map(comp => (<label key={comp} className="flex items-center text-sm"><input type="checkbox" name="familyComposition" value={comp} checked={formData.familyComposition?.includes(comp)} onChange={handleChange} className={checkboxRadioStyle} />{comp}</label>))}</div>
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {activeTab === 'work' && (
-                    <div className="space-y-4 animate-fade-in">
-                        <div><label className={labelStyle}>Nivel de Estudios</label>
-                            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-2">{Object.values(EducationLevel).map(level => (<label key={level} className="flex items-center"><input type="radio" name="educationLevel" value={level} checked={formData.educationLevel === level} onChange={handleChange} className={checkboxRadioStyle} />{level}</label>))}</div>
+                    <div className="space-y-6 animate-fade-in">
+                        <h4 className="text-lg font-semibold text-gray-800 border-b pb-2">Formación Académica y Laboral</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div className="md:col-span-2"><label className={labelStyle}>Nivel de Estudios</label>
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{Object.values(EducationLevel).map(level => (<label key={level} className="flex items-center text-sm"><input type="radio" name="educationLevel" value={level} checked={formData.educationLevel === level} onChange={handleChange} className={checkboxRadioStyle} />{level}</label>))}</div>
+                            </div>
+                            <div><label className={labelStyle}>Profesión o título</label><input name="profession" type="text" value={formData.profession || ''} onChange={handleChange} className={inputStyle} /></div>
+                            <div><label className={labelStyle}>¿Qué estudias en Canadá?</label><input name="studiesInCanada" type="text" value={formData.studiesInCanada || ''} onChange={handleChange} className={inputStyle} /></div>
                         </div>
-                        <div><label className={labelStyle}>Profesión o título</label><input name="profession" type="text" value={formData.profession || ''} onChange={handleChange} className={inputStyle} /></div>
-                        <div><label className={labelStyle}>¿Qué estudias en Canadá?</label><input name="studiesInCanada" type="text" value={formData.studiesInCanada || ''} onChange={handleChange} className={inputStyle} /></div>
                     </div>
                 )}
 
                 {activeTab === 'professional' && (
-                    <div className="space-y-4 animate-fade-in">
-                        <div><label className={labelStyle}>¿Qué servicios ofreces?</label><textarea name="servicesOffered" value={formData.servicesOffered || ''} onChange={handleChange} rows={4} className={inputStyle} /></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-6 animate-fade-in">
+                        <h4 className="text-lg font-semibold text-gray-800 border-b pb-2">Presencia en Línea y Servicios</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="md:col-span-2"><label className={labelStyle}>¿Qué servicios ofreces?</label><textarea name="servicesOffered" value={formData.servicesOffered || ''} onChange={handleChange} rows={4} className={inputStyle} placeholder="Describe los servicios que puedes ofrecer a la comunidad..."/></div>
                             <div><label className={labelStyle}>Instagram</label><input name="instagramUrl" type="text" value={formData.instagramUrl || ''} onChange={handleChange} placeholder="URL o @usuario" className={inputStyle} /></div>
                             <div><label className={labelStyle}>Linkedin</label><input name="linkedinUrl" type="url" value={formData.linkedinUrl || ''} onChange={handleChange} placeholder="URL del perfil" className={inputStyle} /></div>
                         </div>
@@ -162,9 +170,9 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
                 )}
             </div>
 
-            <div className="flex justify-end pt-4 border-t mt-6">
+            <div className="flex justify-end pt-6 border-t mt-8">
                 <button type="submit" disabled={isSubmitting} className={btnPrimary}>
-                    {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+                    {isSubmitting ? 'Guardando Cambios...' : 'Guardar Cambios'}
                 </button>
             </div>
         </form>

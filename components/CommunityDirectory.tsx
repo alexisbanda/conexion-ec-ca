@@ -63,9 +63,13 @@ export const CommunityDirectory: React.FC = () => {
   };
 
   return (
-      <div className="p-4 sm:p-6 bg-gray-50 rounded-lg shadow-sm w-full max-w-6xl mx-auto my-4">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2 font-montserrat">Directorio de Servicios Comunitarios</h2>
-        <p className="text-sm text-gray-600 mb-6">Encuentra servicios y profesionales recomendados por la comunidad.</p>
+      <div className="w-full">
+        <h3 className="text-2xl font-bold text-ecuador-blue mb-6 font-montserrat border-b pb-3">
+             Directorio de Servicios
+            </h3>
+        <p className="text-gray-600 mb-6">
+            Encuentra servicios, profesionales y demandas de ayuda dentro de nuestra comunidad. Usa los filtros para encontrar exactamente lo que necesitas.
+        </p>
 
         {!isAuthenticated && (
             <div className="bg-ecuador-yellow-light border-l-4 border-ecuador-yellow text-gray-700 p-4 mb-6 rounded-md flex items-center">
@@ -96,14 +100,12 @@ export const CommunityDirectory: React.FC = () => {
             <div>
               <label htmlFor="categoryFilter" className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
               <select id="categoryFilter" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow text-sm">
-                {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}
-              </select>
+                {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))}n              </select>
             </div>
             <div>
               <label htmlFor="cityFilter" className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
               <select id="cityFilter" value={filterCity} onChange={e => setFilterCity(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-ecuador-yellow focus:border-ecuador-yellow text-sm">
-                {cities.map(city => (<option key={city} value={city}>{city}</option>))}
-              </select>
+                {cities.map(city => (<option key={city} value={city}>{city}</option>))}n              </select>
             </div>
           </div>
         </div>

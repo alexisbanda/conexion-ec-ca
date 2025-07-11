@@ -23,7 +23,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         return null;
     }
 
-    const maxWidthClass = fullWidth ? 'max-w-4xl' : 'max-w-2xl';
+    const maxWidthClass = fullWidth ? 'max-w-7xl' : 'max-w-2xl';
 
     // 4. Usamos ReactDOM.createPortal para renderizar el modal en #modal-root
     return ReactDOM.createPortal(
@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             role="dialog"
         >
             <div
-                className={`bg-white rounded-lg shadow-xl w-full ${maxWidthClass} max-h-[90vh] overflow-y-auto p-0 sm:p-6 relative transform transition-all duration-300 ease-out scale-95 opacity-0 animate-modal-appear`}
+                className={`bg-white rounded-lg shadow-xl w-full ${maxWidthClass} max-h-[90vh] overflow-y-auto p-4 sm:p-6 relative transform transition-all duration-300 ease-out scale-95 opacity-0 animate-modal-appear`}
                 onClick={(e) => e.stopPropagation()}
                 style={{ animationName: 'modalAppear', animationDuration: '0.3s', animationFillMode: 'forwards' }}
             >

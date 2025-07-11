@@ -99,67 +99,84 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
     const inputStyle = "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm";
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-            {error && <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>}
+        <div className="p-1">
+            <h3 className="text-2xl font-bold text-ecuador-blue mb-6 font-montserrat border-b pb-3">
+                {isEditing ? 'Editar Servicio' : 'Publicar un Nuevo Servicio'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+                {error && <div className="p-3 bg-red-100 text-red-700 rounded-md text-sm md:col-span-2">{error}</div>}
 
-            <div>
-                <label htmlFor="serviceName" className="block text-sm font-medium text-gray-700">Nombre del Servicio/Demanda *</label>
-                <input id="serviceName" name="serviceName" type="text" value={formData.serviceName} onChange={handleChange} required className={inputStyle} placeholder="Ej: Clases de Inglés, Busco empleo..."/>
-            </div>
+                {/* --- INICIO DE LA CUADRÍCULA DE DOS COLUMNAS --- */}
+                <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-6">
 
-            <div>
-                <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo *</label>
-                <select id="type" name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
-                    <option value={ServiceType.OFERTA}>Ofrezco un servicio</option>
-                    <option value={ServiceType.DEMANDA}>Busco un servicio/ayuda</option>
-                </select>
-            </div>
+                    {/* Columna 1 */}
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="serviceName" className="block text-sm font-medium text-gray-700">Nombre del Servicio/Demanda *</label>
+                            <input id="serviceName" name="serviceName" type="text" value={formData.serviceName} onChange={handleChange} required className={inputStyle} placeholder="Ej: Clases de Inglés, Busco empleo..."/>
+                        </div>
 
-            <div>
-                <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700">Descripción Corta *</label>
-                <textarea id="shortDescription" name="shortDescription" value={formData.shortDescription} onChange={handleChange} required rows={3} className={inputStyle} placeholder="Describe brevemente qué ofreces o buscas."/>
-            </div>
+                        <div>
+                            <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo *</label>
+                            <select id="type" name="type" value={formData.type} onChange={handleChange} className={inputStyle}>
+                                <option value={ServiceType.OFERTA}>Ofrezco un servicio</option>
+                                <option value={ServiceType.DEMANDA}>Busco un servicio/ayuda</option>
+                            </select>
+                        </div>
 
-            <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">Categoría *</label>
-                <select id="category" name="category" value={formData.category} onChange={handleChange} className={inputStyle}>
-                    {SERVICE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-            </div>
+                        <div className="md:col-span-2">
+                            <label htmlFor="shortDescription" className="block text-sm font-medium text-gray-700">Descripción Corta *</label>
+                            <textarea id="shortDescription" name="shortDescription" value={formData.shortDescription} onChange={handleChange} required rows={4} className={inputStyle} placeholder="Describe brevemente qué ofreces o buscas (máx 200 caracteres)."/>
+                        </div>
+                         <div>
+                            <label htmlFor="category" className="block text-sm font-medium text-gray-700">Categoría *</label>
+                            <select id="category" name="category" value={formData.category} onChange={handleChange} className={inputStyle}>
+                                {SERVICE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="city" className="block text-sm font-medium text-gray-700">Ciudad *</label>
+                            <input id="city" name="city" type="text" value={formData.city} onChange={handleChange} required className={inputStyle} placeholder="Ej: Vancouver, Toronto"/>
+                        </div>
+                    </div>
 
-            <div>
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700">Ciudad *</label>
-                <input id="city" name="city" type="text" value={formData.city} onChange={handleChange} required className={inputStyle} placeholder="Ej: Vancouver, Toronto"/>
-            </div>
+                    {/* Columna 2 */}
+                    <div className="space-y-4">
+                       
 
-            <div>
-                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">WhatsApp (Opcional)</label>
-                <input id="whatsapp" name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleChange} className={inputStyle} placeholder="Ej: 593991234567"/>
-            </div>
+                        <div>
+                            <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">WhatsApp (Opcional)</label>
+                            <input id="whatsapp" name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleChange} className={inputStyle} placeholder="Ej: 593991234567"/>
+                        </div>
 
-            <div>
-                <label htmlFor="instagram" className="block text-sm font-medium text-gray-700">Instagram (Opcional)</label>
-                <input id="instagram" name="instagram" type="text" value={formData.instagram} onChange={handleChange} className={inputStyle} placeholder="TuUsuario (sin @)"/>
-            </div>
+                        <div>
+                            <label htmlFor="instagram" className="block text-sm font-medium text-gray-700">Instagram (Opcional)</label>
+                            <input id="instagram" name="instagram" type="text" value={formData.instagram} onChange={handleChange} className={inputStyle} placeholder="TuUsuario (sin @)"/>
+                        </div>
 
-            <div>
-                <label htmlFor="website" className="block text-sm font-medium text-gray-700">Otro Sitio Web (Opcional)</label>
-                <input id="website" name="website" type="url" value={formData.website} onChange={handleChange} className={inputStyle} placeholder="https://linkedin.com/in/tu-perfil"/>
-            </div>
+                        <div>
+                            <label htmlFor="website" className="block text-sm font-medium text-gray-700">Otro Sitio Web (Opcional)</label>
+                            <input id="website" name="website" type="url" value={formData.website} onChange={handleChange} className={inputStyle} placeholder="https://linkedin.com/in/tu-perfil"/>
+                        </div>
 
-            <div>
-                <label htmlFor="websiteText" className="block text-sm font-medium text-gray-700">Texto del Enlace (Opcional)</label>
-                <input id="websiteText" name="websiteText" type="text" value={formData.websiteText} onChange={handleChange} className={inputStyle} placeholder="Ej: LinkedIn, Portafolio"/>
-            </div>
+                        <div>
+                            <label htmlFor="websiteText" className="block text-sm font-medium text-gray-700">Texto del Enlace (Opcional)</label>
+                            <input id="websiteText" name="websiteText" type="text" value={formData.websiteText} onChange={handleChange} className={inputStyle} placeholder="Ej: LinkedIn, Portafolio"/>
+                        </div>
+                    </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t mt-6">
-                <button type="button" onClick={onCancel} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md text-sm transition-colors">
-                    Cancelar
-                </button>
-                <button type="submit" disabled={isSubmitting} className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition-colors disabled:opacity-50">
-                    {isSubmitting ? (isEditing ? 'Guardando...' : 'Agregando...') : (isEditing ? 'Guardar Cambios' : 'Agregar Servicio')}
-                </button>
-            </div>
-        </form>
+                </div>
+                {/* --- FIN DE LA CUADRÍCULA --- */}
+
+                <div className="flex justify-end space-x-3 pt-6 border-t mt-8">
+                    <button type="button" onClick={onCancel} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md text-sm transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" disabled={isSubmitting} className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm transition-colors disabled:opacity-50">
+                        {isSubmitting ? (isEditing ? 'Guardando...' : 'Agregando...') : (isEditing ? 'Guardar Cambios' : 'Agregar Servicio')}
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 };
