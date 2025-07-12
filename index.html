@@ -106,10 +106,23 @@
           fontFamily: {
             sans: ['Open Sans', 'sans-serif'],
             montserrat: ['Montserrat', 'sans-serif'],
-          }
+          },
+          animation: {
+        'testimonial-scroll': 'scroll-left 40s linear infinite',
+        },
+        keyframes: {
+        'scroll-left': {
+          '0%': {
+            transform: 'translateX(0%)',
+          },
+          '100%': {
+            transform: 'translateX(-100%)',
+          },
+        }
         }
       }
     }
+  }
   </script>
 <script type="importmap">
 {

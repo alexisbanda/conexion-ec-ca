@@ -1,8 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Benefit, Testimonial as TestimonialType } from '../types';
+// /home/alexis/Sites/Landings/conexion-ec-ca/components/Benefits.tsx
+import React, { useState, useContext } from 'react';
+import { Benefit } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon } from './icons';
 import { BenefitCard } from './BenefitCard';
 import { AuthContext } from '../contexts/AuthContext';
+
+// Definición del tipo TestimonialType
+export interface TestimonialType {
+  id: string;
+  quote: string;
+  author: string;
+  role: string;
+  imageUrl?: string;
+}
 
 const benefitsData: Benefit[] = [
   {
@@ -76,29 +86,28 @@ const testimonialsData: TestimonialType[] = [
     author: 'Carlos Benítez',
     role: 'Estudiante de Postgrado',
     imageUrl: 'https://picsum.photos/seed/testimonialuser4/100/100',
-  }
+  },
+  {
+    id: 't4',
+    quote: 'El portal no solo me ayudó a encontrar un servicio legal de confianza, sino que me hizo sentir parte de una comunidad fuerte y unida. ¡Recomiendo a todos los recién llegados que se unan!',
+    author: 'Daniela G.',
+    role: 'Consultora de Inmigración',
+    imageUrl: 'https://picsum.photos/seed/testimonialuser5/100/100',
+  },
 ];
+
+// Para el carrusel de CSS, duplicamos los testimonios para un efecto de scroll sin fin.
+// Esto evita el "salto" al final de la animación.
+const allTestimonials = [...testimonialsData, ...testimonialsData];
 
 export const Benefits: React.FC = () => {
   const [flippedCardId, setFlippedCardId] = useState<string | null>(null);
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const auth = useContext(AuthContext);
 
   const handleCardFlip = (benefitId: string) => {
-    // Si se hace clic en la tarjeta ya volteada, se cierra. Si no, se abre la nueva.
     setFlippedCardId(prevId => (prevId === benefitId ? null : benefitId));
   };
 
-  // Efecto para el carrusel automático de testimonios
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveTestimonial((prevActive) => (prevActive + 1) % testimonialsData.length);
-    }, 7000); // Cambia de testimonio cada 7 segundos
-
-    return () => clearInterval(timer); // Limpia el intervalo al desmontar el componente
-  }, []);
-
-  // Función para hacer scroll al formulario de contacto
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact');
     if (contactSection) {
@@ -107,66 +116,62 @@ export const Benefits: React.FC = () => {
   };
 
   return (
-      <section id="benefits" className="py-16 md:py-24 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Beneficios de Ser Parte</h2>
-            <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-              Al unirte a nuestra comunidad, desbloqueas ventajas exclusivas pensadas para ti y tu familia.            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {benefitsData.map((benefit) => (
-                <BenefitCard
-                    key={benefit.id}
-                    benefit={benefit}
-                    isFlipped={flippedCardId === benefit.id}
-                    onFlip={() => handleCardFlip(benefit.id)}
-                    onRegisterClick={auth?.openRegisterModal}
-                    onContactClick={scrollToContact}
-                />
-            ))}
-          </div>
+    <section id="benefits" className="py-12 md:py-16 bg-blue-50">
+        <div className="container mx-auto px-6 max-w-7xl">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Beneficios de Ser Parte</h2>
+          <p className="text-lg text-gray-700 max-w-2xl mx-auto">
+            Al unirte a nuestra comunidad, desbloqueas ventajas exclusivas pensadas para ti y tu familia.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {benefitsData.map((benefit) => (
+            <BenefitCard
+              key={benefit.id}
+              benefit={benefit}
+              isFlipped={flippedCardId === benefit.id}
+              onFlip={() => handleCardFlip(benefit.id)}
+              onRegisterClick={auth?.openRegisterModal}
+              onContactClick={scrollToContact}
+            />
+          ))}
+        </div>
 
-          {/* Testimonial Section */}
-          <div className="mt-16 pt-12 border-t border-gray-200">
-            <h3 className="text-2xl md:text-3xl font-bold text-ecuador-blue text-center mb-10 font-montserrat">Lo que dicen nuestros miembros</h3>
-            <div className="max-w-3xl mx-auto bg-ecuador-blue-light p-8 rounded-xl shadow-lg relative">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-ecuador-red text-white rounded-full p-3 shadow-md">
-                <ChatBubbleLeftRightIcon className="w-8 h-8"/>
-              </div>
-              <div className="min-h-[180px] md:min-h-[150px] flex flex-col justify-center">
-                <p className="text-gray-700 italic text-lg mb-6 text-center">"{testimonialsData[activeTestimonial].quote}"</p>
-                <div className="flex items-center justify-center">
-                  {testimonialsData[activeTestimonial].imageUrl && (
-                      <img
-                          src={testimonialsData[activeTestimonial].imageUrl}
-                          alt={testimonialsData[activeTestimonial].author}
+        {/* --- SECCIÓN DE TESTIMONIOS: CAROUSEL CON ANIMACIÓN CSS --- */}
+        <div className="mt-16 pt-12 border-t border-gray-200">
+          <h3 className="text-2xl md:text-3xl font-bold text-ecuador-blue text-center mb-10 font-montserrat">Lo que dicen nuestros miembros</h3>
+          <div className="overflow-hidden relative pb-8">
+            <div className="flex flex-nowrap animate-testimonial-scroll">
+              {allTestimonials.map((testimonial, index) => (
+                <div key={index} className="flex-shrink-0 w-80 md:w-96 p-4 mx-4 md:mx-6">
+                  <div className="bg-ecuador-blue-light p-8 rounded-xl shadow-lg relative flex flex-col justify-between min-h-[360px]">
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-ecuador-red text-white rounded-full p-3 shadow-md pt-6">
+                      <ChatBubbleLeftRightIcon className="w-8 h-8"/>
+                    </div>
+                    <p className="text-gray-700 italic text-lg mb-6 text-center mt-6 overflow-hidden line-clamp-6">
+                      {testimonial.quote}
+                    </p>
+                    <div className="flex items-center justify-center mt-auto">
+                      {testimonial.imageUrl && (
+                        <img
+                          src={testimonial.imageUrl}
+                          alt={testimonial.author}
                           className="w-16 h-16 rounded-full mr-4 border-2 border-ecuador-yellow object-cover"
                           loading="lazy"
-                      />
-                  )}
-                  <div>
-                    <p className="font-bold text-ecuador-blue">{testimonialsData[activeTestimonial].author}</p>
-                    <p className="text-sm text-gray-600">{testimonialsData[activeTestimonial].role}</p>
+                        />
+                      )}
+                      <div>
+                        <p className="font-bold text-ecuador-blue">{testimonial.author}</p>
+                        <p className="text-sm text-gray-600">{testimonial.role}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* Navegación por puntos (bullets) */}
-              <div className="flex justify-center space-x-3 mt-6">
-                {testimonialsData.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setActiveTestimonial(index)}
-                        className={`w-3 h-3 rounded-full transition-colors ${
-                            activeTestimonial === index ? 'bg-ecuador-red' : 'bg-gray-300 hover:bg-gray-400'
-                        }`}
-                        aria-label={`Ir al testimonio ${index + 1}`}
-                    />
-                ))}
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
   );
 };

@@ -1,5 +1,5 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/ServiceCard.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { CommunityServiceItem, ServiceType, ServiceCategory } from '../types';
 import {
     MapPinIcon,
@@ -23,12 +23,14 @@ import { InstagramIcon } from './icons/InstagramIcon';
 interface ServiceCardProps {
     service: CommunityServiceItem;
     isAuthenticated: boolean;
+    onContactClick: () => void;
 }
 
-// --- NUEVA FUNCIÓN AUXILIAR ---
+// --- FUNCIÓN AUXILIAR (SE MANTIENE) ---
 // Esta función recibe una categoría y devuelve el componente de ícono correspondiente.
 const getCategoryIcon = (category: ServiceCategory) => {
-    const iconProps = { className: "w-7 h-7 text-ecuador-red" }; // Estilo común para los íconos
+    // Estilo común para los íconos de categoría
+    const iconProps = { className: "w-6 h-6 text-ecuador-red" };
 
     switch (category) {
         case ServiceCategory.COMIDA:
@@ -52,7 +54,9 @@ const getCategoryIcon = (category: ServiceCategory) => {
     }
 };
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isAuthenticated }) => {
+export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isAuthenticated, onContactClick }) => {
+    const [showContact, setShowContact] = useState(false);
+
     const {
         serviceName,
         type,
@@ -67,69 +71,98 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isAuthenticat
         websiteText
     } = service;
 
+    const cardBorderColor = type === ServiceType.OFERTA
+        ? 'border-green-400'
+        : 'border-blue-400';
+
     const badgeClass = type === ServiceType.OFERTA
         ? 'bg-green-100 text-green-800'
         : 'bg-yellow-100 text-yellow-800';
 
-    // Obtenemos el componente de ícono que vamos a renderizar
     const CategoryIconComponent = getCategoryIcon(category);
 
+    const handleContactToggle = () => {
+        if (isAuthenticated) {
+            setShowContact(!showContact);
+        } else {
+            onContactClick();
+        }
+    };
+
     return (
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 flex flex-col h-full transition-transform transform hover:-translate-y-1">
-            <div className="p-5 flex-grow flex flex-col">
-                {/* --- SECCIÓN DEL ENCABEZADO CON EL ÍCONO --- */}
-                <div className="flex justify-between items-start mb-3">
-                    <div className="flex-grow">
-                        <h3 className="text-lg font-bold text-ecuador-blue font-montserrat pr-2">{serviceName}</h3>
-                        <p className="text-xs font-medium text-gray-500">{category}</p>
-                    </div>
-                    <div className="flex-shrink-0 p-3 bg-ecuador-yellow-light rounded-full">
+        <div className={`bg-white rounded-lg shadow-md border ${cardBorderColor} flex flex-col transition-transform transform hover:-translate-y-1`}>
+            <div className="p-4 flex-grow flex flex-col">
+                
+                {/* --- MEJORA DE JERARQUÍA Y COMPACTACIÓN --- */}
+                {/* Se une el ícono de categoría, el nombre del servicio y el tipo en un solo bloque visual. */}
+                {/* Se reduce el espacio vertical. */}
+                <div className="flex items-center mb-1">
+                    <div className="flex-shrink-0 mr-2">
                         {CategoryIconComponent}
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-ecuador-blue font-montserrat leading-tight">{serviceName}</h3>
                     </div>
                 </div>
 
-                <span className={`self-start px-2 py-0.5 text-xs font-semibold rounded-full whitespace-nowrap mb-4 ${badgeClass}`}>
-                    {type}
-                </span>
+                {/* --- AJUSTE: BADGE Y CATEGORÍA EN LA MISMA LÍNEA --- */}
+                {/* Se crea un contenedor flex para alinear el badge y la categoría horizontalmente */}
+                <div className="flex items-center gap-x-2 mb-2">
+                    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full whitespace-nowrap ${badgeClass}`}>
+                        {type}
+                    </span>
+                    <p className="text-sm font-medium text-gray-500">{category}</p>
+                </div>
 
-                <p className="text-sm text-gray-600 mb-4 flex-grow">{shortDescription}</p>
+                <p className="text-sm text-gray-600 mb-3 flex-grow leading-snug">{shortDescription}</p>
 
-                <div className="text-sm text-gray-500 space-y-2 mt-auto pt-4 border-t border-gray-100">
-                    <div className="flex items-center">
-                        <UserCircleIcon className="w-4 h-4 mr-2" />
+                <div className="text-sm text-gray-500 flex flex-wrap items-center justify-between gap-x-2 mt-auto pt-3 border-t border-gray-100">
+                    <div className="flex items-center" title={`Publicado por ${contactName}`}>
+                        <UserCircleIcon className="w-4 h-4 mr-1" />
                         <span>{contactName}</span>
                     </div>
-                    <div className="flex items-center">
-                        <MapPinIcon className="w-4 h-4 mr-2" />
+                    <div className="flex items-center" title={`Ubicación: ${city}`}>
+                        <MapPinIcon className="w-4 h-4 mr-1" />
                         <span>{city}</span>
                     </div>
                 </div>
             </div>
 
-            {isAuthenticated && (
-                <div className="bg-gray-50 p-3 flex justify-end items-center space-x-3 border-t">
-                    {whatsapp && (
-                        <a href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-green-600 hover:text-green-700" title="Contactar por WhatsApp">
-                            <WhatsAppIcon className="w-6 h-6" />
-                        </a>
-                    )}
-                    {instagram && (
-                        <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:text-pink-700" title="Ver en Instagram">
-                            <InstagramIcon className="w-6 h-6" />
-                        </a>
-                    )}
-                    {contact && (
-                        <a href={`mailto:${contact}`} className="text-gray-600 hover:text-gray-800" title="Enviar correo electrónico">
-                            <EnvelopeIcon className="w-6 h-6" />
-                        </a>
-                    )}
-                    {website && (
-                        <a href={website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" title={websiteText || 'Visitar sitio web'}>
-                            <LinkIcon className="w-6 h-6" />
-                        </a>
-                    )}
-                </div>
-            )}
+            {/* --- SECCIÓN DE CONTACTO MEJORADA Y REVISADA --- */}
+            <div className="bg-gray-50 p-4 border-t">
+                {showContact && isAuthenticated ? (
+                    <div className="flex justify-around items-center animate-fade-in">
+                        {whatsapp && (
+                            <a href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-600 hover:text-green-600 transition-colors" title="WhatsApp">
+                                <WhatsAppIcon className="w-8 h-8" />
+                                <span className="text-xs mt-1">WhatsApp</span>
+                            </a>
+                        )}
+                        {instagram && (
+                            <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-600 hover:text-pink-600 transition-colors" title="Instagram">
+                                <InstagramIcon className="w-8 h-8" />
+                                <span className="text-xs mt-1">Instagram</span>
+                            </a>
+                        )}
+                        {contact && (
+                            <a href={`mailto:${contact}`} className="flex flex-col items-center text-gray-600 hover:text-ecuador-blue transition-colors" title="Email">
+                                <EnvelopeIcon className="w-8 h-8" />
+                                <span className="text-xs mt-1">Email</span>
+                            </a>
+                        )}
+                        {website && (
+                            <a href={website} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-600 hover:text-blue-600 transition-colors" title={websiteText || 'Web'}>
+                                <LinkIcon className="w-8 h-8" />
+                                <span className="text-xs mt-1">{websiteText || 'Web'}</span>
+                            </a>
+                        )}
+                    </div>
+                ) : (
+                    <button onClick={handleContactToggle} className="w-full bg-ecuador-red text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-ecuador-red-dark transition text-center">
+                        {isAuthenticated ? 'Mostrar Contacto' : 'Iniciar Sesión para Contactar'}
+                    </button>
+                )}
+            </div>
         </div>
     );
 };
