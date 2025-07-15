@@ -18,6 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Eventos', href: '#events-news' },
   { label: 'Recursos', href: '#resources-tools' },
   { label: 'Contacto', href: '#contact' },
+  { label: 'Servicios', href: '#services-directory', isPremium: true },
   { label: 'Mi Espacio', href: '/dashboard', isPremium: true },
   { label: 'Panel Admin', href: '/admin', adminOnly: true },
 ];

@@ -58,6 +58,14 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
   }, [isDashboardPage]);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
+    // Si el enlace es para el directorio de servicios, abre el modal en su lugar.
+    if (href === '#services-directory') {
+      e.preventDefault(); // Previene la navegación o el scroll
+      auth?.openDirectoryModal?.();
+      setMobileMenuOpen(false);
+      return; // Detiene la ejecución aquí
+    }
+
     if (!href.startsWith('#')) {
       setMobileMenuOpen(false);
       return;
@@ -130,7 +138,21 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
                         key={item.label}
                         to={item.href}
                         onClick={(e) => handleNavClick(e, item.href)}
-                        className={linkClasses}
+                        className={`${linkClasses}
+                            ${item.href === '#services-directory'
+                                ? `bg-ecuador-red text-ecuador-blue rounded-md px-3 py-1.5 shadow-sm hover:shadow-md`
+                                : ''
+                            }
+                        `}
+                        style={{
+                            // Añadimos un ícono solo al enlace de "Servicios"
+                            // (usando un ícono genérico de 'paquete' como ejemplo)
+                            ...(item.href === '#services-directory' && {
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                            }),
+                        }}
                         aria-label={`Ir a ${item.label}`}
                     >
                       {item.label}
