@@ -4,6 +4,7 @@ import { Benefit } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, ChatBubbleLeftRightIcon, CurrencyDollarIcon } from './icons';
 import { BenefitCard } from './BenefitCard';
 import { AuthContext } from '../contexts/AuthContext';
+import { AdSlot } from './AdSlot';
 
 // Definición del tipo TestimonialType
 export interface TestimonialType {
@@ -54,7 +55,7 @@ const benefitsData: Benefit[] = [
     shortDescription: 'Guías sobre estudios, becas y seminarios web exclusivos sobre convalidación de títulos.',
     detailedDescription: 'Tu futuro académico en Canadá está a tu alcance. Te proporcionamos el mapa para navegar el sistema educativo: desde elegir el programa perfecto y postular a becas, hasta el crucial proceso de convalidación de tus títulos. Como miembro, tendrás acceso a seminarios web exclusivos con expertos y guías paso a paso que te ahorrarán tiempo y esfuerzo. ¡Invierte en tu futuro con el apoyo de tu comunidad!',
     imageUrl: '/assets/images/apoyo_educativo.png',
-  },
+  }/*,
   {
     id: '6',
     icon: <ChatBubbleLeftRightIcon className="w-12 h-12" />,
@@ -62,7 +63,7 @@ const benefitsData: Benefit[] = [
     shortDescription: 'Eventos culturales exclusivos y asistencia 24/7 con nuestro asistente virtual "Conex".',
     detailedDescription: 'Siéntete más cerca de casa mientras construyes tu futuro. Organizamos eventos culturales, festivales y celebraciones que mantienen vivas nuestras tradiciones y nos unen como familia. Y para tus dudas del día a día, nuestro asistente virtual "Conex" está disponible 24/7 para darte respuestas al instante. Es lo mejor de dos mundos: el calor de nuestra gente y la ayuda que necesitas, cuando la necesitas.',
     imageUrl: '/assets/images/integracion_cultural.png',
-  },
+  },*/
 ];
 
 const testimonialsData: TestimonialType[] = [
@@ -125,16 +126,29 @@ export const Benefits: React.FC = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {benefitsData.map((benefit) => (
-            <BenefitCard
-              key={benefit.id}
-              benefit={benefit}
-              isFlipped={flippedCardId === benefit.id}
-              onFlip={() => handleCardFlip(benefit.id)}
-              onRegisterClick={auth?.openRegisterModal}
-              onContactClick={scrollToContact}
-            />
-          ))}
+          {benefitsData.flatMap((benefit, index) => {
+            const card = (
+              <BenefitCard
+                key={benefit.id}
+                benefit={benefit}
+                isFlipped={flippedCardId === benefit.id}
+                onFlip={() => handleCardFlip(benefit.id)}
+                onRegisterClick={auth?.openRegisterModal}
+                onContactClick={scrollToContact}
+              />
+            );
+
+            // Insertar el AdSlot después de la segunda tarjeta de beneficio (índice 1)
+            if (index === 1) {
+              return [
+                card,
+                <div key="ad-slot-benefits" className="h-[450px] flex items-center justify-center bg-white/50 rounded-xl shadow-lg p-4">
+                  <AdSlot location="benefits_section" className="w-full" />
+                </div>,
+              ];
+            }
+            return [card];
+          })}
         </div>
 
         {/* --- SECCIÓN DE TESTIMONIOS: CAROUSEL CON ANIMACIÓN CSS --- */}

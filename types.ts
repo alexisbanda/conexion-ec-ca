@@ -258,3 +258,16 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
+
+// --- Tipos para Anuncios (Banners) ---
+export interface AdSlotItem {
+  id: string;
+  imageUrl: string;
+  targetUrl: string;
+  position: 'left' | 'right';
+  isActive: boolean;
+  startDate?: Timestamp | null;
+  endDate?: Timestamp | null;
+  priority: number;
+  createdAt: Timestamp;
+}

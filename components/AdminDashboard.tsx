@@ -4,13 +4,14 @@ import toast from 'react-hot-toast';
 import { CommunityServiceItem, ServiceStatus, User, UserStatus, EventItem, NewsItem } from '../types';
 import { getAllServicesForAdmin, updateServiceStatus } from '../services/directoryService';
 import { getAllUsers, updateUserStatus as updateUserStatusService } from '../services/userService';
-import { CheckCircleIcon, XCircleIcon, UserGroupIcon, BriefcaseIcon, InformationCircleIcon, CalendarDaysIcon, NewspaperIcon } from './icons';
+import { CheckCircleIcon, XCircleIcon, UserGroupIcon, BriefcaseIcon, InformationCircleIcon, CalendarDaysIcon, NewspaperIcon, MegaphoneIcon } from './icons';
 import { sendApprovalEmail } from '../services/emailService';
 import { Modal } from './Modal';
 import { UserDetailsDisplay } from './UserDetailsDisplay';
 import * as eventService from '../services/eventService';
 import * as newsService from '../services/newsService';
 import { ContentManager } from './ContentManager';
+import { AdManager } from './admin/AdManager';
 import { Timestamp } from 'firebase/firestore';
 
 // --- Componentes de UI Reutilizables (sin cambios) ---
@@ -61,7 +62,7 @@ const newsColumns = [
 // --- COMPONENTE PRINCIPAL DEL DASHBOARD ---
 // ===================================================================
 export const AdminDashboard: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'users' | 'services' | 'events' | 'news'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'services' | 'events' | 'news' | 'ads'>('users');
     const [isUserDetailsModalOpen, setIsUserDetailsModalOpen] = useState(false);
     const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
 
@@ -94,6 +95,9 @@ export const AdminDashboard: React.FC = () => {
                         <button onClick={() => setActiveTab('news')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'news' ? 'border-ecuador-red text-ecuador-red' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
                             <NewspaperIcon className="w-5 h-5 mr-2" /> Gestionar Noticias
                         </button>
+                        <button onClick={() => setActiveTab('ads')} className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center ${activeTab === 'ads' ? 'border-ecuador-red text-ecuador-red' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                            <MegaphoneIcon className="w-5 h-5 mr-2" /> Gestionar Anuncios
+                        </button>
                     </nav>
                 </div>
 
@@ -102,6 +106,7 @@ export const AdminDashboard: React.FC = () => {
                     {activeTab === 'services' && <ServiceManager />}
                     {activeTab === 'events' && <ContentManager title="Eventos" itemType="event" api={eventApi} columns={eventColumns} />}
                     {activeTab === 'news' && <ContentManager title="Noticias" itemType="news" api={newsApi} columns={newsColumns} />}
+                    {activeTab === 'ads' && <AdManager />}
                 </div>
             </div>
 

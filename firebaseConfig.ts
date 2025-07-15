@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, FirebaseApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore"; // <-- AÑADIR ESTA LÍNEA
+import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage"; // <-- AÑADIR ESTA LÍNEA
 
 // TODO: Add your Firebase project's configuration object here
 // IMPORTANT: Replace the placeholder values below with your actual Firebase project config.
@@ -26,11 +27,13 @@ const firebaseConfig = {
 let app: FirebaseApp;
 let auth: Auth;
 let db: Firestore; // <-- AÑADIR ESTA LÍNEA
+let storage: FirebaseStorage; // <-- AÑADIR ESTA LÍNEA
 
 try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app); // <-- AÑADIR ESTA LÍNEA
+    storage = getStorage(app); // <-- AÑADIR ESTA LÍNEA
     console.log("Firebase initialized successfully.");
 } catch (error) {
     console.error("Error initializing Firebase:", error);
@@ -39,8 +42,10 @@ try {
     // @ts-ignore
     auth = null;
     // @ts-ignore
-    db = null; // <-- AÑADIR ESTA LÍNEA
+    db = null;
+    // @ts-ignore
+    storage = null; // <-- AÑADIR ESTA LÍNEA
     alert("Could not initialize Firebase. Please check your configuration and ensure you have replaced the placeholder values in firebaseConfig.ts.");
 }
 // Initialize Firebase
-export { app, auth, db }; // <-- AÑADIR db A LA EXPORTACIÓN
+export { app, auth, db, storage }; // <-- AÑADIR db Y storage A LA EXPORTACIÓN
