@@ -57,10 +57,7 @@ export const updateOnboardingData = async (uid: string, data: Partial<User>): Pr
     try {
         const dataToUpdate = { ...data };
 
-        // Convertimos la fecha de nacimiento a Timestamp si existe.
-        if (dataToUpdate.birthDate) {
-            dataToUpdate.birthDate = Timestamp.fromDate(new Date(dataToUpdate.birthDate as any));
-        }
+        
 
         await updateDoc(userDocRef, {
             ...dataToUpdate,

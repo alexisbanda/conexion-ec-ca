@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../contexts/AuthContext';
 import { updateOnboardingData } from '../services/userService';
-import { User, EducationLevel, FamilyComposition, RemittanceUsage } from '../types';
+import { User, EducationLevel, FamilyComposition, RemittanceUsage, Industry } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
 // Componente de UI para la barra de progreso
@@ -26,6 +26,8 @@ const dateToInputString = (date: Date | Timestamp | string | undefined): string 
     return new Date(d).toISOString().split('T')[0];
 };
 
+
+
 // --- MEJORA: Definición de los pasos para una gestión más limpia ---
 const TOTAL_STEPS = 4;
 
@@ -35,6 +37,7 @@ export const OnboardingWizard: React.FC = () => {
     const [currentStep, setCurrentStep] = useState(1); // Mantenemos el estado del paso actual
     const [formData, setFormData] = useState<Partial<User>>({});
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // --- INICIO DE LA CORRECCIÓN: Definición de estilos reutilizables ---
@@ -58,7 +61,7 @@ export const OnboardingWizard: React.FC = () => {
                 immigrationStatus: auth.user.immigrationStatus || '',
                 lastName: auth.user.lastName || '',
                 phone: auth.user.phone || '',
-                birthDate: auth.user.birthDate,
+                birthYear: auth.user.birthYear,
                 educationLevel: auth.user.educationLevel,
                 profession: auth.user.profession || '',
                 familyComposition: auth.user.familyComposition || [],
@@ -67,11 +70,11 @@ export const OnboardingWizard: React.FC = () => {
                 childrenAges: auth.user.childrenAges || [],
                 studiesInCanada: auth.user.studiesInCanada || '',
                 educationalInstitution: auth.user.educationalInstitution || '',
-                remittanceUsage: auth.user.remittanceUsage || [],
+                
                 isEmployed: auth.user.isEmployed,
                 currentEmployer: auth.user.currentEmployer || '',
                 currentPosition: auth.user.currentPosition || '',
-                isWorkRelatedToStudies: auth.user.isWorkRelatedToStudies,
+                
                 servicesOffered: auth.user.servicesOffered || '',
                 instagramUrl: auth.user.instagramUrl || '',
                 linkedinUrl: auth.user.linkedinUrl || '',
@@ -115,7 +118,7 @@ export const OnboardingWizard: React.FC = () => {
             case 1: // Información Personal
                 if (!formData.lastName?.trim()) newErrors.lastName = 'El apellido es requerido.';
                 if (!formData.phone?.trim()) newErrors.phone = 'El teléfono es requerido.';
-                if (!formData.birthDate) newErrors.birthDate = 'La fecha de nacimiento es requerida.';
+                if (!formData.birthYear) newErrors.birthYear = 'El año de nacimiento es requerido.';
                 if (!formData.arrivalDateCanada) newErrors.arrivalDateCanada = 'La fecha de llegada es requerida.';
                 break;
             case 2: // Familia y Estatus
@@ -129,10 +132,9 @@ export const OnboardingWizard: React.FC = () => {
                 if (!formData.educationLevel) newErrors.educationLevel = 'Selecciona tu nivel de estudios.';
                 if (!formData.profession?.trim()) newErrors.profession = 'Este campo es requerido.';
                 if (formData.isEmployed === undefined) newErrors.isEmployed = 'Indica si tienes trabajo.';
-                if (formData.isWorkRelatedToStudies === undefined) newErrors.isWorkRelatedToStudies = 'Indica si tu trabajo se relaciona con tu formación.';
+                
                 break;
-            case 4: // Financiero y Profesional
-                if (!formData.remittanceUsage || formData.remittanceUsage.length === 0) newErrors.remittanceUsage = 'Selecciona al menos una opción.';
+            
                 if (!formData.servicesOffered?.trim()) newErrors.servicesOffered = 'Este campo es requerido.';
                 break;
             default:
@@ -209,9 +211,9 @@ export const OnboardingWizard: React.FC = () => {
                             </div>
                             <div><label className={labelStyle}>Email</label><input type="email" name="email" value={formData.email || ''} readOnly className={`${inputStyle} bg-gray-100 cursor-not-allowed`} /></div>
                             <div>
-                                <label className={labelStyle}>Fecha de Nacimiento *</label>
-                                <input type="date" name="birthDate" value={dateToInputString(formData.birthDate)} onChange={handleChange} required className={`${inputStyle} ${errors.birthDate ? errorInputStyle : ''}`} />
-                                {errors.birthDate && <p className={errorTextStyle}>{errors.birthDate}</p>}
+                                <label className={labelStyle}>Año de Nacimiento *</label>
+                                <input type="number" name="birthYear" value={formData.birthYear || ''} onChange={handleChange} required className={`${inputStyle} ${errors.birthYear ? errorInputStyle : ''}`} />
+                                {errors.birthYear && <p className={errorTextStyle}>{errors.birthYear}</p>}
                             </div>
                             <div>
                                 <label className={labelStyle}>Fecha de Llegada a Canadá *</label>
@@ -242,8 +244,19 @@ export const OnboardingWizard: React.FC = () => {
                             {errors.hasChildren && <p className={errorTextStyle}>{errors.hasChildren}</p>}
                         </div>
                         {formData.hasChildren && (<div><label className={labelStyle}>Edad aproximada de tus hijos</label><div className="grid grid-cols-2 gap-2 mt-2">{['0-5', '6-10', '11-15', '16-21'].map(range => (<label key={range} className="flex items-center"><input type="checkbox" name="childrenAges" value={range} checked={formData.childrenAges?.includes(range)} onChange={handleChange} className={checkboxRadioStyle} />{range} años</label>))}</div></div>)}
-                        <div><label className={labelStyle}>Estatus actual en Canadá *</label>
-                            <div className="flex flex-wrap gap-2 mt-2">{['Ciudadano', 'Residente Permanente', 'Study Permit', 'Work Permit', 'Refugiado', 'Visitante', 'Otro'].map(status => (<label key={status} className="flex items-center"><input type="radio" name="immigrationStatus" value={status} checked={formData.immigrationStatus === status} onChange={handleChange} className={checkboxRadioStyle} />{status}</label>))}</div>
+                        <div>
+                            <div className="flex items-center">
+                                <label className={labelStyle}>Estatus actual en Canadá *</label>
+                                <button type="button" onClick={() => setIsDisclaimerVisible(!isDisclaimerVisible)} className="ml-2 text-ecuador-blue focus:outline-none">
+                                    (¿Por qué pedimos esto?)
+                                </button>
+                            </div>
+                            {isDisclaimerVisible && (
+                                <div className="mt-2 p-3 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-700">
+                                    <p>Tu estatus migratorio nos ayuda a entender mejor las necesidades de nuestra comunidad y a ofrecerte contenido, eventos y beneficios que sean realmente relevantes para ti. <strong>Esta información es confidencial y no será compartida.</strong></p>
+                                </div>
+                            )}
+                            <div className="flex flex-wrap gap-2 mt-2">{['Ciudadano', 'Residente Permanente', 'Study Permit', 'Work Permit', 'Visitante', 'Otro'].map(status => (<label key={status} className="flex items-center"><input type="radio" name="immigrationStatus" value={status} checked={formData.immigrationStatus === status} onChange={handleChange} className={checkboxRadioStyle} />{status}</label>))}</div>
                             {errors.immigrationStatus && <p className={errorTextStyle}>{errors.immigrationStatus}</p>}
                         </div>
                     </div>
@@ -266,8 +279,13 @@ export const OnboardingWizard: React.FC = () => {
                             {errors.educationLevel && <p className={errorTextStyle}>{errors.educationLevel}</p>}
                         </div>
                         <div>
-                            <label className={labelStyle}>¿Cuál es tu profesión o título? *</label>
-                            <input type="text" name="profession" value={formData.profession || ''} onChange={handleChange} required className={`${inputStyle} ${errors.profession ? errorInputStyle : ''}`} />
+                            <label className={labelStyle}>Industria de tu profesión *</label>
+                            <select name="profession" value={formData.profession || ''} onChange={handleChange} required className={`${inputStyle} ${errors.profession ? errorInputStyle : ''}`}>
+                                <option value="">Selecciona una industria</option>
+                                {Object.values(Industry).map(industry => (
+                                    <option key={industry} value={industry}>{industry}</option>
+                                ))}
+                            </select>
                             {errors.profession && <p className={errorTextStyle}>{errors.profession}</p>}
                         </div>
 
@@ -276,22 +294,14 @@ export const OnboardingWizard: React.FC = () => {
                             {errors.isEmployed && <p className={errorTextStyle}>{errors.isEmployed}</p>}
                         </div>
                         {formData.isEmployed && (<><div><label className={labelStyle}>¿En qué o dónde trabajas?</label><input type="text" name="currentEmployer" value={formData.currentEmployer || ''} onChange={handleChange} className={inputStyle} /></div><div><label className={labelStyle}>Posición - ¿Qué haces en este trabajo?</label><input type="text" name="currentPosition" value={formData.currentPosition || ''} onChange={handleChange} className={inputStyle} /></div></>)}
-                        <div><label className={labelStyle}>¿Tu trabajo actual se relaciona con tu formación? *</label>
-                            <div className="flex space-x-4 mt-2">{['Sí', 'No', 'No tengo trabajo'].map(option => (<label key={option} className="flex items-center"><input type="radio" name="isWorkRelatedToStudies" value={option} checked={formData.isWorkRelatedToStudies === option} onChange={handleChange} className={checkboxRadioStyle} />{option}</label>))}</div>
-                            {errors.isWorkRelatedToStudies && <p className={errorTextStyle}>{errors.isWorkRelatedToStudies}</p>}
-                        </div>
+                        
                     </div>
                 )}
 
                 {currentStep === 4 && (
                     <div className="space-y-6 animate-fade-in">
                         <h3 className="text-xl font-semibold">Financiero y Profesional</h3>
-                        <div><label className={labelStyle}>¿Haces envíos de remesas o cambios de divisa? *</label>
-                            <div className="grid grid-cols-1 gap-2 mt-2">{Object.values(RemittanceUsage).map(usage => (<label key={usage} className="flex items-center"><input type="checkbox" name="remittanceUsage" value={usage} checked={formData.remittanceUsage?.includes(usage)} onChange={handleChange} className={checkboxRadioStyle} />{usage}</label>))}</div>
-                            {errors.remittanceUsage && <p className={errorTextStyle}>{errors.remittanceUsage}</p>}
-                        </div>
-
-                        <hr className="my-4"/>
+                        
 
                         <div>
                             <label className={labelStyle}>¿Qué servicios profesionales o de emprendimiento ofreces? *</label>
@@ -307,6 +317,9 @@ export const OnboardingWizard: React.FC = () => {
                     </div>
                 )}
 
+                <p className="text-xs text-gray-500 mt-4 text-center">
+                    Al finalizar tu perfil, confirmas que has leído y aceptas nuestra <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:underline">Política de Privacidad</a> y los <a href="/terminos-de-servicio" target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:underline">Términos de Servicio</a>. Tus datos nos ayudan a ofrecerte una experiencia personalizada.
+                </p>
                 <div className="flex justify-between items-center pt-6 border-t">
                     <button type="button" onClick={handleBack} disabled={currentStep === 1} className={btnSecondary}>Atrás</button>
                     {currentStep < TOTAL_STEPS && <button type="button" onClick={handleNext} className={btnPrimary}>Siguiente</button>}

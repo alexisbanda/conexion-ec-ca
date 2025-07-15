@@ -3,7 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { AuthContext } from '../contexts/AuthContext';
 import { updateOnboardingData } from '../services/userService';
-import { User, EducationLevel, FamilyComposition, RemittanceUsage } from '../types';
+import { User, EducationLevel, FamilyComposition, Industry } from '../types';
 import { Timestamp } from 'firebase/firestore';
 
 interface UserProfileFormProps {
@@ -25,19 +25,21 @@ const dateToInputString = (date: Date | Timestamp | string | undefined): string 
     return new Date(d).toISOString().split('T')[0];
 };
 
+
+
 type TabKey = 'personal' | 'family' | 'work' | 'professional';
 
 export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSuccess }) => {
     const auth = useContext(AuthContext);
     const [activeTab, setActiveTab] = useState<TabKey>('personal');
     const [formData, setFormData] = useState<Partial<User>>({});
+    const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         // Populate form with all user data when component mounts or user prop changes
         setFormData({
             ...user,
-            birthDate: dateToInputString(user.birthDate) as any,
             arrivalDateCanada: dateToInputString(user.arrivalDateCanada) as any,
         });
     }, [user]);
@@ -72,9 +74,6 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
         try {
             const dataToUpdate = { ...formData };
             // Convert date strings back to Timestamps for Firestore
-            if (dataToUpdate.birthDate) {
-                dataToUpdate.birthDate = Timestamp.fromDate(new Date(dataToUpdate.birthDate as any));
-            }
             if (dataToUpdate.arrivalDateCanada) {
                 dataToUpdate.arrivalDateCanada = Timestamp.fromDate(new Date(dataToUpdate.arrivalDateCanada as any));
             }
@@ -125,7 +124,7 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
                             <div><label className={labelStyle}>Apellidos</label><input name="lastName" type="text" value={formData.lastName || ''} onChange={handleChange} className={inputStyle} /></div>
                             <div><label className={labelStyle}>Teléfono</label><input name="phone" type="tel" value={formData.phone || ''} onChange={handleChange} className={inputStyle} /></div>
                             <div><label className={labelStyle}>Email</label><input name="email" type="email" value={formData.email || ''} onChange={handleChange} readOnly className={`${inputStyle} bg-gray-100 cursor-not-allowed`} /></div>
-                            <div><label className={labelStyle}>Fecha de Nacimiento</label><input name="birthDate" type="date" value={formData.birthDate as any || ''} onChange={handleChange} className={inputStyle} /></div>
+                            <div><label className={labelStyle}>Año de Nacimiento</label><input name="birthYear" type="number" value={formData.birthYear || ''} onChange={handleChange} className={inputStyle} /></div>
                             <div><label className={labelStyle}>Fecha de Llegada a Canadá</label><input name="arrivalDateCanada" type="date" value={formData.arrivalDateCanada as any || ''} onChange={handleChange} className={inputStyle} /></div>
                         </div>
                     </div>
@@ -135,8 +134,19 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
                     <div className="space-y-6 animate-fade-in">
                          <h4 className="text-lg font-semibold text-gray-800 border-b pb-2">Situación Actual</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="md:col-span-2"><label className={labelStyle}>Estatus actual en Canadá</label>
-                                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{['Ciudadano', 'Residente Permanente', 'Study Permit', 'Work Permit', 'Refugiado', 'Visitante', 'Otro'].map(status => (<label key={status} className="flex items-center text-sm"><input type="radio" name="immigrationStatus" value={status} checked={formData.immigrationStatus === status} onChange={handleChange} className={checkboxRadioStyle} />{status}</label>))}</div>
+                            <div className="md:col-span-2">
+                                <div className="flex items-center">
+                                    <label className={labelStyle}>Estatus actual en Canadá</label>
+                                    <button type="button" onClick={() => setIsDisclaimerVisible(!isDisclaimerVisible)} className="ml-2 text-ecuador-blue focus:outline-none">
+                                        (¿Por qué pedimos esto?)
+                                    </button>
+                                </div>
+                                {isDisclaimerVisible && (
+                                    <div className="mt-2 p-3 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-700">
+                                        <p>Tu estatus migratorio nos ayuda a entender mejor las necesidades de nuestra comunidad y a ofrecerte contenido, eventos y beneficios que sean realmente relevantes para ti. <strong>Esta información es confidencial y no será compartida.</strong></p>
+                                    </div>
+                                )}
+                                <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{['Ciudadano', 'Residente Permanente', 'Study Permit', 'Work Permit', 'Visitante', 'Otro'].map(status => (<label key={status} className="flex items-center text-sm"><input type="radio" name="immigrationStatus" value={status} checked={formData.immigrationStatus === status} onChange={handleChange} className={checkboxRadioStyle} />{status}</label>))}</div>
                             </div>
                             <div className="md:col-span-2"><label className={labelStyle}>Núcleo familiar en Canadá</label>
                                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{Object.values(FamilyComposition).map(comp => (<label key={comp} className="flex items-center text-sm"><input type="checkbox" name="familyComposition" value={comp} checked={formData.familyComposition?.includes(comp)} onChange={handleChange} className={checkboxRadioStyle} />{comp}</label>))}</div>
@@ -152,7 +162,15 @@ export const UserProfileForm: React.FC<UserProfileFormProps> = ({ user, onSucces
                              <div className="md:col-span-2"><label className={labelStyle}>Nivel de Estudios</label>
                                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">{Object.values(EducationLevel).map(level => (<label key={level} className="flex items-center text-sm"><input type="radio" name="educationLevel" value={level} checked={formData.educationLevel === level} onChange={handleChange} className={checkboxRadioStyle} />{level}</label>))}</div>
                             </div>
-                            <div><label className={labelStyle}>Profesión o título</label><input name="profession" type="text" value={formData.profession || ''} onChange={handleChange} className={inputStyle} /></div>
+                            <div>
+                                <label className={labelStyle}>Industria de tu profesión</label>
+                                <select name="profession" value={formData.profession || ''} onChange={handleChange} className={inputStyle}>
+                                    <option value="">Selecciona una industria</option>
+                                    {Object.values(Industry).map(industry => (
+                                        <option key={industry} value={industry}>{industry}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div><label className={labelStyle}>¿Qué estudias en Canadá?</label><input name="studiesInCanada" type="text" value={formData.studiesInCanada || ''} onChange={handleChange} className={inputStyle} /></div>
                         </div>
                     </div>

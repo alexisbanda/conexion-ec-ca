@@ -12,12 +12,14 @@ import {
     TechIcon,
     BeautyIcon,
     DeliveryIcon,
+    // --- INICIO DE LA MODIFICACIÓN ---
     AcademicCapIcon,
     EventIcon,
     HomeIcon,
     OtherIcon
 } from './icons';
 import { WhatsAppIcon } from './icons/WhatsAppIcon';
+import { ImageIcon } from './icons/ImageIcon'; // Importa el icono de imagen
 import { InstagramIcon } from './icons/InstagramIcon';
 
 interface ServiceCardProps {
@@ -39,6 +41,10 @@ const getCategoryIcon = (category: ServiceCategory) => {
             return <LegalIcon {...iconProps} />;
         case ServiceCategory.TECNOLOGIA:
             return <TechIcon {...iconProps} />;
+        // --- INICIO DE LA MODIFICACIÓN (Categorías faltantes) ---
+        case ServiceCategory.VIVIENDA:
+             return <HomeIcon {...iconProps} />;
+        // --- FIN DE LA MODIFICACIÓN ---
         case ServiceCategory.BELLEZA:
             return <BeautyIcon {...iconProps} />;
         case ServiceCategory.DELIVERY:
@@ -49,6 +55,10 @@ const getCategoryIcon = (category: ServiceCategory) => {
             return <EventIcon {...iconProps} />;
         case ServiceCategory.HOGAR:
             return <HomeIcon {...iconProps} />;
+        // --- INICIO DE LA MODIFICACIÓN (Categorías faltantes) ---
+        case ServiceCategory.CUIDADO_INFANTIL:
+        case ServiceCategory.TRADUCCION:
+        // --- FIN DE LA MODIFICACIÓN ---
         default:
             return <OtherIcon {...iconProps} />;
     }
@@ -68,7 +78,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isAuthenticat
         instagram,
         contact,
         website,
-        websiteText
+        websiteText,
+        imageUrl, // Extraemos la nueva propiedad imageUrl
     } = service;
 
     const cardBorderColor = type === ServiceType.OFERTA
@@ -93,15 +104,21 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isAuthenticat
         <div className={`bg-white rounded-lg shadow-md border ${cardBorderColor} flex flex-col transition-transform transform hover:-translate-y-1`}>
             <div className="p-4 flex-grow flex flex-col">
                 
-                {/* --- MEJORA DE JERARQUÍA Y COMPACTACIÓN --- */}
-                {/* Se une el ícono de categoría, el nombre del servicio y el tipo en un solo bloque visual. */}
-                {/* Se reduce el espacio vertical. */}
                 <div className="flex items-center mb-1">
                     <div className="flex-shrink-0 mr-2">
                         {CategoryIconComponent}
+                        {imageUrl && (
+                                <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-gray-500 hover:text-ecuador-blue">
+                                    <ImageIcon className="w-5 h-5" />
+                                </a>
+                            )}
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-ecuador-blue font-montserrat leading-tight">{serviceName}</h3>
+                        <h3 className="text-lg font-bold text-ecuador-blue font-montserrat leading-tight flex items-center">
+                            {serviceName}
+                            {/* Muestra el icono de imagen si imageUrl está presente */}
+                        </h3>
+
                     </div>
                 </div>
 

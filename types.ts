@@ -122,7 +122,7 @@ export interface User {
   // --- Datos del Onboarding Wizard ---
   lastName?: string; // Apellidos
   phone?: string;
-  birthDate?: Timestamp;
+  birthYear?: number;
   educationLevel?: EducationLevel;
   profession?: string;
   familyComposition?: FamilyComposition[];
@@ -135,7 +135,7 @@ export interface User {
   isEmployed?: boolean;
   currentEmployer?: string;
   currentPosition?: string;
-  isWorkRelatedToStudies?: 'Sí' | 'No' | 'No tengo trabajo';
+  
   servicesOffered?: string;
   instagramUrl?: string;
   linkedinUrl?: string;
@@ -144,6 +144,31 @@ export interface User {
 
   // --- NUEVO CAMPO PARA SUSCRIPCIONES ---
   subscribedServiceCategories?: ServiceCategory[];
+}
+
+export enum Industry {
+  TECNOLOGIA = 'Tecnología y Software',
+  SALUD = 'Salud y Medicina',
+  EDUCACION = 'Educación y Formación',
+  FINANZAS = 'Finanzas y Contabilidad',
+  MARKETING = 'Marketing y Publicidad',
+  VENTAS = 'Ventas y Comercial',
+  RECURSOS_HUMANOS = 'Recursos Humanos',
+  CONSTRUCCION = 'Construcción y Oficios',
+  HOSPITALIDAD = 'Hostelería y Turismo',
+  TRANSPORTE = 'Transporte y Logística',
+  ARTE_DISENO = 'Arte y Diseño',
+  MEDIOS_COMUNICACION = 'Medios y Comunicación',
+  LEGAL = 'Legal y Asesoría',
+  CIENCIA_INVESTIGACION = 'Ciencia e Investigación',
+  AGRICULTURA = 'Agricultura y Alimentación',
+  SERVICIOS_SOCIALES = 'Servicios Sociales',
+  ADMINISTRACION = 'Administración y Oficina',
+  CONSULTORIA = 'Consultoría',
+  MANUFACTURA = 'Manufactura',
+  ENERGIA = 'Energía y Medio Ambiente',
+  INMOBILIARIA = 'Inmobiliaria',
+  OTRO = 'Otro',
 }
 
 /**
@@ -232,6 +257,8 @@ export interface CommunityServiceItem {
   userId: string;
   createdAt: Timestamp;
   status: ServiceStatus;
+  imageUrl?: string; // URL de la imagen del servicio
+  cost?: number; // Costo del servicio (opcional)
 }
 
 // --- Tipos para Modales ---

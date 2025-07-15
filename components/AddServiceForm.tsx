@@ -1,12 +1,14 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/AddServiceForm.tsx
 import React, { useState, useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { AuthContext } from '../contexts/AuthContext';
 import { addService, updateService } from '../services/directoryService';
 import { CommunityServiceItem, ServiceType, ServiceCategory } from '../types';
+import { storage } from '../firebaseConfig'; // Importa la configuración de Firebase Storage
 
 interface AddServiceFormProps {
-    onSuccess: () => void;
+    onSuccess: () => void; // Callback para cuando el formulario se envía correctamente
     onCancel: () => void;
     initialData?: CommunityServiceItem | null;
 }
@@ -24,6 +26,8 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
         type: ServiceType.OFERTA,
         city: '',
         shortDescription: '',
+        imageUrl: '', // Nueva propiedad para la URL de la imagen
+        cost: 0, // Nueva propiedad para el costo del servicio
         category: SERVICE_CATEGORIES[0],
         whatsapp: '',
         instagram: '',
@@ -40,6 +44,8 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
                 type: initialData.type || ServiceType.OFERTA,
                 city: initialData.city || '',
                 shortDescription: initialData.shortDescription || '',
+                imageUrl: initialData.imageUrl || '', // Establecer la URL de la imagen si existe
+                cost: initialData.cost || 0, // Establecer el costo si existe
                 category: initialData.category || SERVICE_CATEGORIES[0],
                 whatsapp: initialData.whatsapp || '',
                 instagram: initialData.instagram || '',
@@ -62,7 +68,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
         e.preventDefault();
         setError('');
 
-        if (!formData.serviceName || !formData.city || !formData.shortDescription) {
+        if (!formData.serviceName || !formData.city || !formData.shortDescription || !formData.category) {
             setError('El nombre, la descripción y la ciudad son obligatorios.');
             return;
         }
@@ -94,6 +100,38 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
             setIsSubmitting(false);
         }
     };
+
+    // Handler para la subida de imágenes a Firebase Storage
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const storageRef = ref(storage, `services/${auth.user!.id}_${Date.now()}_${file.name}`);
+
+        try {
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+
+            // Actualizar el formData con la URL de descarga
+            setFormData(prev => ({ ...prev, imageUrl: downloadURL }));
+            toast.success('Imagen subida correctamente.');
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            toast.error('Error al subir la imagen. Intenta de nuevo.');
+        }
+    };
+
+    // Limitar la descripción a 200 caracteres y mostrar el contador
+    const maxDescriptionLength = 200;
+    const descriptionRemainingChars = maxDescriptionLength - formData.shortDescription.length;
+
+    const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      if (value.length <= maxDescriptionLength) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+    };
+
 
     // Estilo original de los inputs para mantener la consistencia visual
     const inputStyle = "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm";
@@ -139,14 +177,30 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
                             <input id="city" name="city" type="text" value={formData.city} onChange={handleChange} required className={inputStyle} placeholder="Ej: Vancouver, Toronto"/>
                         </div>
                     </div>
-
                     {/* Columna 2 */}
                     <div className="space-y-4">
-                       
-
+                       {/* Subir imagen (opcional) */}
+                       <div>
+                          <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">Imagen del Servicio (Opcional)</label>
+                          <input type="file" onChange={handleImageUpload} className="mt-1 block w-full text-sm border border-gray-300 rounded-md shadow-sm file:mr-4 file:py-2 file:px-4 file:rounded-l-md file:border-0 file:font-semibold file:bg-ecuador-yellow-light file:text-ecuador-blue hover:file:bg-yellow-200" />
+                          {formData.imageUrl && <img src={formData.imageUrl} alt="Vista previa" className="mt-2 h-20 w-auto rounded-md" />}
+                        </div>
+                        <div>
+                            <label htmlFor="cost" className="block text-sm font-medium text-gray-700">Costo (Opcional)</label>
+                            <input
+                                id="cost"
+                                name="cost"
+                                type="number"
+                                value={formData.cost}
+                                onChange={handleChange}
+                                className={inputStyle}
+                                placeholder="Ej: 25 (dejar vacío si es gratis)"
+                                min={0} // No permitir valores negativos
+                            />
+                        </div>
                         <div>
                             <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">WhatsApp (Opcional)</label>
-                            <input id="whatsapp" name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleChange} className={inputStyle} placeholder="Ej: 593991234567"/>
+                            <input id="whatsapp" name="whatsapp" type="tel" value={formData.whatsapp} onChange={handleChange} className={inputStyle} placeholder="CódigoDePaísNúmero (sin +)"/>
                         </div>
 
                         <div>
