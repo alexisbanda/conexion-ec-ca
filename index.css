@@ -42,3 +42,24 @@
     -ms-overflow-style: none;  /* IE y Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+/* Animación para el botón de Servicios */
+@keyframes pulsate {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px 15px rgba(255, 204, 0, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+  }
+}
+
+.pulsating-button {
+  animation: pulsate 2s infinite;
+  border-radius: 9999px; /* Para que sea redondo como el de WhatsApp */
+}

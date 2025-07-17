@@ -140,7 +140,7 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
                         onClick={(e) => handleNavClick(e, item.href)}
                         className={`${linkClasses}
                             ${item.href === '#services-directory'
-                                ? `bg-ecuador-red text-ecuador-blue rounded-md px-3 py-1.5 shadow-sm hover:shadow-md`
+                                ? `bg-ecuador-red text-white rounded-md px-3 py-1.5 shadow-sm hover:shadow-md pulsating-button`
                                 : ''
                             }
                         `}
@@ -153,9 +153,9 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
                                 gap: '0.5rem',
                             }),
                         }}
-                        aria-label={`Ir a ${item.label}`}
+                        aria-label={`Ir a ${item.label}`}                        
                     >
-                      {item.label}
+                        {item.label}
                     </Link>
                 );
               })}

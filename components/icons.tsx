@@ -41,7 +41,8 @@ import {
     faCommentDots, // Equivalente a ChatBubbleOvalLeftEllipsisIcon (burbuja de chat con puntos)
     faPaperPlane,
     faImage, // Equivalente a PaperAirplaneIcon
-    faBullhorn // Equivalente a MegaphoneIcon
+    faBullhorn, // Equivalente a MegaphoneIcon
+    faClock
 } from '@fortawesome/free-solid-svg-icons';
 // Importa el componente FontAwesomeIcon para usar los iconos en React
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -86,7 +87,8 @@ library.add(
     faCommentDots,
     faPaperPlane, // Equivalente a PaperAirplaneIcon
     faImage, // Equivalente a PaperAirplaneIcon
-    faBullhorn
+    faBullhorn,
+    faClock
 );
 
 // Tipo genérico para las props de los iconos, ahora más simple ya que Font Awesome maneja la mayoría
@@ -254,4 +256,8 @@ export const MegaphoneIcon: React.FC<IconProps> = (props) => (
 
 export const ImageIcon: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faImage} {...props} />
+);
+
+export const ClockIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faClock} {...props} />
 );

@@ -16,11 +16,17 @@ import { Footer } from './components/Footer';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { AuthModals } from './components/AuthModals';
 import { MemberDashboard } from './components/MemberDashboard';
-import { AdminDashboard } from './components/AdminDashboard';
 import AdminRoute from './components/AdminRoute';
 import { EventDetailPage } from './components/EventDetailPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { Chatbot } from './components/Chatbot'; // <-- 1. IMPORTAR EL CHATBOT
+import AdminLayout from './components/admin/layout/AdminLayout';
+import ReportsDashboard from './components/admin/ReportsDashboard';
+import { AdManager } from './components/admin/AdManager';
+import UserManager from './components/admin/UserManager';
+import ServiceManager from './components/admin/ServiceManager';
+import EventManager from './components/admin/EventManager';
+
 const PendingApprovalPage: React.FC = () => (
     <section className="py-16 md:py-24 bg-gray-100 text-center min-h-screen flex flex-col justify-center items-center">
         <h2 className="text-3xl font-bold text-ecuador-blue mb-4 font-montserrat">Cuenta en Revisión</h2>
@@ -97,7 +103,7 @@ const App: React.FC = () => {
     return (
         <div className="flex flex-col min-h-screen">
             <Header isDashboardPage={isDashboardPage} />
-            <main className="flex-grow">
+            <main className={`flex-grow flex flex-col ${isDashboardPage ? 'pt-16' : ''}`}>
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/pending-approval" element={<PendingApprovalPage />} />
@@ -123,10 +129,16 @@ const App: React.FC = () => {
                         path="/admin"
                         element={
                             <AdminRoute>
-                                <AdminDashboard />
+                                <AdminLayout />
                             </AdminRoute>
                         }
-                    />
+                    >
+                        <Route index element={<ReportsDashboard />} />
+                        <Route path="ads" element={<AdManager />} />
+                        <Route path="users" element={<UserManager />} />
+                        <Route path="events" element={<EventManager />} />
+                        <Route path="services" element={<ServiceManager />} />
+                    </Route>
                     <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
             </main>

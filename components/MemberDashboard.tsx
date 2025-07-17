@@ -235,7 +235,7 @@ export const MemberDashboard: React.FC = () => {
     // --- Renderizado Principal del Componente ---
     if (!auth?.user) {
         return (
-            <section className="py-20 text-center min-h-screen flex flex-col justify-center items-center">
+            <section className="py-20 text-center flex flex-col justify-center items-center">
                 <h2 className="text-3xl font-bold text-ecuador-blue mb-4 font-montserrat">Acceso Restringido</h2>
                 <p className="text-lg text-gray-700 mb-6">Por favor, inicia sesión para acceder a tu espacio de miembro.</p>
                 <button onClick={auth?.openLoginModal} className="mt-6 bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-md">
@@ -255,7 +255,7 @@ export const MemberDashboard: React.FC = () => {
     return (
         <section
             id="member-dashboard"
-            className="bg-gradient-to-b from-ecuador-blue-light via-gray-100 to-white py-8 md:py-16 min-h-screen"
+            className="bg-gradient-to-b from-ecuador-blue-light via-gray-100 to-white py-8 md:py-16"
             style={{ paddingTop: '80px' }} // Ajusta el valor según la altura real de tu header
         >
             <div className="container mx-auto px-2 sm:px-4">
