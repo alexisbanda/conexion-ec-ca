@@ -20,7 +20,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Contacto', href: '#contact' },
   { label: 'Directorio', href: '#services-directory', isPremium: true },
   { label: 'Mi Espacio', href: '/dashboard', isPremium: true },
-  { label: 'Panel Admin', href: '/admin', adminOnly: true },
+  { label: 'Admin', href: '/admin', adminOnly: true },
 ];
 
 // Asegúrate de reemplazar esto con tu endpoint real de Formspree

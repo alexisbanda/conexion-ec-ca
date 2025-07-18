@@ -75,13 +75,10 @@ export const CommunityDirectory: React.FC = () => {
 
     return (
         <div className="w-full">
-            <h3 className="text-2xl font-bold text-ecuador-blue mb-6 font-montserrat border-b pb-3">
+            <h3 className="text-2xl font-bold text-ecuador-blue mb-6 font-montserrat">
                 Directorio de Servicios
             </h3>
-            <p className="text-gray-600 mb-6">
-                Encuentra servicios, profesionales y demandas de ayuda dentro de nuestra comunidad. Usa los filtros para encontrar exactamente lo que necesitas.
-            </p>
-
+    
             {!isAuthenticated && (
                 <div className="bg-ecuador-yellow-light border-l-4 border-ecuador-yellow text-gray-700 p-4 mb-6 rounded-md flex items-center">
                     <LockClosedIcon className="w-6 h-6 mr-3 text-ecuador-blue" />

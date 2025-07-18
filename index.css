@@ -43,23 +43,26 @@
     scrollbar-width: none;  /* Firefox */
 }
 
-/* Animación para el botón de Servicios */
+/* Animación para el botón de Servicios - Versión más sutil */
 @keyframes pulsate {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
+    /* Sombra más sutil: menos opacidad, menos dispersión, color más cercano al botón (o un gris muy claro) */
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); /* Blanco muy translúcido */
   }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 10px 15px rgba(255, 204, 0, 0);
+  50% { /* Cambiamos el 70% a 50% para un ciclo más simétrico */
+    transform: scale(1.02); /* Reducimos el crecimiento a 2% */
+    box-shadow: 0 0 8px 6px rgba(255, 255, 255, 0); /* Menos dispersión, transparencia total al final */
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
   }
 }
 
 .pulsating-button {
-  animation: pulsate 2s infinite;
-  border-radius: 9999px; /* Para que sea redondo como el de WhatsApp */
+  animation: pulsate 2s ease-in-out infinite; /* Añadimos ease-in-out para suavizar la animación */
+  /* border-radius: 9999px; // Ya no es necesario si el botón no es completamente redondo */
+  /* Si el botón es rectangular con bordes redondeados, no uses 9999px.
+     Mantén border-radius: rounded-md o similar de Tailwind CSS */
 }

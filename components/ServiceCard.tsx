@@ -14,8 +14,12 @@ import {
     AcademicCapIcon,
     EventIcon,
     HomeIcon,
-    OtherIcon
-} from './icons';
+    OtherIcon,
+    BriefcaseIcon, // Legal or Scale?
+    ChatBubbleLeftRightIcon, // Translation or Chat?
+    MegaphoneIcon, // Other?
+    UserGroupIcon, // Delivery?
+} from './icons.tsx';
 import { WhatsAppIcon } from './icons/WhatsAppIcon';
 import { ImageIcon } from './icons/ImageIcon';
 import { InstagramIcon } from './icons/InstagramIcon';
@@ -46,11 +50,16 @@ const getCategoryIcon = (category: ServiceCategory) => {
             return <AcademicCapIcon {...iconProps} />;
         case ServiceCategory.EVENTOS:
             return <EventIcon {...iconProps} />;
-        case ServiceCategory.HOGAR:
+        case ServiceCategory.HOGAR: // Duplicate entry?
             return <HomeIcon {...iconProps} />;
         case ServiceCategory.CUIDADO_INFANTIL:
+            return <UserGroupIcon {...iconProps} />; // New category
         case ServiceCategory.TRADUCCION:
-            return <OtherIcon {...iconProps} />;
+            return <ChatBubbleLeftRightIcon {...iconProps} />; // New category
+        case ServiceCategory.SALUD_MENTAL: // New category
+            return <MegaphoneIcon {...iconProps} />;
+        case ServiceCategory.EMPLEO: // New category
+            return <BriefcaseIcon {...iconProps} />;
         default:
             return <OtherIcon {...iconProps} />;
     }
