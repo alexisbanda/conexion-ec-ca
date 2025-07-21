@@ -1,8 +1,7 @@
-
 import React from 'react';
-import { ECUADOR_COLORS, NAV_ITEMS } from '../constants';
+import { ECUADOR_COLORS, NAV_ITEMS } from '../constants'; // Asumo que NAV_ITEMS tiene suficientes elementos
 
-// Simplified Social Icons
+// Simplified Social Icons (Se mantienen como están)
 const FacebookIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg fill="currentColor" viewBox="0 0 24 24" {...props}><path d="M12 2.04c-5.5 0-10 4.49-10 10s4.5 10 10 10 10-4.49 10-10S17.5 2.04 12 2.04zm1 14.5h-2v-6h-2v-2.5h2V9.55c0-1.6 1-2.55 3-2.55h1.5v2.5h-1c-.49 0-.6.28-.6.77v1.23h2l-.5 2.5h-1.5v6z"></path></svg>
 );
@@ -18,13 +17,14 @@ export const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-brand-dark text-gray-300 py-12 px-6">
+    <footer className="bg-brand-dark text-gray-300 py-6 px-6"> {/* py-8 a py-6 */}
       <div className="container mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        {/* Ajustamos la cuadrícula principal a 3 columnas para pantallas grandes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"> {/* gap-8 a gap-6 */}
           {/* Logo and Description */}
           <div>
-            <h3 className="text-xl font-bold text-ecuador-yellow mb-3 font-montserrat">Conexión Migrante</h3>
-            <p className="text-sm mb-4">
+            <h3 className="text-xl font-bold text-ecuador-yellow mb-2 font-montserrat">Conexión Migrante</h3> {/* mb-3 a mb-2 */}
+            <p className="text-sm mb-3 text-justify"> {/* mb-4 a mb-3 */}
               Fortaleciendo la comunidad ecuatoriana en Canadá. Apoyo, cultura y oportunidades.
             </p>
             <div className="flex space-x-4">
@@ -34,38 +34,36 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links (Ahora en dos columnas) */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-3">Enlaces Rápidos</h4>
-            <ul className="space-y-2">
+            <h4 className="text-lg font-semibold text-white mb-2">Enlaces Rápidos</h4> {/* mb-3 a mb-2 */}
+            {/* Se añade 'grid grid-cols-2' para dividir la lista en dos columnas */}
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm"> {/* space-y-1 a gap-y-1 para grid */}
+              {/* Iteramos sobre todos los NAV_ITEMS */}
               {NAV_ITEMS.map(item => (
                 <li key={item.label}>
-                  <a href={item.href} className="text-sm hover:text-ecuador-yellow transition-colors">{item.label}</a>
+                  <a href={item.href} className="hover:text-ecuador-yellow transition-colors">{item.label}</a>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact & Support */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-3">Contacto</h4>
-            <ul className="space-y-2 text-sm">
+            <h4 className="text-lg font-semibold text-white mb-2">Contacto y Apoyo</h4> {/* mb-3 a mb-2 */}
+            <ul className="space-y-1 text-sm mb-3"> {/* space-y-2 a space-y-1, mb-4 a mb-3 */}
               <li>Email: <a href="mailto:info@conexionmigrante.ca" className="hover:text-ecuador-yellow transition-colors">info@conexionmigrante.ca</a></li>
               <li>Teléfono: <span className="hover:text-ecuador-yellow transition-colors">+1 (XXX) XXX-XXXX</span></li>
-              <li>Dirección: Ciudad, Provincia, Canadá (Visitas con cita previa)</li>
             </ul>
-          </div>
-
-          {/* Newsletter/Support (Placeholder) */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-3">Apóyanos</h4>
-            <p className="text-sm mb-3">Suscríbete a nuestro boletín para novedades o considera hacer una donación.</p>
-            <input type="email" placeholder="Tu correo electrónico" className="w-full p-2 rounded-md bg-gray-700 text-sm border border-gray-600 focus:ring-ecuador-yellow focus:border-ecuador-yellow" aria-label="Correo electrónico para suscribirse al boletín"/>
-            <button className="mt-2 w-full bg-ecuador-red hover:bg-red-700 text-white text-sm py-2 px-4 rounded-md transition-colors">Suscribirse</button>
+            <p className="text-sm mb-2">Suscríbete para novedades:</p>
+            <div className="flex">
+              <input type="email" placeholder="Tu correo" className="w-full p-2 rounded-l-md bg-gray-700 text-sm border border-gray-600 focus:ring-ecuador-yellow focus:border-ecuador-yellow" aria-label="Correo para suscribirse"/>
+              <button className="bg-ecuador-red hover:bg-red-700 text-white text-sm py-2 px-4 rounded-r-md transition-colors">OK</button>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-8 text-center text-sm">
+        <div className="border-t border-gray-700 pt-6 text-center text-sm"> {/* pt-8 a pt-6 */}
           <p>&copy; {currentYear} Conexión Migrante EC-CA. Todos los derechos reservados.</p>
           <div className="mt-2 space-x-4">
             <a href="#privacy" className="hover:text-ecuador-yellow transition-colors">Política de Privacidad</a>

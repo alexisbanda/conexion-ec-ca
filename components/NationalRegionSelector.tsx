@@ -169,7 +169,7 @@ const NationalRegionSelector: React.FC = () => {
       <div className="absolute top-0 left-0 w-full p-8 z-20 flex justify-between items-center">
         {/* Nombre del sitio */}
         <Link to="/" className="text-2xl font-bold font-montserrat text-white">
-          Ecuatorianos<span className="text-ecuador-yellow">.CA</span> {/* Ajustado a 'CA' para ser más general */}
+          Ecuatorianos<span className="text-ecuador-yellow">CA</span> {/* Ajustado a 'CA' para ser más general */}
         </Link>
         {/* Puedes añadir un botón de "Volver" o "Inicio" aquí si es necesario */}
       </div>
@@ -224,7 +224,7 @@ const NationalRegionSelector: React.FC = () => {
                 </p>
                 <button
                   onClick={() => handleRegionSelect(region)}
-                  className="mt-8 bg-[#fcd116] text-[#002d62] font-bold py-3 px-8 rounded-full hover:bg-[#ce1126] hover:text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  className="mt-8 bg-ecuador-yellow hover:bg-ecuador-red text-[#002d62] hover:text-white  font-extrabold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
                 >
                   Explora {region.name}
                 </button>
