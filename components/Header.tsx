@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { NAV_ITEMS } from '../constants';
 import { NavItem } from '../types';
 import { AuthContext } from '../contexts/AuthContext';
-import { ArrowLeftOnRectangleIcon } from './icons';
+import { regions } from './NationalRegionSelector';
+import { ArrowLeftOnRectangleIcon, LeafIcon } from './icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -22,6 +23,12 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
   }
 
   const { isAuthenticated, user, logout, openLoginModal, openRegisterModal } = auth;
+
+  const regionShortName = useMemo(() => {
+    const currentPath = location.pathname;
+    const currentRegion = regions.find(region => region.path === currentPath);
+    return currentRegion ? currentRegion.shortName : 'BC'; 
+  }, [location.pathname]);
 
   // --- LÓGICA DE FILTRADO DE ENLACES ---
   const visibleNavItems = useMemo(() => {
@@ -70,19 +77,19 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
     }
     e.preventDefault();
     const targetId = href.substring(1);
-    if (location.pathname === '/') {
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth' });
-      }
+    if (location.pathname !== '/' && location.pathname !== '/regiones') {
+        navigate(location.pathname);
+        setTimeout(() => {
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 100);
     } else {
-      navigate('/');
-      setTimeout(() => {
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth' });
+            targetElement.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100);
     }
     setMobileMenuOpen(false);
   };
@@ -113,7 +120,7 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
       <div className="container mx-auto flex justify-between items-center"> {/* Estas clases son clave para la alineación */}
         {/* Nombre del sitio alineado a la izquierda */}
         <Link to="/" onClick={(e) => handleNavClick(e, '#hero')} className={`text-2xl font-bold font-montserrat ${headerIsSolid ? 'text-ecuador-yellow' : 'text-white'}`}>
-          Ecuatorianos<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>BC</span>
+          Ecuatorianos<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>{regionShortName}</span>
         </Link>
 
         {/* Contenedor del menú y botón móvil alineado a la derecha */}
@@ -186,6 +193,15 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
               </>
             )}
           </nav>
+          {/* Enlace al selector de regiones (Desktop) */}
+            <Link
+              to="/"
+              className="ml-4 flex h-10 w-10 items-center justify-center rounded-full bg-ecuador-blue text-white shadow-md transition-transform hover:scale-110 hover:brightness-110"
+              aria-label="Seleccionar región"
+              title="Seleccionar otra región"
+            >
+              🍁
+            </Link>
           {/* Botón de menú móvil */}
           <div className="md:hidden ml-4">
             <button
@@ -231,6 +247,15 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
                 </Link>
               );
             })}
+            {/* Enlace al selector de regiones (Móvil) */}
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="font-medium transition-colors text-white hover:text-ecuador-yellow"
+              aria-label="Seleccionar región"
+            >
+              Cambiar Región
+            </Link>
             <hr className="w-3/4 border-gray-500 my-2"/>
             {isAuthenticated ? (
               <>

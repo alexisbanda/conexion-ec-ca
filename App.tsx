@@ -21,6 +21,7 @@ import { EventDetailPage } from './components/EventDetailPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { Chatbot } from './components/Chatbot'; // <-- 1. IMPORTAR EL CHATBOT
 import AdminLayout from './components/admin/layout/AdminLayout';
+import NationalRegionSelector from './components/NationalRegionSelector';
 import ReportsDashboard from './components/admin/ReportsDashboard';
 import { AdManager } from './components/admin/AdManager';
 import UserManager from './components/admin/UserManager';
@@ -99,13 +100,16 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 const App: React.FC = () => {
     const location = useLocation();
     const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/onboarding');
+    const isRegionSelectorPage = location.pathname === '/';
 
     return (
         <div className="flex flex-col min-h-screen">
-            <Header isDashboardPage={isDashboardPage} />
+            {/* No mostrar el Header en la página de selección de región */}
+            {!isRegionSelectorPage && <Header isDashboardPage={isDashboardPage} />}
             <main className={`flex-grow flex flex-col ${isDashboardPage ? 'pt-16' : ''}`}>
                 <Routes>
-                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/" element={<NationalRegionSelector />} />
+                    <Route path="/:region" element={<LandingPage />} />
                     <Route path="/pending-approval" element={<PendingApprovalPage />} />
                     <Route path="/events/:eventId" element={<EventDetailPage />} />
                     <Route
