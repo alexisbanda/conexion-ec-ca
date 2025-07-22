@@ -43,7 +43,13 @@ import {
     faImage, // Equivalente a PaperAirplaneIcon
     faBullhorn, // Equivalente a MegaphoneIcon
     faClock,
-    faLeaf
+    faLeaf,
+    faHeart,
+    faBook,
+    faPerson,
+    faGlobe,
+    faGift,
+    faLightbulb
 } from '@fortawesome/free-solid-svg-icons';
 // Importa el componente FontAwesomeIcon para usar los iconos en React
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -266,4 +272,32 @@ export const ClockIcon: React.FC<IconProps> = (props) => (
 
 export const LeafIcon: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faLeaf} {...props} />
+);
+
+export const HeartIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faHeart} {...props} />
+);
+
+export const BookOpenIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faBook} {...props} />
+);
+
+export const UsersIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faPerson} {...props} />
+);
+
+export const GlobeAltIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faGlobe} {...props} />
+);
+
+export const DocumentCheckIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faPaperPlane} {...props} />
+);
+
+export const GiftIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faGift} {...props} />
+);
+
+export const IdeaIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faLightbulb} {...props} />
 );
