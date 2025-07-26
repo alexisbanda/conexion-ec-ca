@@ -13,6 +13,8 @@ export interface EventItem {
   published: boolean;
   createdAt: Timestamp;
   rsvps?: string[];
+  province?: string;
+  city?: string;
 }
 
 export interface NewsItem {
@@ -22,6 +24,8 @@ export interface NewsItem {
   link: string;
   publishedAt: Timestamp;
   published: boolean;
+  province?: string;
+  city?: string;
 }
 
 export interface NavItem {
@@ -58,7 +62,8 @@ export interface Resource {
   description: string;
   details?: string;
   isPremium?: boolean;
-  knowledgePoints?: { question: string }[];
+  knowledgePoints?: { question: string, answer: string }[];
+  downloadUrl?: string;
 }
 
 export interface Tool {
@@ -66,8 +71,10 @@ export interface Tool {
   icon: React.ReactNode;
   title: string;
   description: string;
-  modalContent: React.ReactNode;
+  modalContent: React.ReactNode | ((onClose: () => void) => React.ReactNode);
   isPremium?: boolean;
+  isFeatured?: boolean;
+  backgroundImageUrl?: string;
 }
 
 
@@ -251,6 +258,7 @@ export interface CommunityServiceItem {
   // --- FIN DE CAMPOS NUEVOS ---
   contact: string; // Email del usuario (se mantiene como fallback)
   contactName: string;
+  province: string;
   city: string;
   website?: string;
   websiteText?: string;
@@ -289,12 +297,83 @@ export interface ChatMessage {
 // --- Tipos para Anuncios (Banners) ---
 export interface AdSlotItem {
   id: string;
-  imageUrl: string;
-  targetUrl: string;
-  position: 'left' | 'right';
+  location: string;       // e.g., 'benefits_section', 'event_detail'
   isActive: boolean;
+  priority: number;
   startDate?: Timestamp | null;
   endDate?: Timestamp | null;
-  priority: number;
   createdAt: Timestamp;
+
+  // Datos específicos del anuncio anidados para mayor claridad
+  adData: {
+    imageUrl: string;
+    targetUrl: string;
+    sponsorName?: string;
+  };
+
+  // Campos para la segmentación geográfica
+  province?: string; // e.g., 'Ontario'. Si está vacío, es para todas.
+  city?: string;     // e.g., 'Toronto'. Si está vacío, es para toda la provincia.
+}
+
+
+// --- Tipos para el Administrador ---
+
+export interface UserForAdmin {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'member';
+  status: UserStatus;
+  createdAt: Timestamp;
+  onboardingCompleted: boolean;
+  city?: string;
+  province?: string;
+}
+
+export interface ServiceForAdmin {
+  id: string;
+  serviceName: string;
+  type: ServiceType;
+  category: ServiceCategory;
+  contactName: string;
+  province: string;
+  city: string;
+  status: ServiceStatus;
+  createdAt: Timestamp;
+  userId: string;
+}
+
+export interface EventForAdmin {
+  id: string;
+  title: string;
+  date: Timestamp;
+  isPremium: boolean;
+  published: boolean;
+  createdAt: Timestamp;
+  rsvps: number;
+}
+
+export interface AdForAdmin {
+  id: string;
+  location: string;
+  isActive: boolean;
+  priority: number;
+  startDate?: Timestamp;
+  endDate?: Timestamp;
+  imageUrl: string;
+  targetUrl: string;
+  sponsorName?: string;
+  province?: string;
+  city?: string;
+}
+
+export interface ContentItem {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  isPublished: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }

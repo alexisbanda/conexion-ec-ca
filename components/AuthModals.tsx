@@ -2,6 +2,7 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { Modal } from './Modal';
+import { cityData } from '../constants';
 import { ModalContentType, User, RegistrationData } from '../types';
 import { EnvelopeIcon, LockClosedIcon, UserCircleIcon } from './icons';
 import { FirebaseError } from 'firebase/app';
@@ -166,99 +167,7 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
         }
     };
 
-    const cityData = useMemo(() => [
-        {
-            "provincia": "Alberta",
-            "ciudades": [
-                "Calgary", "Edmonton", "Red Deer", "Lethbridge", "St. Albert",
-                "Medicine Hat", "Grande Prairie", "Airdrie", "Spruce Grove", "Leduc"
-            ]
-        },
-        {
-            "provincia": "British Columbia",
-            "ciudades": [
-                "Vancouver", "Victoria", "Surrey", "Burnaby", "Richmond",
-                "Kelowna", "Abbotsford", "Coquitlam", "Langley", "Nanaimo"
-            ]
-        },
-        {
-            "provincia": "Manitoba",
-            "ciudades": [
-                "Winnipeg", "Brandon", "Steinbach", "Thompson", "Portage la Prairie",
-                "Selkirk", "Winkler", "Dauphin", "The Pas", "Morden"
-            ]
-        },
-        {
-            "provincia": "New Brunswick",
-            "ciudades": [
-                "Moncton", "Saint John", "Fredericton", "Dieppe", "Bathurst",
-                "Miramichi", "Edmundston", "Oromocto", "Campbellton", "Sackville"
-            ]
-        },
-        {
-            "provincia": "Newfoundland and Labrador",
-            "ciudades": [
-                "St. John's", "Mount Pearl", "Corner Brook", "Gander", "Grand Falls-Windsor",
-                "Happy Valley-Goose Bay", "Labrador City", "Stephenville", "Marystown", "Conception Bay South"
-            ]
-        },
-        {
-            "provincia": "Nova Scotia",
-            "ciudades": [
-                "Halifax", "Sydney", "Dartmouth", "Truro", "New Glasgow",
-                "Kentville", "Bridgewater", "Amherst", "Yarmouth", "Antigonish"
-            ]
-        },
-        {
-            "provincia": "Ontario",
-            "ciudades": [
-                "Toronto", "Ottawa", "Mississauga", "Brampton", "Hamilton",
-                "London", "Markham", "Vaughan", "Kitchener", "Windsor"
-            ]
-        },
-        {
-            "provincia": "Prince Edward Island",
-            "ciudades": [
-                "Charlottetown", "Summerside", "Stratford", "Cornwall", "Montague",
-                "Souris", "Kensington", "Alberton", "Tignish", "Georgetown"
-            ]
-        },
-        {
-            "provincia": "Québec",
-            "ciudades": [
-                "Montréal", "Québec City", "Laval", "Gatineau", "Longueuil",
-                "Sherbrooke", "Saguenay", "Trois-Rivières", "Terrebonne", "Saint-Jean-sur-Richelieu"
-            ]
-        },
-        {
-            "provincia": "Saskatchewan",
-            "ciudades": [
-                "Saskatoon", "Regina", "Prince Albert", "Moose Jaw", "Yorkton",
-                "Swift Current", "North Battleford", "Estevan", "Weyburn", "Martensville"
-            ]
-        },
-        {
-            "provincia": "Northwest Territories",
-            "ciudades": [
-                "Yellowknife", "Hay River", "Inuvik", "Fort Smith", "Behchoko",
-                "Norman Wells", "Fort Simpson", "Tuktoyaktuk", "Fort Resolution", "Aklavik"
-            ]
-        },
-        {
-            "provincia": "Nunavut",
-            "ciudades": [
-                "Iqaluit", "Rankin Inlet", "Arviat", "Baker Lake", "Cambridge Bay",
-                "Pond Inlet", "Igloolik", "Kugluktuk", "Coral Harbour", "Cape Dorset"
-            ]
-        },
-        {
-            "provincia": "Yukon",
-            "ciudades": [
-                "Whitehorse", "Dawson City", "Watson Lake", "Haines Junction", "Carmacks",
-                "Faro", "Teslin", "Mayo", "Carcross", "Ross River"
-            ]
-        }
-    ], []);
+    
 
     const supportOptions = ['Empleo', 'Vivienda', 'Idioma', 'Comunidad', 'Asesoría', 'Otro'];
 

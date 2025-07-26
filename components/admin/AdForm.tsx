@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Timestamp } from 'firebase/firestore';
-import { AdSlotItem } from '../../types'; // ¡Importante! Asegúrate de que este tipo refleje el nuevo modelo con `adData` anidado.
+import { AdSlotItem } from '../../types';
 import { createAd, updateAd, uploadAdImage } from '../../services/adService';
+import { cityData } from '../../constants'; // Importar datos de ciudades y provincias
 
 // --- Icono de Spinner (local para simplicidad) ---
 const SpinnerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -11,9 +12,9 @@ const SpinnerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 interface AdFormProps {
-  ad?: AdSlotItem | null; // Anuncio para editar, o null para crear uno nuevo
-  onSave: () => void;     // Callback para refrescar la lista después de guardar
-  onCancel: () => void;    // Callback para cerrar el formulario
+  ad?: AdSlotItem | null;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
 export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
@@ -32,6 +33,17 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // --- NUEVOS ESTADOS PARA SEGMENTACIÓN ---
+  const [province, setProvince] = useState<string>('Todas');
+  const [city, setCity] = useState<string>('Todas');
+
+  const provinces = useMemo(() => ['Todas', ...cityData.map(p => p.provincia)], []);
+  const cities = useMemo(() => {
+    if (province === 'Todas') return ['Todas'];
+    const selectedProvince = cityData.find(p => p.provincia === province);
+    return selectedProvince ? ['Todas', ...selectedProvince.ciudades] : ['Todas'];
+  }, [province]);
+
   useEffect(() => {
     if (ad) {
       // Rellenar desde el objeto anidado adData
@@ -43,9 +55,12 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
       setLocation(ad.location);
       setIsActive(ad.isActive);
       setPriority(ad.priority);
-      // Convierte Timestamps de Firestore a string 'yyyy-MM-dd' para los inputs de fecha
       setStartDate(ad.startDate ? ad.startDate.toDate().toISOString().split('T')[0] : '');
       setEndDate(ad.endDate ? ad.endDate.toDate().toISOString().split('T')[0] : '');
+
+      // --- NUEVO: Rellenar campos de segmentación ---
+      setProvince(ad.province || 'Todas');
+      setCity(ad.city || 'Todas');
     } else {
       // Resetea el formulario para un nuevo anuncio
       setTargetUrl('');
@@ -57,6 +72,8 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
       setImagePreview(null);
       setStartDate('');
       setEndDate('');
+      setProvince('Todas');
+      setCity('Todas');
     }
   }, [ad]);
 
@@ -66,6 +83,11 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
     }
+  };
+
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setProvince(e.target.value);
+    setCity('Todas'); // Reset city when province changes
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,11 +105,9 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
       let imageUrl = ad?.adData.imageUrl || '';
 
       if (imageFile) {
-        // Si hay una nueva imagen, la subimos
         imageUrl = await uploadAdImage(imageFile);
       }
 
-      // Construye el nuevo objeto `ad_slot` con la estructura anidada
       const adSlotData = {
         location,
         isActive,
@@ -97,19 +117,20 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
           sponsorName,
           imageUrl,
         },
-        // Convierte strings de fecha a Timestamps de Firestore, o null si están vacíos
         startDate: startDate ? Timestamp.fromDate(new Date(startDate)) : null,
         endDate: endDate ? Timestamp.fromDate(new Date(endDate)) : null,
+        // --- NUEVO: Añadir campos de segmentación ---
+        province: province === 'Todas' ? '' : province,
+        city: city === 'Todas' ? '' : city,
       };
 
       if (ad) {
         await updateAd(ad.id, adSlotData);
       } else {
-        // Aseguramos el tipado correcto para la creación
         await createAd(adSlotData as Omit<AdSlotItem, 'id' | 'createdAt'>);
       }
 
-      onSave(); // Llama al callback para refrescar y cerrar
+      onSave();
     } catch (err) {
       console.error('Error al guardar el anuncio:', err);
       setError('Hubo un error al guardar el anuncio. Por favor, inténtalo de nuevo.');
@@ -139,7 +160,25 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
           <input type="text" id="sponsorName" value={sponsorName} onChange={(e) => setSponsorName(e.target.value)} placeholder="Ej: Mi Empresa Inc." className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"/>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* --- NUEVA SECCIÓN DE SEGMENTACIÓN --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+            <div>
+                <label htmlFor="province" className="block text-sm font-medium text-gray-700">Segmentar por Provincia</label>
+                <select id="province" value={province} onChange={handleProvinceChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm">
+                    {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Dejar en 'Todas' para un anuncio global.</p>
+            </div>
+            <div>
+                <label htmlFor="city" className="block text-sm font-medium text-gray-700">Segmentar por Ciudad</label>
+                <select id="city" value={city} onChange={(e) => setCity(e.target.value)} disabled={province === 'Todas'} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm disabled:bg-gray-100">
+                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                 <p className="text-xs text-gray-500 mt-1">Dejar en 'Todas' para aplicar a toda la provincia.</p>
+            </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700">Ubicación del Espacio</label>
             <select id="location" value={location} onChange={(e) => setLocation(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm">
@@ -149,6 +188,11 @@ export const AdForm: React.FC<AdFormProps> = ({ ad, onSave, onCancel }) => {
               <option value="directory_sidebar">Directorio (Barra Lateral)</option>
               <option value="sticky_banner_left">Banner Fijo (Izquierda)</option>
               <option value="sticky_banner_right">Banner Fijo (Derecha)</option>
+              <option value="resources_section">Sección de Recursos</option>
+              <option value="tools_section">Sección de Herramientas</option>
+              <option value="event_carousel_section">Sección Carrusel de Eventos</option>
+              <option value="top_horizontal_banner">Banner Horizontal Superior</option>
+              <option value="bottom_horizontal_banner">Banner Horizontal Inferior</option>
             </select>
           </div>
           <div>

@@ -1,8 +1,9 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/ContentForm.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { EventItem, NewsItem } from '../types';
 import { Timestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { cityData } from '../constants';
 
 // Tipos para hacer el componente más robusto
 type ContentItemData = Partial<EventItem> & Partial<NewsItem>;

@@ -17,6 +17,11 @@ const formatDate = (timestamp: Timestamp) => timestamp ? new Date(timestamp.seco
 const eventColumns = [
     { header: 'Título', accessor: 'title' },
     { header: 'Fecha', accessor: 'date', render: (item: EventItem) => formatDate(item.date) },
+    { 
+        header: 'Segmentación', 
+        accessor: 'province', 
+        render: (item: EventItem) => item.province ? `${item.province}${item.city ? ` / ${item.city}` : ''}` : <span className="text-gray-400 italic">Global</span>
+    },
     { header: 'Premium', accessor: 'isPremium', render: (item: EventItem) => item.isPremium ? 'Sí' : 'No' },
 ];
 

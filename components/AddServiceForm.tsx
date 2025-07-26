@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { AuthContext } from '../contexts/AuthContext';
 import { addService, updateService } from '../services/directoryService';
+import { cityData } from '../constants';
 import { CommunityServiceItem, ServiceType, ServiceCategory } from '../types';
 import { storage } from '../firebaseConfig'; // Importa la configuración de Firebase Storage
 
@@ -24,6 +25,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
     const [formData, setFormData] = useState({
         serviceName: '',
         type: ServiceType.OFERTA,
+        province: '',
         city: '',
         shortDescription: '',
         imageUrl: '', // Nueva propiedad para la URL de la imagen
@@ -42,6 +44,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
             setFormData({
                 serviceName: initialData.serviceName || '',
                 type: initialData.type || ServiceType.OFERTA,
+                province: initialData.province || '',
                 city: initialData.city || '',
                 shortDescription: initialData.shortDescription || '',
                 imageUrl: initialData.imageUrl || '', // Establecer la URL de la imagen si existe
@@ -173,8 +176,22 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
                             </select>
                         </div>
                         <div>
+                            <label htmlFor="province" className="block text-sm font-medium text-gray-700">Provincia *</label>
+                            <select id="province" name="province" value={formData.province} onChange={handleChange} required className={inputStyle}>
+                                <option value="">Selecciona una provincia</option>
+                                {cityData.map(province => (
+                                    <option key={province.provincia} value={province.provincia}>{province.provincia}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
                             <label htmlFor="city" className="block text-sm font-medium text-gray-700">Ciudad *</label>
-                            <input id="city" name="city" type="text" value={formData.city} onChange={handleChange} required className={inputStyle} placeholder="Ej: Vancouver, Toronto"/>
+                            <select id="city" name="city" value={formData.city} onChange={handleChange} required className={inputStyle} disabled={!formData.province}>
+                                <option value="">Selecciona una ciudad</option>
+                                {formData.province && cityData.find(p => p.provincia === formData.province)?.ciudades.map(city => (
+                                    <option key={city} value={city}>{city}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     {/* Columna 2 */}

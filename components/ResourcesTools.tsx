@@ -2,10 +2,11 @@ import React, { useState, useMemo, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { regions } from './NationalRegionSelector';
 import { Resource, Tool, ModalState, ModalContentType } from '../types';
-import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon } from './icons'; // Importamos nuevos iconos
+import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
 import { AuthContext } from '../contexts/AuthContext';
+import { AdSlot } from './AdSlot'; // Importamos el componente AdSlot
 
 interface AccordionItem {
   title: string;
@@ -46,8 +47,8 @@ interface RedirectPromptProps {
 
 const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose }) => {
     const handleRedirect = () => {
-        window.open(url, '_blank'); // Abre la URL en una nueva pestaña
-        onClose(); // Cierra el modal actual
+        window.open(url, '_blank');
+        onClose();
     };
 
     return (
@@ -80,69 +81,67 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
 // --- DATOS DE GUÍAS ESENCIALES (MODIFICADOS PARA downloadUrl y answers) ---
 // La definición de essentialGuidesData se queda dentro del componente ResourcesTools como antes.
 
-// --- DATOS DE HERRAMIENTAS (REORGANIZADOS Y EXPANDIDOS) ---
+// --- DATOS DE HERRAMIENTAS (REORGANIZADOS Y EXPANDIDOS CON IMÁGENES DE FONDO) ---
 const toolsData: Tool[] = [
   { // 1. Directorio Comunitario (DESTACADO AHORA)
     id: 'tool3',
     icon: <MapPinIcon className="w-10 h-10" />,
     title: 'Directorio Comunitario',
     description: 'Encuentra negocios y servicios ofrecidos por miembros de la comunidad.',
-    modalContent: <CommunityDirectory />, // Suponiendo que CommunityDirectory no necesita props de openToolModal
+    modalContent: <CommunityDirectory />,
     isPremium: true,
-    isFeatured: true // NUEVO: Para marcarlo como destacado
+    isFeatured: true
   },
-  { // 2. AquiTodoEsGratis
-    id: 'tool4',
+  { // 2. AquiTodoEsGratis (CON IMAGEN DE FONDO)
+    id: 'tool4a',
     icon: <GiftIcon className="w-10 h-10" />,
     title: 'Aquí todo es Gratis',
     description: 'Portal donde se ofrece y se pide todo GRATIS!.',
-    modalContent: (onClose) => <RedirectPrompt toolName="Portal Oficial IRCC" url="https://www.canada.ca/en/immigration-refugees-citizenship.html" onClose={onClose} />,
-    isPremium: false
+    modalContent: (onClose: any) => <RedirectPrompt toolName="Aquí todo es Gratis" url="https://ejemplo.com/aquitodoesgratis" onClose={onClose} />,
+    isPremium: false,
+    backgroundImageUrl: 'https://picsum.photos/seed/free_stuff/600/400'
   },
-  { // 3. GuiaDelEcuatorianoSabido
-    id: 'tool5',
+  { // 3. GuiaDelEcuatorianoSabido (CON IMAGEN DE FONDO)
+    id: 'tool5a',
     icon: <IdeaIcon className="w-10 h-10" />,
-    title: 'Guia del Ecuatoriano Sabido',
+    title: 'Guía del Ecuatoriano Sabio',
     description: 'Las mejores sugerencias y tips para los que extrañan el país.',
-    modalContent: (onClose) => <RedirectPrompt toolName="Job Bank de Canadá" url="https://www.jobbank.gc.ca/" onClose={onClose} />,
-    isPremium: false
+    modalContent: (onClose: any) => <RedirectPrompt toolName="Guía del Ecuatoriano Sabio" url="https://ejemplo.com/guiasabio" onClose={onClose} />,
+    isPremium: false,
+    backgroundImageUrl: 'https://picsum.photos/seed/wise_ecuadorian/600/400'
   },
-  { // 2. Enlace a IRCC
+  { // 4. Enlace a IRCC
     id: 'tool4',
     icon: <GlobeAltIcon className="w-10 h-10" />,
     title: 'Portal Oficial IRCC',
     description: 'Accede a información oficial sobre inmigración, visas y ciudadanía.',
-    modalContent: (onClose) => <RedirectPrompt toolName="Portal Oficial IRCC" url="https://www.canada.ca/en/immigration-refugees-citizenship.html" onClose={onClose} />,
+    modalContent: (onClose: any) => <RedirectPrompt toolName="Portal Oficial IRCC" url="https://www.canada.ca/en/immigration-refugees-citizenship.html" onClose={onClose} />,
     isPremium: false
   },
-  { // 3. Enlace a Job Bank
+  { // 5. Enlace a Job Bank
     id: 'tool5',
     icon: <BriefcaseIcon className="w-10 h-10" />,
     title: 'Bolsa de Empleo Nacional',
     description: 'Explora miles de ofertas de trabajo en todo Canadá.',
-    modalContent: (onClose) => <RedirectPrompt toolName="Job Bank de Canadá" url="https://www.jobbank.gc.ca/" onClose={onClose} />,
+    modalContent: (onClose: any) => <RedirectPrompt toolName="Job Bank de Canadá" url="https://www.jobbank.gc.ca/" onClose={onClose} />,
     isPremium: false
   },
-  { // 5. Conversor de dinero
+  { // 6. Enlace a Conversor de Dinero (Ahora como enlace externo)
     id: 'tool7',
     icon: <CurrencyDollarIcon className="w-10 h-10" />,
-    title: 'USD => CAD',
+    title: 'Conversor USD-CAD',
     description: 'Tasa de cambio entre monedas en tiempo real.',
-    modalContent: (onClose) => <RedirectPrompt toolName="Legal Aid BC" url="https://legalaid.bc.ca/" onClose={onClose} />,
+    modalContent: (onClose: any) => <RedirectPrompt toolName="Conversor de Divisas" url="https://www.xe.com/currencyconverter/" onClose={onClose} />,
     isPremium: false
   },
-  { // 6. Enlace a Salud Mental
+  { // 7. Enlace a Salud Mental
     id: 'tool8',
     icon: <HeartIcon className="w-10 h-10" />,
     title: 'Recursos Salud Mental',
     description: 'Directorio de apoyo psicológico y bienestar en tu comunidad.',
-    modalContent: (onClose) => <RedirectPrompt toolName="Recursos de Salud Mental" url="https://www.camh.ca/en/professionals/professionals--projects/immigrant-and-refugee-mental-health-project" onClose={onClose} />,
+    modalContent: (onClose: any) => <RedirectPrompt toolName="Recursos de Salud Mental" url="https://www.camh.ca/en/professionals/professionals--projects/immigrant-and-refugee-mental-health-project" onClose={onClose} />,
     isPremium: false
   },
-  // 7. Conversores (Decisión: Mantenerlos si se hacen funcionales o se marcan como "Próximamente")
-  // Por ahora, se dejan fuera para priorizar los enlaces externos de alto valor.
-  // { id: 'tool1', icon: <CurrencyDollarIcon className="w-10 h-10" />, title: 'Conversor de Divisas', description: 'Calcula tipos de cambio entre diferentes monedas.', modalContent: <CurrencyConverterTool /> },
-  // { id: 'tool2', icon: <ScaleIcon className="w-10 h-10" />, title: 'Conversor de Medidas', description: 'Convierte unidades de peso, longitud, temperatura y más.', modalContent: <UnitConverterTool /> },
 ];
 
 
@@ -155,12 +154,13 @@ export const ResourcesTools: React.FC = () => {
   };
 
   const location = useLocation();
-  const currentRegion = regions.find(r => r.path === location.pathname);
+  // Hacemos la lógica más robusta para que funcione en sub-rutas como /bc/eventos
+  const regionPathSegment = '/' + location.pathname.split('/')[1];
+  const currentRegion = regions.find(r => r.path === regionPathSegment);
   const regionName = currentRegion ? currentRegion.name : 'Canadá';
   const shortName = currentRegion ? currentRegion.shortName : 'CA';
 
 
-  // --- MOVEMOS essentialGuidesData DENTRO DEL COMPONENTE Y USAMOS useMemo ---
   const essentialGuidesData: Resource[] = useMemo(() => ([
     {
       id: 'guide1',
@@ -264,7 +264,7 @@ export const ResourcesTools: React.FC = () => {
           { question: '¿Por qué es importante el voluntariado para mi integración?', answer: 'Es una excelente forma de ganar experiencia canadiense, mejorar el idioma, hacer contactos y contribuir a la comunidad.' },
       ]
     },
-  ]), [regionName, shortName]); // La dependencia es regionName y shortName
+  ]), [regionName, shortName]);
 
 
   const openResourceModal = (resource: Resource) => {
@@ -418,8 +418,8 @@ export const ResourcesTools: React.FC = () => {
                 </div>
               )}
 
-              {/* --- RESTO DE GUÍAS (empezando desde el segundo elemento) --- */}
-              {essentialGuidesData.slice(1).map((resource) => (
+              {/* --- RESTO DE GUÍAS (excluyendo el último para el anuncio) --- */}
+              {essentialGuidesData.slice(1, 6).map((resource) => ( // Renderiza las 5 guías después de la destacada
                   <div
                       key={resource.id}
                       className="bg-ecuador-yellow-light p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center relative"
@@ -441,6 +441,8 @@ export const ResourcesTools: React.FC = () => {
                     </span>
                   </div>
               ))}
+              {/* --- ANUNCIO DE GUÍAS --- */}
+              <AdSlot location="resources_section" className="col-span-1" />
             </div>
           </div>
 
@@ -451,7 +453,7 @@ export const ResourcesTools: React.FC = () => {
                 Herramientas del Día a Día
             </h3>
             {/* Contenedor principal de herramientas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-6"> {/* Ajustado a 4 columnas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-6">
               {/* --- HERRAMIENTA DESTACADA (Directorio Comunitario) --- */}
               {toolsData.length > 0 && (
                 <div
@@ -479,29 +481,42 @@ export const ResourcesTools: React.FC = () => {
                 </div>
               )}
 
-              {/* --- RESTO DE HERRAMIENTAS --- */}
-              {toolsData.slice(1).map((tool) => (
+              {/* --- RESTO DE HERRAMIENTAS (excluyendo el último item para el anuncio) --- */}
+              {toolsData.slice(1, 6).map((tool) => ( // Renderiza las 5 herramientas después de la destacada
                   <div
                       key={tool.id}
-                      className={`bg-ecuador-blue-light p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center relative ${tool.isPremium && !authContext?.isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow transform hover:-translate-y-1 cursor-pointer flex flex-col items-center text-center relative overflow-hidden
+                          ${tool.backgroundImageUrl ? 'bg-cover bg-center' : 'bg-ecuador-blue-light'}
+                          ${tool.isPremium && !authContext?.isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      style={tool.backgroundImageUrl ? { backgroundImage: `url(${tool.backgroundImageUrl})` } : {}}
                       onClick={() => openToolModal(tool)}
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(tool)}
                       aria-label={`Abrir herramienta ${tool.title}`}
                   >
-                    {tool.isPremium && !authContext?.isAuthenticated && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold rounded-lg">
-                          <LockClosedIcon className="w-8 h-8 mr-2" />
-                          Miembros
+                    {/* Overlay para contenido premium o para texto sobre imagen de fondo */}
+                    {(tool.isPremium && !authContext?.isAuthenticated) || tool.backgroundImageUrl ? (
+                        <div className={`absolute inset-0 flex items-center justify-center rounded-lg z-20 
+                                ${tool.isPremium && !authContext?.isAuthenticated ? 'bg-black bg-opacity-40 text-white text-lg font-bold' : 'bg-black bg-opacity-30'}`}>
+                            {tool.isPremium && !authContext?.isAuthenticated && (
+                                <LockClosedIcon className="w-8 h-8 mr-2" />
+                            )}
                         </div>
-                    )}
-                    <div className="text-ecuador-red mb-4">{tool.icon}</div>
-                    <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{tool.title}</h4>
-                    <p className="text-gray-600 text-sm flex-grow">{tool.description}</p>
-                    <button className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
-                      {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Abrir herramienta'} &rarr;
-                    </button>
+                    ) : null}
+
+                    {/* Contenido de la tarjeta sobre el overlay (si hay imagen de fondo) */}
+                    <div className="relative z-30 flex flex-col items-center text-center h-full w-full">
+                        <div className={`${tool.backgroundImageUrl ? 'text-white' : 'text-ecuador-red'} mb-4`}>{tool.icon}</div>
+                        <h4 className={`${tool.backgroundImageUrl ? 'text-white' : 'text-ecuador-blue'} text-lg font-semibold mb-2`}>{tool.title}</h4>
+                        <p className={`${tool.backgroundImageUrl ? 'text-gray-200' : 'text-gray-600'} text-sm flex-grow`}>{tool.description}</p>
+                        <button className={`mt-4 text-sm font-semibold self-center transition-colors 
+                                ${tool.backgroundImageUrl ? 'text-white hover:text-gray-200' : 'text-ecuador-red hover:text-red-700'}`}>
+                          {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Abrir herramienta'} &rarr;
+                        </button>
+                    </div>
                   </div>
               ))}
+              {/* --- ANUNCIO DE HERRAMIENTAS --- */}
+              <AdSlot location="tools_section" className="col-span-1" />
             </div>
           </div>
 

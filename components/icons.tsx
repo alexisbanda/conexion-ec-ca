@@ -49,7 +49,8 @@ import {
     faPerson,
     faGlobe,
     faGift,
-    faLightbulb
+    faLightbulb,
+    faTag
 } from '@fortawesome/free-solid-svg-icons';
 // Importa el componente FontAwesomeIcon para usar los iconos en React
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -300,4 +301,8 @@ export const GiftIcon: React.FC<IconProps> = (props) => (
 
 export const IdeaIcon: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faLightbulb} {...props} />
+);
+
+export const TagIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faTag} {...props} />
 );

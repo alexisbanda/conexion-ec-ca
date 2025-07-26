@@ -103,6 +103,7 @@ export const AdManager: React.FC = () => {
                         <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ubicación</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Segmentación</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patrocinador</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vigencia</th>
@@ -115,6 +116,16 @@ export const AdManager: React.FC = () => {
                             <tr key={ad.id}>
                                 <td className="px-4 py-3"><img src={ad.adData.imageUrl} alt={ad.adData.sponsorName || 'Anuncio'} className="w-20 h-20 object-contain rounded border p-1 bg-gray-50" /></td>
                                 <td className="px-4 py-3 text-gray-700">{locationDisplayNames[ad.location] || locationDisplayNames.default}</td>
+                                <td className="px-4 py-3 text-gray-700">
+                                    {ad.province ? (
+                                        <div>
+                                            <span className="font-semibold">{ad.province}</span>
+                                            {ad.city && <span className="block text-xs text-gray-500">{ad.city}</span>}
+                                        </div>
+                                    ) : (
+                                        <span className="text-gray-400 italic">Global</span>
+                                    )}
+                                </td>
                                 <td className="px-4 py-3"><span className={`text-xs font-medium px-2 py-1 rounded-full ${ad.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{ad.isActive ? 'Activado' : 'Apagado'}</span></td>
                                 <td className="px-4 py-3 text-gray-700">{ad.adData.sponsorName || 'N/A'}</td>
                                 <td className="px-4 py-3 text-gray-700">{formatDate(ad.startDate)} - {formatDate(ad.endDate)}</td>
