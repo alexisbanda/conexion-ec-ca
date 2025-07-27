@@ -26,6 +26,18 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
     const [formData, setFormData] = useState<ContentItemData>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // --- ESTADOS PARA SEGMENTACIÓN ---
+    const [province, setProvince] = useState<string>('Todas');
+    const [city, setCity] = useState<string>('Todas');
+
+    const provinces = useMemo(() => ['Todas', ...cityData.map(p => p.provincia)], []);
+    const cities = useMemo(() => {
+        if (province === 'Todas') return ['Todas'];
+        const selectedProvince = cityData.find(p => p.provincia === province);
+        return selectedProvince ? ['Todas', ...selectedProvince.ciudades] : ['Todas'];
+    }, [province]);
+
+
     useEffect(() => {
         if (initialData) {
             // Pre-populamos el formulario, asegurando que las fechas se conviertan a string
@@ -34,16 +46,29 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
                 date: initialData.date ? timestampToDateString(initialData.date) as any : '',
                 publishedAt: initialData.publishedAt ? timestampToDateString(initialData.publishedAt) as any : '',
             });
+            if (itemType === 'event') {
+                setProvince((initialData as EventItem).province || 'Todas');
+                setCity((initialData as EventItem).city || 'Todas');
+            }
         } else {
             // Valores por defecto para un nuevo item
             const defaultDate = new Date().toISOString().split('T')[0];
             setFormData(itemType === 'event' ? { date: defaultDate as any } : { publishedAt: defaultDate as any });
+            if (itemType === 'event') {
+                setProvince('Todas');
+                setCity('Todas');
+            }
         }
     }, [initialData, itemType]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    };
+
+    const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setProvince(e.target.value);
+        setCity('Todas'); // Reset city when province changes
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -55,31 +80,29 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
 
         setIsSubmitting(true);
         try {
-            // --- INICIO DE LA CORRECCIÓN ---
-            // Creamos una copia mutable para poder limpiarla
             const dataToSubmit: { [key: string]: any } = { ...formData };
 
-            // Convertimos las fechas y eliminamos los campos irrelevantes del otro tipo
             if (itemType === 'event') {
                 if (dataToSubmit.date) {
                     dataToSubmit.date = Timestamp.fromDate(new Date(dataToSubmit.date as any));
                 }
-                // Eliminamos los campos que solo pertenecen a 'news'
                 delete dataToSubmit.publishedAt;
                 delete dataToSubmit.summary;
                 delete dataToSubmit.link;
+
+                // Añadir campos de segmentación
+                dataToSubmit.province = province === 'Todas' ? '' : province;
+                dataToSubmit.city = city === 'Todas' ? '' : city;
 
             } else if (itemType === 'news') {
                 if (dataToSubmit.publishedAt) {
                     dataToSubmit.publishedAt = Timestamp.fromDate(new Date(dataToSubmit.publishedAt as any));
                 }
-                // Eliminamos los campos que solo pertenecen a 'event'
                 delete dataToSubmit.date;
                 delete dataToSubmit.description;
                 delete dataToSubmit.imageUrl;
                 delete dataToSubmit.isPremium;
             }
-            // --- FIN DE LA CORRECCIÓN ---
 
             await onSubmit(dataToSubmit);
 
@@ -112,7 +135,26 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
                         <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700">URL de la Imagen (Opcional)</label>
                         <input id="imageUrl" name="imageUrl" type="url" value={formData.imageUrl || ''} onChange={handleChange} className="mt-1 w-full input-style" />
                     </div>
-                    <div className="flex items-center">
+
+                    {/* --- SECCIÓN DE SEGMENTACIÓN --- */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 mt-4">
+                        <div>
+                            <label htmlFor="province" className="block text-sm font-medium text-gray-700">Segmentar por Provincia</label>
+                            <select id="province" value={province} onChange={handleProvinceChange} className="mt-1 block w-full input-style">
+                                {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Dejar en 'Todas' para un evento global.</p>
+                        </div>
+                        <div>
+                            <label htmlFor="city" className="block text-sm font-medium text-gray-700">Segmentar por Ciudad</label>
+                            <select id="city" value={city} onChange={(e) => setCity(e.target.value)} disabled={province === 'Todas'} className="mt-1 block w-full input-style disabled:bg-gray-100">
+                                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Dejar en 'Todas' para aplicar a toda la provincia.</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center pt-4">
                         <input id="isPremium" name="isPremium" type="checkbox" checked={!!formData.isPremium} onChange={handleChange} className="h-4 w-4 rounded text-ecuador-blue focus:ring-ecuador-yellow" />
                         <label htmlFor="isPremium" className="ml-2 block text-sm text-gray-900">¿Es un evento premium (solo para miembros)?</label>
                     </div>

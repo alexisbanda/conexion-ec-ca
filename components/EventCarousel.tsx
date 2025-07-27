@@ -2,7 +2,7 @@
 import React, { useRef, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventItem } from '../types';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarDaysIcon, LockClosedIcon, UserGroupIcon } from './icons';
+import { ChevronLeftIcon, ChevronRightIcon, CalendarDaysIcon, LockClosedIcon, UserGroupIcon, MapPinIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
 import { Timestamp } from 'firebase/firestore';
 
@@ -64,6 +64,10 @@ const EventCard: React.FC<EventCardProps> = React.memo(({ event, isAuthenticated
           <div className="flex items-center text-sm text-ecuador-red mb-2">
             <CalendarDaysIcon className="w-5 h-5 mr-2" />
             <span>{formatDate(event.date)}</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-500 mb-3">
+            <MapPinIcon className="w-5 h-5 mr-2" />
+            <span>{event.province || 'TBD'}{event.city ? `, ${event.city}` : ''}</span>
           </div>
           <div className="flex items-center text-sm text-ecuador-blue mb-3">
             <UserGroupIcon className="w-5 h-5 mr-2" />

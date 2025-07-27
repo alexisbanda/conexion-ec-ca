@@ -1,5 +1,6 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/EventsNews.tsx
 import React, { useState, useContext, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { EventItem, NewsItem } from '../types';
 import { EventCarousel } from './EventCarousel';
 import { MagnifyingGlassIcon, NewspaperIcon, LinkIcon, CalendarDaysIcon } from './icons';
@@ -8,8 +9,10 @@ import { getPublicEvents } from '../services/eventService';
 // --- CORRECCIÓN: Limpiamos las importaciones de newsService ---
 import { getPaginatedPublicNews, NEWS_PAGE_SIZE } from '../services/newsService';
 import { DocumentSnapshot } from 'firebase/firestore';
+import { regions } from './NationalRegionSelector';
 
 export const EventsNews: React.FC = () => {
+  const { region: regionPath } = useParams<{ region: string }>();
   const [searchTerm, setSearchTerm] = useState('');
   const authContext = useContext(AuthContext);
 
@@ -21,6 +24,13 @@ export const EventsNews: React.FC = () => {
   const [lastNewsDoc, setLastNewsDoc] = useState<DocumentSnapshot | null>(null);
   const [hasMoreNews, setHasMoreNews] = useState(true);
   const [isMoreNewsLoading, setIsMoreNewsLoading] = useState(false);
+
+  useEffect(() => {
+    const region = regions.find(r => r.path === `/${regionPath}`);
+    if (region) {
+      setSearchTerm(region.name);
+    }
+  }, [regionPath]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -61,10 +71,19 @@ export const EventsNews: React.FC = () => {
     }
   };
 
-  const filteredEvents = events.filter(event =>
-      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEvents = events.filter(event => {
+      const term = searchTerm.toLowerCase();
+      // Si no hay provincia definida en el evento, se muestra en todas las regiones.
+      if (!event.province) {
+        return true;
+      }
+      return (
+          event.title.toLowerCase().includes(term) ||
+          event.description.toLowerCase().includes(term) ||
+          (event.province && event.province.toLowerCase().includes(term)) ||
+          (event.city && event.city.toLowerCase().includes(term))
+      );
+  });
 
   return (
       <section id="events-news" className="py-14 md:py-16 bg-ecuador-blue-light">

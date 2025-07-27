@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventItem } from '../types';
 import { getEventById } from '../services/eventService';
-import { CalendarDaysIcon } from './icons';
+import { CalendarDaysIcon, MapPinIcon } from './icons';
 import { Timestamp } from 'firebase/firestore';
 import { RsvpSection } from './RsvpSection';
 
@@ -74,9 +74,17 @@ export const EventDetailPage: React.FC = () => {
                 <div className="container mx-auto px-6">
                     {/* Si no usas el título en el hero, muéstralo aquí */}
                     <h1 className="text-4xl md:text-5xl font-bold text-ecuador-blue mb-4 font-montserrat">{event.title}</h1>
-                    <div className="flex items-center text-lg text-ecuador-red mb-6 font-semibold">
-                        <CalendarDaysIcon className="w-6 h-6 mr-2" />
-                        <span>{formatDate(event.date)}</span>
+                    <div className="flex flex-wrap items-center text-lg text-ecuador-red mb-6 font-semibold">
+                        <div className="flex items-center mr-6 mb-2 md:mb-0">
+                            <CalendarDaysIcon className="w-6 h-6 mr-2" />
+                            <span>{formatDate(event.date)}</span>
+                        </div>
+                        {(event.province || event.city) && (
+                            <div className="flex items-center text-gray-600">
+                                <MapPinIcon className="w-6 h-6 mr-2" />
+                                <span>{event.province}{event.city ? `, ${event.city}` : ''}</span>
+                            </div>
+                        )}
                     </div>
                     <div className="prose max-w-none text-gray-700 mb-8">
                         <p>{event.description}</p>
