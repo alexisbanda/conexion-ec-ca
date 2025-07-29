@@ -1,6 +1,5 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/services/newsService.ts
 import { db } from '../firebaseConfig';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp } from 'firebase/firestore';
 import {
     collection,
     getDocs,
@@ -13,7 +12,8 @@ import {
     orderBy,
     limit, // <-- Importar 'limit'
     startAfter, // <-- Importar 'startAfter'
-    DocumentSnapshot // <-- Importar el tipo para el cursor
+    DocumentSnapshot, // <-- Importar el tipo para el cursor
+    serverTimestamp
 } from 'firebase/firestore';
 import { NewsItem } from '../types';
 export const NEWS_PAGE_SIZE = 5; // Mostraremos 5 noticias por página
@@ -67,7 +67,7 @@ export const getPaginatedPublicNews = async (lastVisible: DocumentSnapshot | nul
 
 
 // Obtiene todas las noticias para el panel de admin
-export const getAllNewsForAdmin = async (): Promise<NewsItem[]> => {
+export const getAllNews = async (): Promise<NewsItem[]> => {
     if (!db) throw new Error("Firestore no inicializado.");
     const newsCollection = collection(db, 'news');
     const q = query(newsCollection, orderBy('publishedAt', 'desc'));

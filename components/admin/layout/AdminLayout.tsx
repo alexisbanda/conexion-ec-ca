@@ -11,6 +11,7 @@ const AdminLayout: React.FC = () => {
         { href: '/admin/users', label: 'Usuarios', icon: <UserGroupIcon className="w-5 h-5" /> },
         { href: '/admin/ads', label: 'Anuncios', icon: <NewspaperIcon className="w-5 h-5" /> },
         { href: '/admin/events', label: 'Eventos', icon: <CalendarDaysIcon className="w-5 h-5" /> },
+        { href: '/admin/news', label: 'Noticias', icon: <NewspaperIcon className="w-5 h-5" /> },
         { href: '/admin/services', label: 'Servicios', icon: <BriefcaseIcon className="w-5 h-5" /> },
     ];
 

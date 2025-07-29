@@ -27,6 +27,7 @@ import { AdManager } from './components/admin/AdManager';
 import UserManager from './components/admin/UserManager';
 import ServiceManager from './components/admin/ServiceManager';
 import EventManager from './components/admin/EventManager';
+import NewsManager from './components/admin/NewsManager';
 
 const PendingApprovalPage: React.FC = () => (
     <section className="py-16 md:py-24 bg-gray-100 text-center min-h-screen flex flex-col justify-center items-center">
