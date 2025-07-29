@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { regions } from './NationalRegionSelector';
-import { Resource, Tool, ModalState, ModalContentType } from '../types';
+import { Resource, Tool, ModalState, ModalContentType } from '../types'; // Asegúrate de que Tool tenga backgroundImageUrl y ctaText
 import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
@@ -81,7 +81,7 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
 // --- DATOS DE GUÍAS ESENCIALES (MODIFICADOS PARA downloadUrl y answers) ---
 // La definición de essentialGuidesData se queda dentro del componente ResourcesTools como antes.
 
-// --- DATOS DE HERRAMIENTAS (REORGANIZADOS Y EXPANDIDOS CON IMÁGENES DE FONDO) ---
+// --- DATOS DE HERRAMIENTAS (REORGANIZADOS Y EXPANDIDOS CON IMÁGENES DE FONDO Y ctaText) ---
 const toolsData: Tool[] = [
   { // 1. Directorio Comunitario (DESTACADO AHORA)
     id: 'tool3',
@@ -90,7 +90,8 @@ const toolsData: Tool[] = [
     description: 'Encuentra negocios y servicios ofrecidos por miembros de la comunidad.',
     modalContent: <CommunityDirectory />,
     isPremium: true,
-    isFeatured: true
+    isFeatured: true,
+    ctaText: 'Abrir Directorio' // CTA específico
   },
   { // 2. AquiTodoEsGratis (CON IMAGEN DE FONDO)
     id: 'tool4a',
@@ -99,7 +100,8 @@ const toolsData: Tool[] = [
     description: 'Portal donde se ofrece y se pide todo GRATIS!.',
     modalContent: (onClose: any) => <RedirectPrompt toolName="Aquí todo es Gratis" url="https://ejemplo.com/aquitodoesgratis" onClose={onClose} />,
     isPremium: false,
-    backgroundImageUrl: 'https://picsum.photos/seed/free_stuff/600/400'
+    backgroundImageUrl: 'https://picsum.photos/seed/free_stuff/600/400',
+    ctaText: 'Ir al Portal Gratis' // CTA específico
   },
   { // 3. GuiaDelEcuatorianoSabido (CON IMAGEN DE FONDO)
     id: 'tool5a',
@@ -108,7 +110,8 @@ const toolsData: Tool[] = [
     description: 'Las mejores sugerencias y tips para los que extrañan el país.',
     modalContent: (onClose: any) => <RedirectPrompt toolName="Guía del Ecuatoriano Sabio" url="https://ejemplo.com/guiasabio" onClose={onClose} />,
     isPremium: false,
-    backgroundImageUrl: 'https://picsum.photos/seed/wise_ecuadorian/600/400'
+    backgroundImageUrl: 'https://picsum.photos/seed/wise_ecuadorian/600/400',
+    ctaText: 'Ir a la Guía' // CTA específico
   },
   { // 4. Enlace a IRCC
     id: 'tool4',
@@ -116,7 +119,8 @@ const toolsData: Tool[] = [
     title: 'Portal Oficial IRCC',
     description: 'Accede a información oficial sobre inmigración, visas y ciudadanía.',
     modalContent: (onClose: any) => <RedirectPrompt toolName="Portal Oficial IRCC" url="https://www.canada.ca/en/immigration-refugees-citizenship.html" onClose={onClose} />,
-    isPremium: false
+    isPremium: false,
+    ctaText: 'Visitar IRCC' // CTA específico
   },
   { // 5. Enlace a Job Bank
     id: 'tool5',
@@ -124,7 +128,8 @@ const toolsData: Tool[] = [
     title: 'Bolsa de Empleo Nacional',
     description: 'Explora miles de ofertas de trabajo en todo Canadá.',
     modalContent: (onClose: any) => <RedirectPrompt toolName="Job Bank de Canadá" url="https://www.jobbank.gc.ca/" onClose={onClose} />,
-    isPremium: false
+    isPremium: false,
+    ctaText: 'Ir a Job Bank' // CTA específico
   },
   { // 6. Enlace a Conversor de Dinero (Ahora como enlace externo)
     id: 'tool7',
@@ -132,7 +137,8 @@ const toolsData: Tool[] = [
     title: 'Conversor USD-CAD',
     description: 'Tasa de cambio entre monedas en tiempo real.',
     modalContent: (onClose: any) => <RedirectPrompt toolName="Conversor de Divisas" url="https://www.xe.com/currencyconverter/" onClose={onClose} />,
-    isPremium: false
+    isPremium: false,
+    ctaText: 'Abrir Conversor' // CTA específico
   },
   { // 7. Enlace a Salud Mental
     id: 'tool8',
@@ -140,7 +146,8 @@ const toolsData: Tool[] = [
     title: 'Recursos Salud Mental',
     description: 'Directorio de apoyo psicológico y bienestar en tu comunidad.',
     modalContent: (onClose: any) => <RedirectPrompt toolName="Recursos de Salud Mental" url="https://www.camh.ca/en/professionals/professionals--projects/immigrant-and-refugee-mental-health-project" onClose={onClose} />,
-    isPremium: false
+    isPremium: false,
+    ctaText: 'Ver Recursos' // CTA específico
   },
 ];
 
@@ -154,9 +161,7 @@ export const ResourcesTools: React.FC = () => {
   };
 
   const location = useLocation();
-  // Hacemos la lógica más robusta para que funcione en sub-rutas como /bc/eventos
-  const regionPathSegment = '/' + location.pathname.split('/')[1];
-  const currentRegion = regions.find(r => r.path === regionPathSegment);
+  const currentRegion = regions.find(r => r.path === location.pathname);
   const regionName = currentRegion ? currentRegion.name : 'Canadá';
   const shortName = currentRegion ? currentRegion.shortName : 'CA';
 
@@ -182,7 +187,7 @@ export const ResourcesTools: React.FC = () => {
       icon: <BriefcaseIcon className="w-10 h-10" />,
       title: `Guía Laboral en ${regionName}`,
       description: `Adapta tu CV, optimiza tu LinkedIn y prepárate para las entrevistas de trabajo en ${regionName}.`,
-      details: `El mercado laboral de ${regionName} tiene sus propias reglas. Te enseñamos a "traducir" tu experiencia al formato local, a crear un perfil de LinkedIn que atraiga reclutadores y a responder con confianza en las entrevistas.`,
+      details: `El mercado laboral de ${regionName} tiene sus propias reglas. Te enseñamos a "traducir" tu experiencia al formato local, a crear un perfil de LinkedIn que atrae reclutadores y a responder con confianza en las entrevistas.`,
       isPremium: true,
       downloadUrl: `/${shortName}/guia-laboral-premium.pdf`,
       knowledgePoints: [
@@ -442,7 +447,7 @@ export const ResourcesTools: React.FC = () => {
                   </div>
               ))}
               {/* --- ANUNCIO DE GUÍAS --- */}
-              <AdSlot location="resources_section" className="col-span-1" />
+              <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1" /> {/* Col-span ajustado para que sea del tamaño de una card regular */}
             </div>
           </div>
 
@@ -510,13 +515,13 @@ export const ResourcesTools: React.FC = () => {
                         <p className={`${tool.backgroundImageUrl ? 'text-gray-200' : 'text-gray-600'} text-sm flex-grow`}>{tool.description}</p>
                         <button className={`mt-4 text-sm font-semibold self-center transition-colors 
                                 ${tool.backgroundImageUrl ? 'text-white hover:text-gray-200' : 'text-ecuador-red hover:text-red-700'}`}>
-                          {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Abrir herramienta'} &rarr;
+                          {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : tool.ctaText || 'Abrir herramienta'} &rarr; {/* Usamos tool.ctaText */}
                         </button>
                     </div>
                   </div>
               ))}
               {/* --- ANUNCIO DE HERRAMIENTAS --- */}
-              <AdSlot location="tools_section" className="col-span-1" />
+              <AdSlot location="tools_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-blue-light" className="col-span-1" /> {/* Col-span ajustado para que sea del tamaño de una card regular */}
             </div>
           </div>
 

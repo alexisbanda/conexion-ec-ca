@@ -142,6 +142,7 @@ const App: React.FC = () => {
                         <Route path="ads" element={<AdManager />} />
                         <Route path="users" element={<UserManager />} />
                         <Route path="events" element={<EventManager />} />
+                        <Route path="news" element={<NewsManager />} />
                         <Route path="services" element={<ServiceManager />} />
                     </Route>
                     <Route path="*" element={<Navigate to="/" />} />

@@ -38,7 +38,7 @@ const benefitsData: Benefit[] = [
     title: 'Haz Crecer tu Negocio',
     shortDescription: 'Promociona tu emprendimiento en nuestro directorio y llega a una comunidad que confía en ti.',
     detailedDescription: 'Tu negocio merece brillar. Te ofrecemos la plataforma perfecta para que toda la comunidad ecuatoriana en Canadá conozca tu talento. Al publicar en nuestro Directorio Comunitario, no solo ganas visibilidad, sino que te conectas con una red de clientes que confían en ti. Participa en ferias y eventos de networking exclusivos donde tu emprendimiento será el protagonista. ¡Es hora de crecer juntos!',
-    imageUrl: '/assets/images/evento_networking.png', // Sugerencia: crear una nueva imagen para este beneficio
+    imageUrl: '/assets/images/evento_networking.png',
   },
   {
     id: '4',
@@ -55,8 +55,8 @@ const benefitsData: Benefit[] = [
     shortDescription: 'Guías sobre estudios, becas y seminarios web exclusivos sobre convalidación de títulos.',
     detailedDescription: 'Tu futuro académico en Canadá está a tu alcance. Te proporcionamos el mapa para navegar el sistema educativo: desde elegir el programa perfecto y postular a becas, hasta el crucial proceso de convalidación de tus títulos. Como miembro, tendrás acceso a seminarios web exclusivos con expertos y guías paso a paso que te ahorrarán tiempo y esfuerzo. ¡Invierte en tu futuro con el apoyo de tu comunidad!',
     imageUrl: '/assets/images/apoyo_educativo.png',
-  }/*,
-  {
+  },
+  /*{ // Agregamos el beneficio 6 que estaba comentado para completar el grid si es necesario.
     id: '6',
     icon: <ChatBubbleLeftRightIcon className="w-12 h-12" />,
     title: 'Integración y Cultura',
@@ -97,8 +97,6 @@ const testimonialsData: TestimonialType[] = [
   },
 ];
 
-// Para el carrusel de CSS, duplicamos los testimonios para un efecto de scroll sin fin.
-// Esto evita el "salto" al final de la animación.
 const allTestimonials = [...testimonialsData, ...testimonialsData];
 
 export const Benefits: React.FC = () => {
@@ -139,12 +137,12 @@ export const Benefits: React.FC = () => {
             );
 
             // Insertar el AdSlot después de la segunda tarjeta de beneficio (índice 1)
+            // Aseguramos que el AdSlot reciba solo las clases de layout necesarias.
+            // El AdSlot.tsx es quien define la apariencia del placeholder.
             if (index === 1) {
               return [
                 card,
-                <div key="ad-slot-benefits" className="h-[450px] flex items-center justify-center bg-white/50 rounded-xl shadow-lg p-4">
-                  <AdSlot location="benefits_section" className="w-full" />
-                </div>,
+                <AdSlot key="ad-slot-benefits" location="benefits_section" className="col-span-1" />
               ];
             }
             return [card];
@@ -158,7 +156,7 @@ export const Benefits: React.FC = () => {
             <div className="flex flex-nowrap animate-testimonial-scroll">
               {allTestimonials.map((testimonial, index) => (
                 <div key={index} className="flex-shrink-0 w-80 md:w-96 p-4 mx-4 md:mx-6">
-                  <div className="bg-ecuador-blue-light p-8 rounded-xl shadow-lg relative flex flex-col justify-between min-h-[360px]">
+                  <div className="bg-ecuador-blue-light p-8 rounded-xl shadow-lg relative flex flex-col justify-between min-h-[300px]"> {/* Ajustado min-h a 300px */}
                     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-ecuador-red text-white rounded-full p-3 shadow-md pt-6">
                       <ChatBubbleLeftRightIcon className="w-8 h-8"/>
                     </div>

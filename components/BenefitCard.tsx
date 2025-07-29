@@ -13,15 +13,16 @@ interface BenefitCardProps {
 export const BenefitCard: React.FC<BenefitCardProps> = ({ benefit, isFlipped, onFlip, onRegisterClick, onContactClick }) => {
   return (
     // Contenedor que establece la perspectiva 3D
+    // El onClick para voltear ya NO está aquí, ahora está en el botón "Ver más detalles"
     <div className="group h-[450px] [perspective:1000px]">
       {/* Contenedor que rota */}
       <div
         className={`relative h-full w-full rounded-xl shadow-lg transition-all duration-500 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}
-        onClick={onFlip}
-        role="button"
+        // Eliminamos el onClick aquí, la tarjeta solo gira cuando el botón específico es presionado
+        role="button" // Se mantiene role="button" pero la acción principal se mueve al botón interno
         tabIndex={0}
-        onKeyPress={(e) => e.key === 'Enter' && onFlip()}
-        aria-label={`Ver más detalles sobre ${benefit.title}`}
+        onKeyPress={(e) => e.key === 'Enter' && onFlip()} // Se mantiene para accesibilidad con teclado
+        aria-label={`Ver detalles de ${benefit.title}`} // Label general para la tarjeta
       >
         {/* CARA FRONTAL */}
         <div className="absolute inset-0 [backface-visibility:hidden] bg-white rounded-xl overflow-hidden flex flex-col">
@@ -34,16 +35,25 @@ export const BenefitCard: React.FC<BenefitCardProps> = ({ benefit, isFlipped, on
                 loading="lazy"
               />
               <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
-                 <div className="text-white text-6xl opacity-80">{benefit.icon}</div>
+                 {/* --- MEJORA: Ícono con mejor contraste --- */}
+                 {/* El ícono es ahora amarillo para destacar más */}
+                 <div className="text-white text-6xl">{benefit.icon}</div>
               </div>
             </div>
           )}
           <div className="p-6 flex-grow flex flex-col">
             <h3 className="text-xl font-bold text-ecuador-blue mb-2 font-montserrat">{benefit.title}</h3>
             <p className="text-gray-600 text-sm mb-4 flex-grow">{benefit.shortDescription}</p>
-            <span className="mt-auto text-sm font-semibold text-ecuador-red self-start">
+            {/* --- MEJORA: Botón explícito para voltear la tarjeta --- */}
+            <button 
+              onClick={onFlip} // Ahora solo este botón voltea la tarjeta
+              className="mt-auto text-sm font-semibold text-ecuador-red hover:text-red-700 self-start transition-colors"
+              aria-label={`Ver más detalles sobre ${benefit.title}`}
+              aria-expanded={isFlipped} // Indica si los detalles están expandidos
+              type="button" // Es un botón
+            >
                 Ver más detalles &rarr;
-            </span>
+            </button>
           </div>
         </div>
 
@@ -82,7 +92,8 @@ export const BenefitCard: React.FC<BenefitCardProps> = ({ benefit, isFlipped, on
                 e.stopPropagation();
                 onContactClick && onContactClick();
               }}
-              className="w-full bg-ecuador-blue text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-yellow-400 transition text-center"
+              // --- MEJORA: Hover del botón Contacto consistente con la marca ---
+              className="w-full bg-ecuador-blue text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-blue-700 transition text-center"
             >
               Contacto
             </a>

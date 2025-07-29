@@ -13,7 +13,11 @@ const newsApi = {
 
 const newsColumns = [
     { header: 'Título', accessor: 'title' },
-    { header: 'Resumen', accessor: 'summary' },
+    { 
+        header: 'Segmentación', 
+        accessor: 'province', 
+        render: (item: NewsItem) => `${item.province || 'Global'}${item.city ? ` > ${item.city}` : ''}` 
+    },
     { header: 'Enlace', accessor: 'link', render: (item: NewsItem) => <a href={item.link} target="_blank" rel="noopener noreferrer">{item.link}</a> },
 ];
 

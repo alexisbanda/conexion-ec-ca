@@ -50,11 +50,15 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
                 setProvince((initialData as EventItem).province || 'Todas');
                 setCity((initialData as EventItem).city || 'Todas');
             }
+            if (itemType === 'news') {
+                setProvince((initialData as NewsItem).province || 'Todas');
+                setCity((initialData as NewsItem).city || 'Todas');
+            }
         } else {
             // Valores por defecto para un nuevo item
             const defaultDate = new Date().toISOString().split('T')[0];
             setFormData(itemType === 'event' ? { date: defaultDate as any } : { publishedAt: defaultDate as any });
-            if (itemType === 'event') {
+            if (itemType === 'event' || itemType === 'news') {
                 setProvince('Todas');
                 setCity('Todas');
             }
@@ -102,6 +106,10 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
                 delete dataToSubmit.description;
                 delete dataToSubmit.imageUrl;
                 delete dataToSubmit.isPremium;
+
+                // Añadir campos de segmentación
+                dataToSubmit.province = province === 'Todas' ? '' : province;
+                dataToSubmit.city = city === 'Todas' ? '' : city;
             }
 
             await onSubmit(dataToSubmit);
@@ -174,6 +182,24 @@ export const ContentForm: React.FC<ContentFormProps> = ({ itemType, initialData,
                     <div>
                         <label htmlFor="publishedAt" className="block text-sm font-medium text-gray-700">Fecha de Publicación</label>
                         <input id="publishedAt" name="publishedAt" type="date" value={formData.publishedAt as any || ''} onChange={handleChange} required className="mt-1 w-full input-style" />
+                    </div>
+
+                    {/* --- SECCIÓN DE SEGMENTACIÓN PARA NOTICIAS --- */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 mt-4">
+                        <div>
+                            <label htmlFor="province-news" className="block text-sm font-medium text-gray-700">Segmentar por Provincia</label>
+                            <select id="province-news" value={province} onChange={handleProvinceChange} className="mt-1 block w-full input-style">
+                                {provinces.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Dejar en 'Todas' para una noticia global.</p>
+                        </div>
+                        <div>
+                            <label htmlFor="city-news" className="block text-sm font-medium text-gray-700">Segmentar por Ciudad</label>
+                            <select id="city-news" value={city} onChange={(e) => setCity(e.target.value)} disabled={province === 'Todas'} className="mt-1 block w-full input-style disabled:bg-gray-100">
+                                {cities.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">Dejar en 'Todas' para aplicar a toda la provincia.</p>
+                        </div>
                     </div>
                 </>
             )}
