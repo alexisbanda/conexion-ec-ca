@@ -1,16 +1,21 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/Chatbot.tsx
-import React, { useState, useEffect, useRef, useContext } from 'react'; // 1. Importar useContext
+
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { ChatMessage } from '../types';
-import { AuthContext } from '../contexts/AuthContext'; // 2. Importar el AuthContext
+import { AuthContext } from '../contexts/AuthContext';
 import {
     ChatBubbleOvalLeftEllipsisIcon,
     PaperAirplaneIcon,
     XMarkIcon
 } from './icons';
+// --- CAMBIO APLICADO: Seguridad ---
+// Se importa DOMPurify para sanitizar el HTML recibido del bot.
+import DOMPurify from 'dompurify';
+
 
 const initialMessage: ChatMessage = {
     role: 'assistant',
-    content: `¡Hola! Soy <b>Conex</b>, tu asistente virtual de EcuatorianosBC. Estoy aquí para ayudarte con tus preguntas sobre la vida y migración en Canadá. ¿En qué puedo ayudarte hoy?`
+    content: `¡Hola! Soy <b>Conex</b>, tu asistente virtual de la Comunidad de Ecuatorianos en Canadá!. Estoy aquí para ayudarte con tus preguntas sobre la vida y migración en Canadá. ¿En qué puedo ayudarte hoy?`
 };
 
 export const Chatbot: React.FC = () => {
@@ -19,34 +24,46 @@ export const Chatbot: React.FC = () => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const chatContainerRef = useRef<HTMLDivElement>(null); // 3. Ref para el contenedor de mensajes
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const auth = useContext(AuthContext);
 
-    const auth = useContext(AuthContext); // 4. Obtener el contexto de autenticación
+    // --- CAMBIO APLICADO: UX y Accesibilidad ---
+    // Ref para el campo de texto para poder hacer focus en él.
+    const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // 5. NUEVO EFECTO: Maneja los clics en los enlaces dinámicos del chat
+    // --- CAMBIO APLICADO: UX y Accesibilidad ---
+    // Este efecto maneja el foco automático al abrir el chat.
+    useEffect(() => {
+        if (isOpen) {
+            // Se usa un pequeño timeout para asegurar que el input es parte del DOM
+            // y visible después de la animación de entrada de la ventana.
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
+        }
+    }, [isOpen]);
+
+    // Efecto para manejar los clics en los enlaces dinámicos del chat
     useEffect(() => {
         const handleChatClick = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             const link = target.closest('a');
-
             if (!link || !auth) return;
 
             const action = link.dataset.action;
-
             if (action) {
-                event.preventDefault(); // Prevenir la navegación por defecto del enlace
-
+                event.preventDefault();
                 if (action === 'open-register') {
-                    setIsOpen(false); // Cerrar el chat
-                    auth.openRegisterModal(); // Abrir el modal de registro
+                    setIsOpen(false);
+                    auth.openRegisterModal();
                 } else if (action === 'focus-contact') {
                     const contactForm = document.getElementById('contact');
                     if (contactForm) {
-                        setIsOpen(false); // Cerrar el chat
+                        setIsOpen(false);
                         contactForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }
                 }
@@ -63,7 +80,7 @@ export const Chatbot: React.FC = () => {
                 container.removeEventListener('click', handleChatClick);
             }
         };
-    }, [auth, messages]); // Dependencias: se vuelve a ejecutar si el contexto o los mensajes cambian
+    }, [auth, messages]);
 
     const toggleChat = () => {
         setIsOpen(!isOpen);
@@ -79,11 +96,38 @@ export const Chatbot: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/.netlify/functions/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ messages: [...messages, userMessage] })
-            });
+            // --- CAMBIO APLICADO: Rendimiento ---
+            // Se recorta el historial en el cliente antes de enviarlo al backend.
+           // Capturamos el contenido de texto principal de la página.
+const mainContentElement = document.querySelector('#page-content') || document.querySelector('main');
+// Usamos .innerText para obtener solo el texto, sin HTML.
+// Limitamos a 2000 caracteres para no sobrecargar el prompt.
+const mainContentText = mainContentElement ? mainContentElement.innerText.trim().substring(0, 2000) : '';
+
+const pageContext = {
+    url: window.location.href,
+    title: document.title,
+    // Añadimos el contenido de texto
+    content: mainContentText
+};
+
+
+    const MAX_MESSAGES_IN_HISTORY = 8;
+    const allMessages = [...messages, userMessage];
+    const historyToSend = allMessages.slice(-MAX_MESSAGES_IN_HISTORY);
+
+    const response = await fetch('/.netlify/functions/gemini', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Si tienes autenticación, el token iría aquí
+        },
+        body: JSON.stringify({
+            messages: historyToSend,
+            // Añadimos el objeto de contexto a la petición
+            context: pageContext
+        })
+    });
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -127,7 +171,6 @@ export const Chatbot: React.FC = () => {
                         </button>
                     </header>
 
-                    {/* 6. Añadir la ref al contenedor de mensajes */}
                     <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto scrollbar-hide bg-gray-50">
                         {messages.map((msg, index) => (
                             <div key={index} className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -138,7 +181,19 @@ export const Chatbot: React.FC = () => {
                                             : 'bg-gray-200 text-gray-800 rounded-bl-none'
                                     }`}
                                 >
-                                    <p className="text-sm" dangerouslySetInnerHTML={{ __html: msg.content }}></p>
+                                    {/* --- CAMBIO APLICADO: Seguridad --- */}
+                                    {/* Se renderiza el contenido de forma segura. El HTML del bot se sanitiza */}
+                                    {/* y el contenido del usuario se trata como texto plano. */}
+                                    {msg.role === 'assistant' ? (
+                                        <p
+                                            className="text-sm"
+                                            dangerouslySetInnerHTML={{
+                                                __html: DOMPurify.sanitize(msg.content)
+                                            }}
+                                        ></p>
+                                    ) : (
+                                        <p className="text-sm">{msg.content}</p>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -159,6 +214,9 @@ export const Chatbot: React.FC = () => {
                     <footer className="p-4 border-t border-gray-200">
                         <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
                             <input
+                                // --- CAMBIO APLICADO: UX y Accesibilidad ---
+                                // Se asigna la ref al input.
+                                ref={inputRef}
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
