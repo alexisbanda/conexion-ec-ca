@@ -381,7 +381,7 @@ export const ResourcesTools: React.FC = () => {
 
   return (
       <section id="resources-tools" className="py-14 md:py-16 bg-white">
-        <div className="container mx-auto px-6 max-w-7xl">
+        <div className="container mx-auto px-6 max-w-8xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Tu Caja de Herramientas en {regionName}</h2>
             <p className="text-lg text-gray-700 max-w-2xl mx-auto">

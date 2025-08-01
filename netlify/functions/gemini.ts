@@ -34,21 +34,26 @@ const systemInstruction = {
 
         ---
         **REGLAS DE CONVERSIÓN Y LLAMADO A LA ACCIÓN (CTA):**
-
-        Tu objetivo secundario es ayudar a que la comunidad crezca. Para ello, ofrece la membresía como una solución a las necesidades del usuario, siguiendo estas directrices:
-
-        8.  **CTA por Palabra Clave:** Si el usuario menciona temas directamente relacionados con beneficios para socios (ej: "revisión de CV", "networking", "descuentos", "contactos profesionales", "asesoría legal", "plantillas de documentos"), responde su pregunta primero de forma útil. Inmediatamente después, de manera natural y servicial, menciona el beneficio específico que obtendría como socio.
+         8.  **CTA por Palabra Clave:** Si el usuario menciona temas directamente relacionados con beneficios para socios (ej: "revisión de CV", "networking", "descuentos", "contactos profesionales"), responde su pregunta primero de forma útil. Inmediatamente después, de manera natural y servicial, menciona el beneficio específico que obtendría como socio.
         
-        9.  **CTA por Barrera de Contenido:** Si la respuesta a una pregunta involucra recursos que son exclusivos para socios (ej: plantillas avanzadas, directorios de profesionales, webinars grabados, guías detalladas), proporciona una respuesta pública y general que sea valiosa. Luego, informa al usuario que la versión completa, más detallada o el recurso en sí, está disponible en el portal para socios.
+        9.  **CTA por Barrera de Contenido:** Si el usuario pregunta por recursos que sabes que son exclusivos para socios (ej: plantillas avanzadas, directorios de profesionales, webinars grabados, guías detalladas), proporciónale una respuesta pública y general que sea valiosa. Luego, infórmale que la versión completa, más detallada o el recurso en sí, está disponible en el portal para socios.
 
-        10. **Tono del CTA:** Tu tono nunca debe ser de venta directa o insistente. Preséntalo siempre como una sugerencia útil, una extensión lógica de la ayuda que ya estás proveyendo. Usa frases como "Por cierto, ya que hablamos de esto...", "Para ir un paso más allá...", "Muchos miembros en tu situación encuentran muy útil...".
+        10. **Tono del CTA:** Tu tono nunca debe ser de venta directa o insistente. Preséntalo siempre como una sugerencia útil, una extensión lógica de la ayuda que ya estás proveyendo. Usa frases como "Por cierto, ya que hablamos de esto...", "Para ir un paso más allá...", "Muchos miembros encuentran muy útil...".
 
-        11. **Respeta la Negativa:** Si el usuario rechaza la oferta o la ignora (dice "no gracias" o cambia de tema), **no insistas**. Agradece su interés y continúa la conversación sobre el tema que él elija. La confianza es tu principal prioridad.
-        
+        11. **Respeta la Negativa:** Si el usuario rechaza la oferta o la ignora, **no insistas**. Agradece su interés y continúa la conversación sobre el tema que él elija. La confianza es tu principal prioridad.
         ---
         `
     }]
 };
+
+// --- NUEVO: Se define un array de acciones estructuradas ---
+// Esto reemplaza el antiguo bloque de HTML 'contactInfo'.
+const footerActions = [
+    { text: '¿Nuevo aquí? Regístrate', type: 'action' as const, value: 'open-register' },
+    { text: 'Contactar a un Asesor', type: 'action' as const, value: 'focus-contact' },
+    { text: 'Chatear por WhatsApp', type: 'link' as const, value: 'https://wa.me/15551234567' } // ¡RECUERDA CAMBIAR ESTE NÚMERO!
+];
+
 
 export const handler = async function(event) {
     if (event.httpMethod !== 'POST') {
@@ -76,7 +81,6 @@ export const handler = async function(event) {
     
     const conversationHistory = incomingMessages.slice(-MAX_MESSAGES_IN_HISTORY);
 
-    // --- AJUSTE FINAL DE TONO: Se refina la instrucción para que el bot haga una inferencia sobre el interés del usuario. ---
     let contextInstruction = null;
     if (pageContext && pageContext.content) {
         contextInstruction = {
@@ -133,24 +137,15 @@ export const handler = async function(event) {
         const data = await response.json();
         const botResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Lo siento, no pude generar una respuesta. Por favor, intenta reformular tu pregunta.";
 
-        const contactInfo = `
-<hr style="margin: 1rem 0; border-color: rgba(255,255,255,0.2);">
-<p><b>¿Necesitas más ayuda?</b></p>
-<ul>
-    <li><b>¿Nuevo aquí?</b> <a href="#" data-action="open-register" style="color: inherit; text-decoration: underline;">Regístrate gratis</a> para acceder a todos los beneficios.</li>
-    <li><b>¿Preguntas específicas?</b> <a href="#contact" data-action="focus-contact" style="color: inherit; text-decoration: underline;">Contacta a un asesor</a>.</li>
-    <li><b>Chatea con nosotros:</b> <a href="https://wa.me/15551234567" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">WhatsApp</a>.</li>
-</ul>
-`;
-
-        const finalResponse = `${botResponse}\n\n${contactInfo}`;
-
+        // --- MODIFICADO: La respuesta ahora es un objeto JSON con 'content' y 'actions' ---
+        // Se elimina la concatenación de la variable `contactInfo`
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: {
                     role: 'assistant',
-                    content: finalResponse
+                    content: botResponse,
+                    actions: footerActions // Se adjunta el array de acciones estructuradas
                 }
             })
         };

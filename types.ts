@@ -377,3 +377,17 @@ export interface ContentItem {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
+
+// Define el tipo para una sola acción/botón
+export interface ChatAction {
+  text: string;
+  type: 'action' | 'link'; // 'action' para clics internos, 'link' para externos
+  value: string; // Puede ser un data-action o una URL
+}
+
+// Modifica ChatMessage para incluir un array opcional de acciones
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  actions?: ChatAction[]; // Array opcional de acciones
+}

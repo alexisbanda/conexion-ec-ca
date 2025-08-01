@@ -1,57 +1,56 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/Chatbot.tsx
 
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { ChatMessage } from '../types';
+// --- MODIFICADO: Se importan los nuevos tipos para las acciones ---
+import { ChatMessage, ChatAction } from '../types'; 
 import { AuthContext } from '../contexts/AuthContext';
 import {
     ChatBubbleOvalLeftEllipsisIcon,
     PaperAirplaneIcon,
     XMarkIcon
 } from './icons';
-// --- CAMBIO APLICADO: Seguridad ---
-// Se importa DOMPurify para sanitizar el HTML recibido del bot.
-import DOMPurify from 'dompurify';
-
 
 const initialMessage: ChatMessage = {
     role: 'assistant',
-    content: `¡Hola! Soy <b>Conex</b>, tu asistente virtual de la Comunidad de Ecuatorianos en Canadá!. Estoy aquí para ayudarte con tus preguntas sobre la vida y migración en Canadá. ¿En qué puedo ayudarte hoy?`
+    content: `¡Hola! Soy <b>Conex</b>, tu asistente virtual. Estoy aquí para ayudarte con tus dudas sobre la vida y migración en Canadá. Puedes escribirme una pregunta o empezar con una de las siguientes opciones:`
 };
+
+// --- NUEVO: Lista de Preguntas Frecuentes ---
+const frequentQuestions = [
+    "¿Cuáles son los primeros trámites que debo hacer al llegar?",
+    "¿Cómo puedo adaptar mi CV al formato canadiense?",
+    "¿Qué tipos de visa de trabajo existen?",
+    "¿Cómo funciona el sistema de salud en Canadá?",
+];
 
 export const Chatbot: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    // --- NUEVO: Estado para controlar la visibilidad de las FAQ ---
+    const [showFaqs, setShowFaqs] = useState(true);
+    
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    const auth = useContext(AuthContext);
-
-    // --- CAMBIO APLICADO: UX y Accesibilidad ---
-    // Ref para el campo de texto para poder hacer focus en él.
     const inputRef = useRef<HTMLInputElement>(null);
+    const auth = useContext(AuthContext);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    // --- CAMBIO APLICADO: UX y Accesibilidad ---
-    // Este efecto maneja el foco automático al abrir el chat.
     useEffect(() => {
         if (isOpen) {
-            // Se usa un pequeño timeout para asegurar que el input es parte del DOM
-            // y visible después de la animación de entrada de la ventana.
-            setTimeout(() => {
-                inputRef.current?.focus();
-            }, 100);
+            setTimeout(() => inputRef.current?.focus(), 100);
         }
     }, [isOpen]);
-
-    // Efecto para manejar los clics en los enlaces dinámicos del chat
+    
+    // Este useEffect para manejar los data-action sigue funcionando perfectamente
     useEffect(() => {
         const handleChatClick = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            const link = target.closest('a');
+            const link = target.closest('a, button'); // Ahora también escucha en botones
             if (!link || !auth) return;
 
             const action = link.dataset.action;
@@ -74,60 +73,47 @@ export const Chatbot: React.FC = () => {
         if (container) {
             container.addEventListener('click', handleChatClick);
         }
-
         return () => {
             if (container) {
                 container.removeEventListener('click', handleChatClick);
             }
         };
-    }, [auth, messages]);
+    }, [auth]);
 
-    const toggleChat = () => {
-        setIsOpen(!isOpen);
-    };
 
-    const handleSendMessage = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!input.trim() || isLoading) return;
+    // --- MODIFICADO: Lógica de envío refactorizada para reutilización ---
+    const sendMessage = async (messageContent: string) => {
+        if (!messageContent.trim() || isLoading) return;
 
-        const userMessage: ChatMessage = { role: 'user', content: input };
+        if (showFaqs) {
+            setShowFaqs(false);
+        }
+
+        const userMessage: ChatMessage = { role: 'user', content: messageContent };
         setMessages(prev => [...prev, userMessage]);
-        setInput('');
         setIsLoading(true);
 
-        try {
-            // --- CAMBIO APLICADO: Rendimiento ---
-            // Se recorta el historial en el cliente antes de enviarlo al backend.
-           // Capturamos el contenido de texto principal de la página.
-const mainContentElement = document.querySelector('#page-content') || document.querySelector('main');
-// Usamos .innerText para obtener solo el texto, sin HTML.
-// Limitamos a 2000 caracteres para no sobrecargar el prompt.
-const mainContentText = mainContentElement ? mainContentElement.innerText.trim().substring(0, 2000) : '';
+        const currentMessages = [...messages, userMessage];
 
-const pageContext = {
-    url: window.location.href,
-    title: document.title,
-    // Añadimos el contenido de texto
-    content: mainContentText
-};
+        try {
+            const mainContentElement = document.querySelector('#page-content') || document.querySelector('main');
+            const mainContentText = mainContentElement ? mainContentElement.innerText.trim().substring(0, 2000) : '';
+            const pageContext = {
+                url: window.location.href,
+                title: document.title,
+                content: mainContentText
+            };
 
 
     const MAX_MESSAGES_IN_HISTORY = 8;
     const allMessages = [...messages, userMessage];
     const historyToSend = allMessages.slice(-MAX_MESSAGES_IN_HISTORY);
 
-    const response = await fetch('/.netlify/functions/gemini', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            // Si tienes autenticación, el token iría aquí
-        },
-        body: JSON.stringify({
-            messages: historyToSend,
-            // Añadimos el objeto de contexto a la petición
-            context: pageContext
-        })
-    });
+            const response = await fetch('/.netlify/functions/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: historyToSend, context: pageContext })
+            });
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -148,6 +134,18 @@ const pageContext = {
             setIsLoading(false);
         }
     };
+    
+    const handleFormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await sendMessage(input);
+        setInput('');
+    };
+
+    const handleFaqClick = async (question: string) => {
+        await sendMessage(question);
+    };
+
+    const toggleChat = () => setIsOpen(!isOpen);
 
     return (
         <>
@@ -173,7 +171,7 @@ const pageContext = {
 
                     <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto scrollbar-hide bg-gray-50">
                         {messages.map((msg, index) => (
-                            <div key={index} className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div key={index} className={`flex flex-col mb-4 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                                 <div
                                     className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                                         msg.role === 'user'
@@ -181,24 +179,57 @@ const pageContext = {
                                             : 'bg-gray-200 text-gray-800 rounded-bl-none'
                                     }`}
                                 >
-                                    {/* --- CAMBIO APLICADO: Seguridad --- */}
-                                    {/* Se renderiza el contenido de forma segura. El HTML del bot se sanitiza */}
-                                    {/* y el contenido del usuario se trata como texto plano. */}
-                                    {msg.role === 'assistant' ? (
-                                        <p
-                                            className="text-sm"
-                                            dangerouslySetInnerHTML={{
-                                                __html: DOMPurify.sanitize(msg.content)
-                                            }}
-                                        ></p>
-                                    ) : (
-                                        <p className="text-sm">{msg.content}</p>
-                                    )}
+                                    <p className="text-sm" dangerouslySetInnerHTML={{ __html: msg.content }}></p>
                                 </div>
+                                
+                                {/* --- NUEVO: Renderizado de los botones de acción --- */}
+                                {msg.actions && msg.actions.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-3 max-w-xs lg:max-w-md">
+                                        {msg.actions.map((action, actionIndex) => (
+                                            action.type === 'link' ? (
+                                                <a
+                                                    key={actionIndex}
+                                                    href={action.value}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-sm bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors"
+                                                >
+                                                    {action.text}
+                                                </a>
+                                            ) : (
+                                                <button
+                                                    key={actionIndex}
+                                                    data-action={action.value}
+                                                    className="text-sm bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-full hover:bg-gray-100 transition-colors"
+                                                >
+                                                    {action.text}
+                                                </button>
+                                            )
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ))}
+
+                        {/* --- NUEVO: Renderizado de las Preguntas Frecuentes --- */}
+                        {showFaqs && (
+                            <div className="mt-4 p-2">
+                                <div className="flex flex-col items-start gap-2">
+                                    {frequentQuestions.map((q, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => handleFaqClick(q)}
+                                            className="w-full text-left text-sm text-ecuador-blue p-3 rounded-lg bg-white hover:bg-gray-100 transition-colors border border-gray-200 shadow-sm"
+                                        >
+                                            {q}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {isLoading && (
-                            <div className="flex justify-start mb-4">
+                             <div className="flex justify-start mb-4">
                                 <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl rounded-bl-none">
                                     <div className="flex items-center space-x-1">
                                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-pulse-fast"></span>
@@ -212,10 +243,8 @@ const pageContext = {
                     </div>
 
                     <footer className="p-4 border-t border-gray-200">
-                        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+                        <form onSubmit={handleFormSubmit} className="flex items-center space-x-2">
                             <input
-                                // --- CAMBIO APLICADO: UX y Accesibilidad ---
-                                // Se asigna la ref al input.
                                 ref={inputRef}
                                 type="text"
                                 value={input}

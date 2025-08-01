@@ -5,7 +5,7 @@ import { UserGroupIcon, BriefcaseIcon, ChatBubbleLeftRightIcon } from './icons';
 export const AboutUs: React.FC = () => {
   return (
       <section id="about-us" className="py-12 md:py-16 bg-ecuador-yellow-light">
-        <div className="container mx-auto px-6 max-w-7xl">
+        <div className="container mx-auto px-6 max-w-8xl">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">¿Quiénes Somos?</h2>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
