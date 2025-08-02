@@ -1,12 +1,21 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/components/EventCarousel.tsx
-import React, { useRef, useContext, useCallback } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EventItem } from '../types';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarDaysIcon, LockClosedIcon, UserGroupIcon, MapPinIcon } from './icons';
+import { LockClosedIcon, UserGroupIcon, MapPinIcon, CalendarDaysIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
 import { Timestamp } from 'firebase/firestore';
 
-// --- UTILITIES ---
+// --- NUEVO: Importaciones de Swiper ---
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
+
+// --- NUEVO: Estilos de Swiper ---
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
+// --- UTILITIES (Sin cambios) ---
 const formatDate = (timestamp: Timestamp): string => {
   if (!timestamp?.seconds) return 'Fecha no disponible';
   return new Date(timestamp.seconds * 1000).toLocaleDateString('es-ES', {
@@ -16,10 +25,7 @@ const formatDate = (timestamp: Timestamp): string => {
   });
 };
 
-// --- OPTIMIZATION 1: EXTRACT CARD TO A MEMOIZED COMPONENT ---
-// Al mover la tarjeta a su propio componente y envolverla en React.memo,
-// evitamos que se vuelva a renderizar innecesariamente. Solo se actualizará
-// si sus props (event, isAuthenticated, onClick) cambian.
+// --- EventCard COMPONENT (Sin cambios, tu componente ya está optimizado) ---
 interface EventCardProps {
   event: EventItem;
   isAuthenticated: boolean;
@@ -32,11 +38,8 @@ const EventCard: React.FC<EventCardProps> = React.memo(({ event, isAuthenticated
 
   return (
       <div
-          className={`flex-shrink-0 w-80 md:w-96 bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative cursor-pointer ${isLocked ? 'opacity-60' : ''}`}
-          // --- OPTIMIZATION 2: CSS HINT FOR SMOOTHER ANIMATIONS ---
-          // 'will-change' le dice al navegador que se prepare para animar la propiedad 'transform',
-          // lo que a menudo resulta en un rendimiento más fluido al delegarlo a la GPU.
-          style={{ scrollSnapAlign: 'start', willChange: 'transform' }}
+          className={`flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative cursor-pointer ${isLocked ? 'opacity-60' : ''}`}
+          style={{ willChange: 'transform' }}
           onClick={() => onClick(event)}
           role="button"
           tabIndex={0}
@@ -54,12 +57,9 @@ const EventCard: React.FC<EventCardProps> = React.memo(({ event, isAuthenticated
             alt={event.title}
             className="w-full h-48 object-cover"
             loading="lazy"
-            // --- OPTIMIZATION 3: ASYNCHRONOUS IMAGE DECODING ---
-            // 'decoding="async"' le permite al navegador decodificar la imagen fuera del hilo principal,
-            // mejorando la capacidad de respuesta y reduciendo el "jank" o lag.
             decoding="async"
         />
-        <div className="p-5 flex flex-col h-full">
+        <div className="p-5 flex flex-col flex-grow">
           <h4 className="text-xl font-semibold text-ecuador-blue mb-2 font-montserrat truncate">{event.title}</h4>
           <div className="flex items-center text-sm text-ecuador-red mb-2">
             <CalendarDaysIcon className="w-5 h-5 mr-2" />
@@ -75,39 +75,24 @@ const EventCard: React.FC<EventCardProps> = React.memo(({ event, isAuthenticated
           </div>
           <p className="text-gray-600 text-sm mb-4 h-16 overflow-hidden text-ellipsis">{event.description}</p>
           <div className="mt-auto">
-          <span className="text-sm font-semibold text-ecuador-red hover:text-red-700 transition-colors">
-            {isLocked ? 'Iniciar Sesión para ver' : 'Más información'} &rarr;
-          </span>
+            <span className="text-sm font-semibold text-ecuador-red hover:text-red-700 transition-colors">
+              {isLocked ? 'Iniciar Sesión para ver' : 'Más información'} &rarr;
+            </span>
           </div>
         </div>
       </div>
   );
 });
 
-// --- MAIN CAROUSEL COMPONENT ---
+// --- MAIN CAROUSEL COMPONENT (Completamente reescrito con Swiper) ---
 interface EventCarouselProps {
   events: EventItem[];
 }
 
 export const EventCarousel: React.FC<EventCarouselProps> = ({ events }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = scrollContainerRef.current.offsetWidth * 0.8;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  // --- OPTIMIZATION 4: MEMOIZE CALLBACKS ---
-  // Usamos useCallback para asegurarnos de que la función handleCardClick no se
-  // recree en cada render, lo que es una buena práctica, especialmente cuando
-  // se pasa como prop a un componente memoizado como EventCard.
   const handleCardClick = useCallback((event: EventItem) => {
     if (event.isPremium && !authContext?.isAuthenticated) {
       authContext?.openLoginModal();
@@ -121,39 +106,86 @@ export const EventCarousel: React.FC<EventCarouselProps> = ({ events }) => {
   }
 
   return (
-      <div className="relative">
-        <div
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto space-x-6 pb-4 scrollbar-hide"
-            style={{ scrollSnapType: 'x mandatory' }}
-        >
-          {events.map((event) => (
-              <EventCard
-                  key={event.id}
-                  event={event}
-                  isAuthenticated={!!authContext?.isAuthenticated}
-                  onClick={handleCardClick}
-              />
-          ))}
-        </div>
-        {events.length > 2 && (
-            <>
-              <button
-                  onClick={() => scroll('left')}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10 hidden sm:block"
-                  aria-label="Evento anterior"
-              >
-                <ChevronLeftIcon className="w-6 h-6 text-ecuador-blue" />
-              </button>
-              <button
-                  onClick={() => scroll('right')}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-4 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors z-10 hidden sm:block"
-                  aria-label="Siguiente evento"
-              >
-                <ChevronRightIcon className="w-6 h-6 text-ecuador-blue" />
-              </button>
-            </>
-        )}
-      </div>
+    // Contenedor principal para aplicar estilos personalizados a Swiper
+    <div className="relative swiper-container-events">
+      {/* NUEVO: Estilos personalizados para los controles de Swiper */}
+      <style>{`
+        .swiper-container-events .swiper-button-next,
+        .swiper-container-events .swiper-button-prev {
+          color: #002D62; /* ecuador-blue */
+          background-color: white;
+          width: 44px;
+          height: 44px;
+          border-radius: 9999px;
+          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .swiper-container-events .swiper-button-next::after,
+        .swiper-container-events .swiper-button-prev::after {
+          font-size: 20px;
+          font-weight: bold;
+        }
+        .swiper-container-events .swiper-pagination-bullet {
+          background-color: #002D62; /* ecuador-blue */
+          opacity: 0.5;
+        }
+        .swiper-container-events .swiper-pagination-bullet-active {
+          background-color: #D52B1E; /* ecuador-red */
+          opacity: 1;
+        }
+      `}</style>
+      
+      <Swiper
+        // Carga los módulos necesarios
+        modules={[Navigation, Pagination, A11y, Autoplay]}
+        // Espacio entre slides
+        spaceBetween={24}
+        // Configuración responsive
+        breakpoints={{
+          // mobile
+          320: {
+            slidesPerView: 1,
+            spaceBetween: 16,
+          },
+          // tablet
+          768: {
+            slidesPerView: 2,
+            spaceBetween: 24,
+          },
+          // desktop
+          1024: {
+            slidesPerView: 3,
+            spaceBetween: 24,
+          },
+        }}
+        // Habilita los botones de navegación
+        navigation
+        // Habilita la paginación con puntos clickeables
+        pagination={{ clickable: true }}
+        // Habilita el bucle infinito
+        loop={true}
+        // Configuración del auto-play
+        autoplay={{
+          delay: 5000, // 5 segundos
+          disableOnInteraction: true, // Se detiene si el usuario interactúa
+          pauseOnMouseEnter: true, // Se detiene al pasar el cursor por encima
+        }}
+        // Para accesibilidad
+        a11y={{
+          prevSlideMessage: 'Evento anterior',
+          nextSlideMessage: 'Siguiente evento',
+        }}
+        className="pb-12" // Padding bottom para dar espacio a la paginación
+      >
+        {events.map((event) => (
+          <SwiperSlide key={event.id} className="h-auto">
+            <EventCard
+              event={event}
+              isAuthenticated={!!authContext?.isAuthenticated}
+              onClick={handleCardClick}
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 };

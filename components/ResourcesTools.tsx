@@ -24,7 +24,7 @@ const Accordion: React.FC<{ items: AccordionItem[] }> = ({ items }) => {
     return (
         <div className="space-y-2">
             {items.map((item, index) => (
-                <div key={index} className="border rounded-md">
+                <div key={index} className="border rounded-xl">
                     <button
                         onClick={() => toggleItem(index)}
                         className="w-full flex justify-between items-center p-4 text-left font-semibold text-gray-800 hover:bg-gray-50"
@@ -64,13 +64,13 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
             <div className="flex justify-center gap-4 mt-6">
                 <button
                     onClick={onClose}
-                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-2xl transition-colors"
                 >
                     Cancelar
                 </button>
                 <button
                     onClick={handleRedirect}
-                    className="bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                    className="bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
                 >
                     Continuar al sitio
                 </button>
@@ -323,7 +323,7 @@ export const ResourcesTools: React.FC = () => {
                 closeModal();
                 authContext?.openLoginModal();
               }}
-              className="bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              className="bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
             >
               Iniciar Sesión
             </button>
@@ -332,7 +332,7 @@ export const ResourcesTools: React.FC = () => {
                 closeModal();
                 authContext?.openRegisterModal();
               }}
-              className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
             >
               Regístrate Gratis
             </button>
@@ -348,7 +348,7 @@ export const ResourcesTools: React.FC = () => {
                 items={(resource.knowledgePoints || []).map(point => ({
                     title: point.question,
                     content: (
-                        <div className="p-4 bg-ecuador-yellow-light rounded-md">
+                        <div className="p-4 bg-ecuador-yellow-light rounded-xl">
                             {resource.downloadUrl ? (
                                 <>
                                     <p className="text-sm text-gray-700 mb-3">Puedes descargar la guía completa aquí:</p>
@@ -356,7 +356,7 @@ export const ResourcesTools: React.FC = () => {
                                         href={resource.downloadUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-block bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-transform transform hover:scale-105"
+                                        className="inline-block bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl text-sm transition-transform transform hover:scale-105"
                                     >
                                         Descargar Guía
                                     </a>
@@ -441,7 +441,7 @@ export const ResourcesTools: React.FC = () => {
             </motion.h3>
             {/* Contenedor principal de guías */}
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 [grid-auto-rows:minmax(200px,auto)]"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -453,7 +453,7 @@ export const ResourcesTools: React.FC = () => {
                     variants={itemVariants}
                     whileHover={{ scale: 1.03, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
                     key={essentialGuidesData[0].id}
-                    className="col-span-full md:col-span-2 lg:col-span-2 bg-gradient-to-br from-ecuador-blue to-blue-700 p-8 rounded-lg shadow-xl cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden"
+                    className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-ecuador-blue to-blue-700 p-8 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden"
                     onClick={() => openResourceModal(essentialGuidesData[0])}
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(essentialGuidesData[0])}
                     aria-label={`Abrir detalles de ${essentialGuidesData[0].title}`}
@@ -476,12 +476,20 @@ export const ResourcesTools: React.FC = () => {
               )}
 
               {/* --- RESTO DE GUÍAS (excluyendo el último para el anuncio) --- */}
-              {essentialGuidesData.slice(1, 6).map((resource) => ( // Renderiza las 5 guías después de la destacada
+              {essentialGuidesData.slice(1, 6).map((resource, index) => {
+                const layoutClasses = [
+                    'lg:col-span-1 lg:row-span-1', // Guía 2
+                    'lg:col-span-1 lg:row-span-1', // Guía 3
+                    'lg:col-span-2 lg:row-span-1', // Guía 4 (ancha)
+                    'lg:col-span-1 lg:row-span-1', // Guía 5
+                    'lg:col-span-1 lg:row-span-1', // Guía 6
+                ];
+                return (
                   <motion.div
                       key={resource.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                      className="bg-ecuador-yellow-light p-6 rounded-lg shadow-md cursor-pointer flex flex-col items-center text-center relative"
+                      className={`${layoutClasses[index]} bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
                       onClick={() => openResourceModal(resource)}
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
                       aria-label={`Abrir detalles de ${resource.title}`}
@@ -499,10 +507,11 @@ export const ResourcesTools: React.FC = () => {
                       {resource.isPremium ? 'Acceso Miembros' : resource.downloadUrl ? 'Descargar Guía' : 'Leer Contenido'} &rarr;
                     </span>
                   </motion.div>
-              ))}
+                )
+              })}
               {/* --- ANUNCIO DE GUÍAS --- */}
-              <motion.div variants={itemVariants} className="h-full">
-                <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1 h-full" />
+              <motion.div variants={itemVariants} className="h-full lg:col-span-2 lg:row-span-1 rounded-2xl">
+                <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
             </motion.div>
           </div>
@@ -521,7 +530,7 @@ export const ResourcesTools: React.FC = () => {
             </motion.h3>
             {/* Contenedor principal de herramientas */}
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-6"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 [grid-auto-rows:minmax(200px,auto)]"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -533,7 +542,7 @@ export const ResourcesTools: React.FC = () => {
                     key={toolsData[0].id}
                     variants={itemVariants}
                     whileHover={{ scale: 1.03, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                    className="col-span-full md:col-span-2 lg:col-span-2 bg-gradient-to-br from-green-600 to-green-800 p-8 rounded-lg shadow-xl cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden"
+                    className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-green-600 to-green-800 p-8 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden"
                     onClick={() => openToolModal(toolsData[0])}
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(toolsData[0])}
                     aria-label={`Abrir herramienta ${toolsData[0].title}`}
@@ -542,7 +551,7 @@ export const ResourcesTools: React.FC = () => {
                     <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 transform rotate-45 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
                     
                     {toolsData[0].isPremium && !authContext?.isAuthenticated && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold rounded-lg z-20">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold rounded-2xl z-20">
                           <LockClosedIcon className="w-8 h-8 mr-2" />
                           Miembros
                         </div>
@@ -557,14 +566,22 @@ export const ResourcesTools: React.FC = () => {
               )}
 
               {/* --- RESTO DE HERRAMIENTAS (excluyendo el último item para el anuncio) --- */}
-              {toolsData.slice(1, 6).map((tool) => ( // Renderiza las 5 herramientas después de la destacada
+              {toolsData.slice(1, 6).map((tool, index) => {
+                const layoutClasses = [
+                    'lg:col-span-1 lg:row-span-1', // Herramienta 2
+                    'lg:col-span-1 lg:row-span-2', // Herramienta 3 (alta)
+                    'lg:col-span-1 lg:row-span-1', // Herramienta 4
+                    'lg:col-span-1 lg:row-span-1', // Herramienta 5
+                    'lg:col-span-1 lg:row-span-1', // Herramienta 6
+                ];
+                return (
                   <motion.div
                       key={tool.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                      className={`p-6 rounded-lg shadow-md cursor-pointer flex flex-col items-center text-center relative overflow-hidden
+                      className={`${layoutClasses[index]} p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative overflow-hidden
                           ${tool.backgroundImageUrl ? 'bg-cover bg-center' : 'bg-ecuador-blue-light'}
-                          ${tool.isPremium && !authContext?.isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          ${tool.isPremium && !authContext?.isAuthenticated ? 'cursor-not-allowed' : ''}`}
                       style={tool.backgroundImageUrl ? { backgroundImage: `url(${tool.backgroundImageUrl})` } : {}}
                       onClick={() => openToolModal(tool)}
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(tool)}
@@ -572,8 +589,9 @@ export const ResourcesTools: React.FC = () => {
                   >
                     {/* Overlay para contenido premium o para texto sobre imagen de fondo */}
                     {(tool.isPremium && !authContext?.isAuthenticated) || tool.backgroundImageUrl ? (
-                        <div className={`absolute inset-0 flex items-center justify-center rounded-lg z-20 
-                                ${tool.isPremium && !authContext?.isAuthenticated ? 'bg-black bg-opacity-40 text-white text-lg font-bold' : 'bg-black bg-opacity-30'}`}>
+                        <div className={`absolute inset-0 flex items-center justify-center rounded-2xl z-10 
+                                ${tool.isPremium && !authContext?.isAuthenticated ? 'bg-black bg-opacity-50 text-white text-lg font-bold' : 'bg-black bg-opacity-30'}
+                                ${tool.backgroundImageUrl ? 'backdrop-blur-sm' : ''}`}>
                             {tool.isPremium && !authContext?.isAuthenticated && (
                                 <LockClosedIcon className="w-8 h-8 mr-2" />
                             )}
@@ -581,7 +599,7 @@ export const ResourcesTools: React.FC = () => {
                     ) : null}
 
                     {/* Contenido de la tarjeta sobre el overlay (si hay imagen de fondo) */}
-                    <div className="relative z-30 flex flex-col items-center text-center h-full w-full">
+                    <div className="relative z-20 flex flex-col items-center text-center h-full w-full">
                         <div className={`${tool.backgroundImageUrl ? 'text-white' : 'text-ecuador-red'} mb-4`}>{tool.icon}</div>
                         <h4 className={`${tool.backgroundImageUrl ? 'text-white' : 'text-ecuador-blue'} text-lg font-semibold mb-2`}>{tool.title}</h4>
                         <p className={`${tool.backgroundImageUrl ? 'text-gray-200' : 'text-gray-600'} text-sm flex-grow`}>{tool.description}</p>
@@ -591,10 +609,11 @@ export const ResourcesTools: React.FC = () => {
                         </button>
                     </div>
                   </motion.div>
-              ))}
+                )
+              })}
               {/* --- ANUNCIO DE HERRAMIENTAS --- */}
-               <motion.div variants={itemVariants} className="h-full">
-                <AdSlot location="tools_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-blue-light" className="col-span-1 h-full" />
+               <motion.div variants={itemVariants} className="h-full lg:col-span-2 lg:row-span-1 rounded-2xl">
+                <AdSlot location="tools_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-blue-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
             </motion.div>
           </div>

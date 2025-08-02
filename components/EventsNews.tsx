@@ -179,21 +179,21 @@ export const EventsNews: React.FC = () => {
             ) : error ? (
                 <p className="text-center text-red-500">{error}</p>
             ) : (
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredNews.map((newsItem) => (
-                      <div key={newsItem.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                      <div key={newsItem.id} className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow flex flex-col">
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="text-xl font-semibold text-ecuador-blue mr-2">{newsItem.title}</h4>
                           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ml-auto whitespace-nowrap ${newsItem.province ? 'bg-ecuador-yellow text-ecuador-blue' : 'bg-gray-200 text-gray-800'}`}>
                             {newsItem.province || 'Canadá'}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-3">{newsItem.summary}</p>
+                        <p className="text-gray-600 text-sm mb-4 flex-grow">{newsItem.summary}</p>
                         <a
                             href={newsItem.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-semibold text-ecuador-red hover:text-red-700 transition-colors flex items-center"
+                            className="text-sm font-semibold text-ecuador-red hover:text-red-700 transition-colors flex items-center self-start mt-auto"
                             aria-label={`Leer más sobre ${newsItem.title}`}
                         >
                           Leer más <LinkIcon className="w-4 h-4 ml-1" />
