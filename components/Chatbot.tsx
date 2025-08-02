@@ -46,11 +46,11 @@ export const Chatbot: React.FC = () => {
         }
     }, [isOpen]);
     
-    // Este useEffect para manejar los data-action sigue funcionando perfectamente
+    // Maneja los clics en los botones de acción del chat
     useEffect(() => {
         const handleChatClick = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            const link = target.closest('a, button'); // Ahora también escucha en botones
+            const link = target.closest('a, button');
             if (!link || !auth) return;
 
             const action = link.dataset.action;
@@ -78,7 +78,7 @@ export const Chatbot: React.FC = () => {
                 container.removeEventListener('click', handleChatClick);
             }
         };
-    }, [auth]);
+    }, [auth, isOpen]);
 
 
     // --- MODIFICADO: Lógica de envío refactorizada para reutilización ---

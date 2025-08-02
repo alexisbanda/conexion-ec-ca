@@ -35,10 +35,8 @@ export { LegalIcon } from './LegalIcon';
 export { OtherIcon } from './OtherIcon';
 export { ScaleIcon } from './ScaleIcon';
 export { TechIcon } from './TechIcon';
-export { UserGroupIcon } from './UserGroupIcon';
-
-// --- Iconos de Redes Sociales ---
-export { InstagramIcon } from './InstagramIcon';
-export { WhatsAppIcon } from './WhatsAppIcon';
-export { ChatBubbleOvalLeftEllipsisIcon } from './ChatBubbleOvalLeftEllipsisIcon';
-export { PaperAirplaneIcon } from './PaperAirplaneIcon';
+export * from './UserGroupIcon';
+export * from './WhatsAppIcon';
+export * from './XCircleIcon';
+export * from './XMarkIcon';
+export * from './LinkIcon';

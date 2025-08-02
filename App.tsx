@@ -1,6 +1,6 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/App.tsx
 import React, { useContext, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { AuthContext } from './contexts/AuthContext';
 import { UserStatus } from './types';
 
@@ -44,18 +44,28 @@ const PendingApprovalPage: React.FC = () => (
 );
 
 
-const LandingPage: React.FC = () => (
-    // ... (código sin cambios)
-    <>
-        <ScrollProgressBar />
+const LandingPage: React.FC = () => {
+    const { region } = useParams<{ region: string }>();
+
+    useEffect(() => {
+        // Guarda la ruta de la región actual para que el Header sepa a dónde volver
+        if (region) {
+            sessionStorage.setItem('lastVisitedRegion', `/${region}`);
+        }
+    }, [region]);
+
+    return (
+        <>
+            <ScrollProgressBar />
             <Hero />
             <AboutUs />
             <Benefits />
             <ResourcesTools />
             <EventsNews />
             <ContactForm />
-    </>
-);
+        </>
+    );
+};
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     // ... (código sin cambios)
@@ -99,6 +109,15 @@ const App: React.FC = () => {
     const location = useLocation();
     const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/onboarding');
     const isRegionSelectorPage = location.pathname === '/';
+
+    useEffect(() => {
+        if (location.state?.scrollTo) {
+            const targetElement = document.getElementById(location.state.scrollTo);
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }, [location]);
 
     return (
         // NUEVO: 2. ENVOLVER TODA LA APP CON EL PROVIDER

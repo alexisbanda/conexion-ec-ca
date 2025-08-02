@@ -6,7 +6,7 @@ const MAX_MESSAGES_IN_HISTORY = MAX_USER_TURNS * 2;
 
 const generationConfig = {
     "temperature": 0.6,
-    "maxOutputTokens": 500,
+    "maxOutputTokens": 300,
 };
 
 const safetySettings = [

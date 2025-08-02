@@ -48,50 +48,39 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsSticky(window.scrollY > 50);
-    };
-    if (!isDashboardPage) {
-      window.addEventListener('scroll', handleScroll);
-    } else {
-      setIsSticky(true);
-    }
-    return () => {
-      if (!isDashboardPage) {
-        window.removeEventListener('scroll', handleScroll);
+      const isScrolled = window.scrollY > 50;
+      if (isScrolled !== isSticky) {
+        setIsSticky(isScrolled);
       }
     };
-  }, [isDashboardPage]);
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isSticky]);
 
   const handleNavClick = (e: React.MouseEvent, href: string) => {
-    // Si el enlace es para el directorio de servicios, abre el modal en su lugar.
-    if (href === '#services-directory') {
-      e.preventDefault(); // Previene la navegación o el scroll
-      auth?.openDirectoryModal?.();
-      setMobileMenuOpen(false);
-      return; // Detiene la ejecución aquí
-    }
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = href.substring(1);
+      const homePath = sessionStorage.getItem('lastVisitedRegion') || '/'; // Usa la región guardada
 
-    if (!href.startsWith('#')) {
-      setMobileMenuOpen(false);
-      return;
-    }
-    e.preventDefault();
-    const targetId = href.substring(1);
-    if (location.pathname !== '/' && location.pathname !== '/regiones') {
-        navigate(location.pathname);
-        setTimeout(() => {
-            const targetElement = document.getElementById(targetId);
-            if (targetElement) {
-                targetElement.scrollIntoView({ behavior: 'smooth' });
-            }
-        }, 100);
-    } else {
+      // Si ya estamos en la página de inicio correcta, solo nos desplazamos.
+      if (location.pathname === homePath) {
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
-            targetElement.scrollIntoView({ behavior: 'smooth' });
+          targetElement.scrollIntoView({ behavior: 'smooth' });
         }
+      } else {
+        // Si estamos en otra página, navegamos a la de inicio y pasamos el anclaje.
+        navigate(homePath, { state: { scrollTo: targetId } });
+      }
+      setMobileMenuOpen(false);
+    } else {
+      // Para enlaces que no son de anclaje (como /dashboard, /admin)
+      setMobileMenuOpen(false);
     }
-    setMobileMenuOpen(false);
   };
 
   const handleLogout = () => {

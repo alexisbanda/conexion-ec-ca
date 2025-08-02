@@ -1,8 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useParams } from 'react-router-dom';
 import { Benefit, Testimonial } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
+import { regions } from './NationalRegionSelector';
 
 // --- DATA --- //
 const benefitsData: Benefit[] = [
@@ -24,13 +26,13 @@ const benefitsData: Benefit[] = [
     id: '3',
     icon: <CurrencyDollarIcon />,
     title: 'Haz Crecer tu Negocio',
-    detailedDescription: 'Te ofrecemos la plataforma perfecta para que toda la comunidad ecuatoriana en Canadá conozca tu talento. Gana visibilidad y conéctate con una red de clientes que confían en ti.',
+    detailedDescription: 'Te ofrecemos la plataforma perfecta para que toda la comunidad ecuatoriana en {regionName} conozca tu talento. Gana visibilidad y conéctate con una red de clientes que confían en ti.',
     imageUrl: '/assets/images/evento_networking.png',
   },
   {
     id: '4',
     icon: <HomeIcon />,
-    title: 'Tu Hogar en Canadá',
+    title: 'Tu Hogar en {regionName}',
     detailedDescription: 'Te acompañamos en cada paso con guías claras para buscar vivienda, entender los contratos de alquiler y conocer tus derechos como inquilino. Siéntete seguro y en casa desde el primer día.',
     imageUrl: '/assets/images/apoyo_vivienda.png',
   },
@@ -75,6 +77,10 @@ const slideVariants = {
 };
 
 export const Benefits: React.FC = () => {
+  const { region: regionId } = useParams<{ region: string }>();
+  const region = regions.find(r => r.id === regionId);
+  const regionName = region ? region.name : 'Canadá';
+
   const [activeBenefitId, setActiveBenefitId] = useState<string>(benefitsData[0].id);
   const benefitRefs = useRef<Map<string, HTMLElement>>(new Map());
   const auth = useContext(AuthContext);
@@ -110,14 +116,14 @@ export const Benefits: React.FC = () => {
   const openRegister = () => auth?.openRegisterModal();
 
   return (
-    <section id="benefits-testimonials" className="bg-gray-50">
+    <section id="benefits" className="bg-gray-50">
       {/* --- BENEFITS SECTION --- */}
       <div className="hidden md:flex md:gap-16 max-w-7xl mx-auto px-6">
           <div className="md:w-1/3">
               <div className="sticky top-0 flex flex-col justify-center h-screen py-8">
                   <div className="mb-12 text-left">
                       <h2 className="text-4xl font-bold text-ecuador-blue mb-4 font-montserrat">Un Ecosistema de Apoyo Real</h2>
-                      <p className="text-lg text-gray-600">Más que una membresía, es tu acceso a un conjunto de herramientas y conexiones para el éxito en Canadá.</p>
+                      <p className="text-lg text-gray-600">Más que una membresía, es tu acceso a un conjunto de herramientas y conexiones para el éxito en {regionName}.</p>
                   </div>
                   {benefitsData.map((benefit) => (
                       <div
@@ -128,7 +134,7 @@ export const Benefits: React.FC = () => {
                               <div className={`p-3 rounded-full transition-colors duration-300 ${activeBenefitId === benefit.id ? 'bg-ecuador-yellow' : 'bg-gray-200'}`}>
                                   {React.cloneElement(benefit.icon, { className: `w-6 h-6 transition-colors duration-300 ${activeBenefitId === benefit.id ? 'text-ecuador-blue' : 'text-gray-600'}` })}
                               </div>
-                              <h3 className={`ml-4 text-lg font-semibold transition-colors duration-300 ${activeBenefitId === benefit.id ? 'text-ecuador-blue' : 'text-gray-600'}`}>{benefit.title}</h3>
+                              <h3 className={`ml-4 text-lg font-semibold transition-colors duration-300 ${activeBenefitId === benefit.id ? 'text-ecuador-blue' : 'text-gray-600'}`}>{benefit.title.replace('{regionName}', regionName)}</h3>
                           </div>
                       </div>
                   ))}
@@ -157,13 +163,13 @@ export const Benefits: React.FC = () => {
                                   className="text-4xl lg:text-5xl font-bold font-montserrat mb-4"
                                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
                               >
-                                  {benefit.title}
+                                  {benefit.title.replace('{regionName}', regionName)}
                               </motion.h3>
                               <motion.p 
                                   className="text-xl lg:text-2xl text-gray-200 leading-relaxed max-w-2xl"
                                   variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.1 } } }}
                               >
-                                  {benefit.detailedDescription}
+                                  {benefit.detailedDescription.replace('{regionName}', regionName)}
                               </motion.p>
                               <motion.button
                                   onClick={openRegister}
@@ -184,7 +190,7 @@ export const Benefits: React.FC = () => {
         <div className="container mx-auto px-6 max-w-4xl">
             <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6 }}>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat">Lo que Nuestra Comunidad Dice</h2>
-                <p className="text-lg text-blue-200 max-w-3xl mx-auto">Historias reales de miembros que han transformado su vida en Canadá con nuestro apoyo.</p>
+                <p className="text-lg text-blue-200 max-w-3xl mx-auto">Historias reales de miembros que han transformado su vida en {regionName} con nuestro apoyo.</p>
             </motion.div>
             <div className="relative h-96">
                 <AnimatePresence initial={false} custom={direction}>
@@ -230,8 +236,8 @@ export const Benefits: React.FC = () => {
           {benefitsData.map(benefit => (
               <div key={benefit.id} className="text-center">
                   <img src={benefit.imageUrl} alt={benefit.title} className="w-full h-auto max-h-[50vh] object-contain rounded-2xl shadow-xl mb-6" />
-                  <h3 className="text-2xl font-bold text-ecuador-blue mb-3">{benefit.title}</h3>
-                  <p className="text-gray-700 leading-relaxed">{benefit.detailedDescription}</p>
+                  <h3 className="text-2xl font-bold text-ecuador-blue mb-3">{benefit.title.replace('{regionName}', regionName)}</h3>
+                  <p className="text-gray-700 leading-relaxed">{benefit.detailedDescription.replace('{regionName}', regionName)}</p>
               </div>
           ))}
           <div className="text-center pt-8">

@@ -1,145 +1,103 @@
 import React, { useState } from 'react';
-import { FORMSPREE_ENDPOINT } from '../constants';
-import { CheckCircleIcon, ExclamationCircleIcon } from './icons';
-
-interface FormData {
-  name: string;
-  email: string;
-  message: string;
-}
-
-// Define a more specific type for Formspree errors if known, otherwise use a general one
-interface FormspreeError {
-  message: string;
-  // Potentially other fields like 'code' or 'field'
-}
-
-interface FormspreeErrorResponse {
-  errors: FormspreeError[];
-}
+import { motion } from 'framer-motion';
+import { PaperAirplaneIcon } from './icons';
 
 export const ContactForm: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState<{ type: 'success' | 'error' | ''; message: string }>({ type: '', message: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+  const [status, setStatus] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setStatus({ type: '', message: '' });
+    setStatus('Enviando...');
 
     try {
-      const response = await fetch(FORMSPREE_ENDPOINT, {
+      const response = await fetch('/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ 'form-name': 'contact', ...formData }).toString()
       });
 
       if (response.ok) {
-        setStatus({ type: 'success', message: '¡Gracias por tu mensaje! Nos pondremos en contacto contigo pronto.' });
+        setStatus('¡Mensaje enviado con éxito!');
         setFormData({ name: '', email: '', message: '' });
       } else {
-        const data = await response.json();
-        // Check if data is an object, has an 'errors' property, and 'errors' is an array
-        if (data && typeof data === 'object' && 'errors' in data && Array.isArray((data as FormspreeErrorResponse).errors)) {
-          setStatus({ type: 'error', message: (data as FormspreeErrorResponse).errors.map(error => error.message).join(", ") });
-        } else {
-          setStatus({ type: 'error', message: 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo.' });
-        }
+        throw new Error('Network response was not ok.');
       }
     } catch (error) {
-      setStatus({ type: 'error', message: 'Hubo un error al enviar tu mensaje. Verifica tu conexión a internet.' });
-    } finally {
-      setIsSubmitting(false);
+      setStatus('Hubo un error al enviar el mensaje. Inténtalo de nuevo.');
+      console.error('Form submission error:', error);
     }
   };
 
-
   return (
-    <section id="contact">
-      <div className="py-14 md:py-16 bg-ecuador-blue">
-        <div className="container mx-auto px-6">
+    <section 
+      id="contact" 
+      className="relative bg-cover bg-center text-white py-20 md:py-32"
+      style={{ backgroundImage: `url('/assets/images/Vancouver_Quito_2.png')` }}
+    >
+      <div className="absolute inset-0 bg-ecuador-blue bg-opacity-80"></div>
+      
+      <div className="relative container mx-auto px-6 flex flex-col items-center">
+        <motion.div 
+          className="w-full max-w-2xl"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
+          {/* --- Encabezado --- */}
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-ecuador-yellow mb-4 font-montserrat">Contáctanos</h2>
-            <p className="text-lg text-ecuador-yellow-light max-w-xl mx-auto">
-              ¿Tienes preguntas o quieres unirte? Envíanos un mensaje y te responderemos a la brevedad.
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 font-montserrat">Conecta con Nosotros</h2>
+            <p className="text-lg text-blue-200 leading-relaxed">
+              Tu viaje en Canadá es importante para nosotros. Escríbenos, estamos listos para escucharte.
             </p>
           </div>
-          <div className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-xl">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nombre Completo</label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                  aria-label="Nombre Completo"
-                />
+
+          {/* --- Tarjeta Flotante (Glassmorphism) --- */}
+          <div className="bg-white/10 backdrop-blur-lg p-8 md:p-10 rounded-3xl shadow-2xl border border-white/20">
+            <form 
+              name="contact" 
+              method="POST" 
+              data-netlify="true" 
+              data-netlify-honeypot="bot-field"
+              onSubmit={handleSubmit}
+            >
+              <input type="hidden" name="form-name" value="contact" />
+              <p className="hidden"><label>Don’t fill this out if you’re human: <input name="bot-field" /></label></p>
+              
+              <div className="space-y-8">
+                <div className="relative">
+                  <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required className="peer w-full bg-transparent border-b-2 border-white/50 text-white placeholder-transparent focus:outline-none focus:border-ecuador-yellow transition-colors" placeholder="Nombre Completo" />
+                  <label htmlFor="name" className="absolute left-0 -top-5 text-blue-200 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-100/70 peer-placeholder-shown:top-0.5 peer-focus:-top-5 peer-focus:text-ecuador-yellow peer-focus:text-sm">Nombre Completo</label>
+                </div>
+                <div className="relative">
+                  <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required className="peer w-full bg-transparent border-b-2 border-white/50 text-white placeholder-transparent focus:outline-none focus:border-ecuador-yellow transition-colors" placeholder="Correo Electrónico" />
+                  <label htmlFor="email" className="absolute left-0 -top-5 text-blue-200 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-100/70 peer-placeholder-shown:top-0.5 peer-focus:-top-5 peer-focus:text-ecuador-yellow peer-focus:text-sm">Correo Electrónico</label>
+                </div>
+                <div className="relative">
+                  <textarea id="message" name="message" value={formData.message} onChange={handleChange} required rows={4} className="peer w-full bg-transparent border-b-2 border-white/50 text-white placeholder-transparent focus:outline-none focus:border-ecuador-yellow transition-colors" placeholder="Tu Mensaje"></textarea>
+                  <label htmlFor="message" className="absolute left-0 -top-5 text-blue-200 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-100/70 peer-placeholder-shown:top-1 peer-focus:-top-5 peer-focus:text-ecuador-yellow peer-focus:text-sm">Tu Mensaje</label>
+                </div>
               </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                  aria-label="Correo Electrónico"
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700">Mensaje (Opcional)</label>
-                <textarea
-                  name="message"
-                  id="message"
-                  rows={4}
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-ecuador-yellow focus:border-ecuador-yellow sm:text-sm"
-                  aria-label="Tu mensaje"
-                ></textarea>
-              </div>
-              <div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-ecuador-red hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:opacity-50"
-                  aria-label="Enviar formulario de contacto"
-                >
-                  {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
-                </button>
-              </div>
+
+              <button type="submit" className="mt-10 w-full bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-4 px-4 rounded-xl text-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-300 flex items-center justify-center">
+                <PaperAirplaneIcon className="w-6 h-6 mr-3" />
+                Enviar Mensaje
+              </button>
+
+              {status && <p className="mt-4 text-center text-sm font-medium text-white">{status}</p>}
             </form>
-            {status.message && (
-              <div className={`mt-6 p-4 rounded-md text-sm flex items-center ${
-                  status.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}
-                role="alert"
-              >
-                {status.type === 'success' ? <CheckCircleIcon className="w-5 h-5 mr-2" /> : <ExclamationCircleIcon className="w-5 h-5 mr-2" />}
-                {status.message}
-              </div>
-            )}
-             {FORMSPREE_ENDPOINT === "https://formspree.io/f/YOUR_FORM_ID_HERE" && (
-               <p className="mt-4 text-xs text-center text-gray-500">
-                 Nota: El formulario de contacto es una demostración. Reemplace YOUR_FORM_ID_HERE en `constants.ts` con su endpoint de Formspree real para habilitarlo.
-               </p>
-             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

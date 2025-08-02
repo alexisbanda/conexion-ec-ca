@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { regions } from './NationalRegionSelector';
 import { Resource, Tool, ModalState, ModalContentType } from '../types'; // Asegúrate de que Tool tenga backgroundImageUrl y ctaText
-import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon } from './icons';
+import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
 import { AuthContext } from '../contexts/AuthContext';
@@ -453,43 +453,37 @@ export const ResourcesTools: React.FC = () => {
                     variants={itemVariants}
                     whileHover={{ scale: 1.03, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
                     key={essentialGuidesData[0].id}
-                    className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-ecuador-blue to-blue-700 p-8 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden"
+                    className="lg:col-span-2 lg:row-span-1 bg-gradient-to-r from-ecuador-blue to-blue-700 p-6 rounded-2xl shadow-xl cursor-pointer flex items-center relative overflow-hidden group"
                     onClick={() => openResourceModal(essentialGuidesData[0])}
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(essentialGuidesData[0])}
                     aria-label={`Abrir detalles de ${essentialGuidesData[0].title}`}
                 >
-                    {/* Elemento decorativo en la esquina */}
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 transform rotate-45 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
-                    
                     {essentialGuidesData[0].isPremium && (
-                        <div className="absolute top-4 left-4 flex items-center bg-ecuador-red text-white text-sm font-bold px-3 py-1 rounded-full z-10">
-                            <LockClosedIcon className="w-4 h-4 mr-1" /> Contenido Exclusivo
+                        <div className="absolute top-3 right-3 flex items-center bg-ecuador-red text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+                            <LockClosedIcon className="w-3 h-3 mr-1" /> Exclusivo
                         </div>
                     )}
-                    <div className="text-white mb-4 z-10">{essentialGuidesData[0].icon}</div>
-                    <h4 className="text-3xl font-bold text-white mb-2 z-10">{essentialGuidesData[0].title}</h4>
-                    <p className="text-white text-base mb-4 z-10">{essentialGuidesData[0].description}</p>
-                    <span className="mt-4 text-sm font-semibold text-ecuador-yellow hover:text-yellow-300 self-center transition-colors z-10">
-                        Ver Más &rarr;
-                    </span>
+                    <div className="mr-5 text-white bg-white/20 p-3 rounded-full">{essentialGuidesData[0].icon}</div>
+                    <div className="flex-grow">
+                        <h4 className="text-xl font-bold text-white mb-1">{essentialGuidesData[0].title}</h4>
+                        <p className="text-blue-100 text-sm">{essentialGuidesData[0].description}</p>
+                    </div>
+                    <ChevronRightIcon className="w-10 h-10 text-ecuador-yellow ml-5 transform transition-transform group-hover:translate-x-1" />
                 </motion.div>
               )}
 
-              {/* --- RESTO DE GUÍAS (excluyendo el último para el anuncio) --- */}
+              {/* --- RESTO DE GUÍAS --- */}
               {essentialGuidesData.slice(1, 6).map((resource, index) => {
-                const layoutClasses = [
-                    'lg:col-span-1 lg:row-span-1', // Guía 2
-                    'lg:col-span-1 lg:row-span-1', // Guía 3
-                    'lg:col-span-2 lg:row-span-1', // Guía 4 (ancha)
-                    'lg:col-span-1 lg:row-span-1', // Guía 5
-                    'lg:col-span-1 lg:row-span-1', // Guía 6
-                ];
+                // La guía de validación de títulos ahora es de tamaño normal
+                const isWideCard = resource.id === 'guide4_disabled'; // Desactivamos la tarjeta ancha por ahora
+                const layoutClasses = isWideCard ? 'lg:col-span-2' : 'lg:col-span-1';
+                
                 return (
                   <motion.div
                       key={resource.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                      className={`${layoutClasses[index]} bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
+                      className={`${layoutClasses} bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
                       onClick={() => openResourceModal(resource)}
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
                       aria-label={`Abrir detalles de ${resource.title}`}
@@ -502,7 +496,6 @@ export const ResourcesTools: React.FC = () => {
                     <div className="text-ecuador-red mb-4">{resource.icon}</div>
                     <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{resource.title}</h4>
                     <p className="text-gray-600 text-sm flex-grow">{resource.description}</p>
-                    {/* Texto CTA condicional y estilizado */}
                     <span className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
                       {resource.isPremium ? 'Acceso Miembros' : resource.downloadUrl ? 'Descargar Guía' : 'Leer Contenido'} &rarr;
                     </span>
@@ -510,7 +503,7 @@ export const ResourcesTools: React.FC = () => {
                 )
               })}
               {/* --- ANUNCIO DE GUÍAS --- */}
-              <motion.div variants={itemVariants} className="h-full lg:col-span-2 lg:row-span-1 rounded-2xl">
+              <motion.div variants={itemVariants} className="h-full lg:col-span-1 lg:row-span-1 rounded-2xl">
                 <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
             </motion.div>
@@ -541,27 +534,44 @@ export const ResourcesTools: React.FC = () => {
                 <motion.div
                     key={toolsData[0].id}
                     variants={itemVariants}
-                    whileHover={{ scale: 1.03, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                    className="lg:col-span-2 lg:row-span-2 bg-gradient-to-br from-green-600 to-green-800 p-8 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between items-center text-center relative overflow-hidden"
+                    whileHover={{ y: -5, boxShadow: "0px 15px 30px rgba(0,0,0,0.2)" }}
+                    className="lg:col-span-2 lg:row-span-2 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between text-center relative overflow-hidden group"
                     onClick={() => openToolModal(toolsData[0])}
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(toolsData[0])}
                     aria-label={`Abrir herramienta ${toolsData[0].title}`}
                 >
+                    {/* Background Image & Overlay */}
+                    <div className="absolute inset-0">
+                        <img 
+                            src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
+                            alt="Miembros de la comunidad conectando"
+                            className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-600/80 to-green-800/90"></div>
+                    </div>
+
                     {/* Elemento decorativo en la esquina */}
                     <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 transform rotate-45 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
                     
+                    {/* Premium Lock */}
                     {toolsData[0].isPremium && !authContext?.isAuthenticated && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 text-white text-lg font-bold rounded-2xl z-20">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg font-bold rounded-2xl z-20">
                           <LockClosedIcon className="w-8 h-8 mr-2" />
                           Miembros
                         </div>
                     )}
-                    <div className="text-white mb-4 z-10">{toolsData[0].icon}</div>
-                    <h4 className="text-3xl font-bold text-white mb-2 z-10">{toolsData[0].title}</h4>
-                    <p className="text-white text-base mb-4 z-10">{toolsData[0].description}</p>
-                    <span className="mt-4 text-sm font-semibold text-white hover:text-gray-200 self-center transition-colors z-10">
-                        {toolsData[0].isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Abrir Herramienta'} &rarr;
-                    </span>
+
+                    {/* Content Container */}
+                    <div className="relative z-10 flex flex-col justify-between items-center h-full p-8">
+                        <div>
+                            <div className="text-white mb-4">{toolsData[0].icon}</div>
+                            <h4 className="text-3xl font-bold text-white mb-2">{toolsData[0].title}</h4>
+                            <p className="text-green-100 text-base">{toolsData[0].description}</p>
+                        </div>
+                        <span className="mt-4 text-sm font-semibold text-white hover:text-gray-200 self-center transition-colors">
+                            {toolsData[0].isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : 'Abrir Herramienta'} &rarr;
+                        </span>
+                    </div>
                 </motion.div>
               )}
 
