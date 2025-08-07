@@ -15,6 +15,9 @@ export interface EventItem {
   rsvps?: string[];
   province?: string;
   city?: string;
+  userId?: string; // <-- AÑADIDO
+  category?: ServiceCategory;
+  referenceUrl?: string;
 }
 
 export interface NewsItem {
@@ -151,6 +154,12 @@ export interface User {
 
   // --- NUEVO CAMPO PARA SUSCRIPCIONES ---
   subscribedServiceCategories?: ServiceCategory[];
+
+  // --- Campos de Gamificación y Conteo ---
+  membershipLevel?: string; // e.g., 'Socio', 'Socio Full', 'Embajador'
+  points?: number;
+  servicesCount?: number;
+  eventsCount?: number;
 }
 
 export enum Industry {
@@ -210,7 +219,7 @@ export interface AuthContextType extends AuthState {
   openDirectoryModal: () => void;
   closeAuthModal: () => void;
   authModalState: ModalState;
-  refreshUserData: () => Promise<void>;
+  refreshUserData: (partialUser?: Partial<User>) => Promise<void>;
 }
 
 // --- Tipos para el Directorio de Servicios ---

@@ -138,7 +138,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await sendPasswordResetEmail(auth, email);
   };
 
-  const refreshUserData = async (): Promise<void> => {
+  const refreshUserData = async (partialUser?: Partial<User>): Promise<void> => {
     if (auth.currentUser) {
       const updatedData = await getUserData(auth.currentUser.uid);
       if (updatedData) {
@@ -147,6 +147,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           name: auth.currentUser.displayName,
           email: auth.currentUser.email,
           ...updatedData,
+          ...partialUser, // Fusionar datos parciales
         };
         setAuthState(prevState => ({
           ...prevState,

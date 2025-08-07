@@ -48,6 +48,40 @@ export const getEventById = async (eventId: string): Promise<EventItem | null> =
     return null;
 };
 
+/**
+ * Obtiene los eventos creados por un usuario específico.
+ */
+export const getUserEvents = async (userId: string): Promise<EventItem[]> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const eventsCollection = collection(db, 'events');
+    const q = query(
+        eventsCollection,
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
+};
+
+/**
+ * Obtiene los últimos eventos publicados de una ciudad específica.
+ * @param city - La ciudad para filtrar los eventos.
+ * @param limit - El número máximo de eventos a obtener.
+ * @returns Una promesa que se resuelve con un array de EventItem.
+ */
+export const getEventsByCity = async (city: string, limitNum: number): Promise<EventItem[]> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const eventsCollection = collection(db, 'events');
+    const q = query(
+        eventsCollection,
+        where('published', '==', true),
+        where('city', '==', city),
+        orderBy('date', 'desc'),
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
+};
+
 
 // --- Funciones para el Administrador ---
 
@@ -116,4 +150,18 @@ export const cancelRsvp = async (eventId: string, userId: string): Promise<void>
     await updateDoc(eventDocRef, {
         rsvps: arrayRemove(userId)
     });
+};
+
+/**
+ * Obtiene los eventos a los que un usuario ha confirmado asistencia.
+ */
+export const getEventsForUserRsvp = async (userId: string): Promise<EventItem[]> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const eventsCollection = collection(db, 'events');
+    const q = query(
+        eventsCollection,
+        where('rsvps', 'array-contains', userId)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
 };

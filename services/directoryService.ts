@@ -161,3 +161,32 @@ export const updateServiceStatus = async (serviceId: string, status: ServiceStat
         throw error;
     }
 };
+
+/**
+ * Obtiene los últimos servicios APROBADOS de una ciudad específica.
+ * @param city - La ciudad para filtrar los servicios.
+ * @param limit - El número máximo de servicios a obtener.
+ * @returns Una promesa que se resuelve con un array de CommunityServiceItem.
+ */
+export const getServicesByCity = async (city: string, limitNum: number): Promise<CommunityServiceItem[]> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    try {
+        const servicesCollection = collection(db, 'services');
+        const q = query(
+            servicesCollection,
+            where('status', '==', ServiceStatus.APROBADO),
+            where('city', '==', city),
+            orderBy('createdAt', 'desc'),
+        );
+        const querySnapshot = await getDocs(q);
+
+        const services: CommunityServiceItem[] = [];
+        querySnapshot.forEach((doc) => {
+            services.push({ id: doc.id, ...doc.data() } as CommunityServiceItem);
+        });
+        return services;
+    } catch (error) {
+        console.error(`Error al obtener los servicios de ${city}: `, error);
+        return [];
+    }
+};
