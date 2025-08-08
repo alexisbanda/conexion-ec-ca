@@ -8,6 +8,12 @@ import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
 import { AuthContext } from '../contexts/AuthContext';
 import { AdSlot } from './AdSlot';
+import regionalToolsConfig from '../regionalToolsConfig.json';
+
+const iconMap: { [key: string]: React.ReactElement } = {
+  GiftIcon: <GiftIcon className="w-10 h-10" />,
+  IdeaIcon: <IdeaIcon className="w-10 h-10" />,
+};
 
 interface AccordionItem {
   title: string;
@@ -78,63 +84,6 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
     );
 };
 
-const regionalToolsConfig = {
-  bc: {
-    tool4a: {
-      icon: <GiftIcon className="w-10 h-10" />,
-      title: 'Aquí todo es Gratis Vancouver',
-      description: 'Encuentra artículos gratuitos en la comunidad de British Columbia.',
-      url: 'https://www.facebook.com/groups/aquitodoesgratisvancouver/',
-      backgroundImageUrl: 'https://picsum.photos/seed/bc_free/600/400',
-      ctaText: 'Ir a Grupo BC'
-    },
-    tool5a: {
-      icon: <IdeaIcon className="w-10 h-10" />,
-      title: 'Guía del Ecuatoriano Sabio - BC',
-      description: 'Tips y secretos para ecuatorianos viviendo en British Columbia.',
-      url: 'https://www.facebook.com/groups/ecuatorianosenelmundo/',
-      backgroundImageUrl: 'https://picsum.photos/seed/bc_guide/600/400',
-      ctaText: 'Ver Guía BC'
-    }
-  },
-  on: {
-    tool4a: {
-      icon: <GiftIcon className="w-10 h-10" />,
-      title: 'Regalos y Donaciones Toronto',
-      description: 'Conecta con la comunidad de Ontario para intercambiar artículos gratis.',
-      url: 'https://www.facebook.com/groups/1539993676261839/',
-      backgroundImageUrl: 'https://picsum.photos/seed/on_free/600/400',
-      ctaText: 'Ir a Grupo ON'
-    },
-    tool5a: {
-      icon: <IdeaIcon className="w-10 h-10" />,
-      title: 'Guía del Ecuatoriano Sabio - ON',
-      description: 'Tips y secretos para ecuatorianos viviendo en Ontario.',
-      url: 'https://www.facebook.com/groups/ecuatorianosenelmundo/',
-      backgroundImageUrl: 'https://picsum.photos/seed/on_wise/600/400',
-      ctaText: 'Ver Guía ON'
-    }
-  },
-  default: {
-    tool4a: {
-      icon: <GiftIcon className="w-10 h-10" />,
-      title: 'Aquí todo es Gratis',
-      description: 'Portal donde se ofrece y se pide todo GRATIS!.',
-      url: 'https://www.facebook.com/groups/toutestgratuitmontreal/',
-      backgroundImageUrl: 'https://picsum.photos/seed/free_stuff/600/400',
-      ctaText: 'Ir al Portal Gratis'
-    },
-    tool5a: {
-      icon: <IdeaIcon className="w-10 h-10" />,
-      title: 'Guía del Ecuatoriano Sabio',
-      description: 'Las mejores sugerencias y tips para los que extrañan el país.',
-      url: 'https://www.facebook.com/groups/ecuatorianosenelmundo/',
-      backgroundImageUrl: 'https://picsum.photos/seed/wise_ecuadorian/600/400',
-      ctaText: 'Ir a la Guía'
-    }
-  }
-};
-
 export const ResourcesTools: React.FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
   const authContext = useContext(AuthContext);
@@ -151,8 +100,14 @@ export const ResourcesTools: React.FC = () => {
 
   const toolsData = useMemo(() => {
     const regionalConfig = regionalToolsConfig[regionId as keyof typeof regionalToolsConfig] || regionalToolsConfig.default;
-    const regionalTool4a = regionalConfig.tool4a;
-    const regionalTool5a = regionalConfig.tool5a;
+    const getToolConfig = (toolKey: 'tool4a' | 'tool5a') => {
+      const config = regionalConfig[toolKey];
+      return {
+        ...config,
+        icon: iconMap[config.icon as keyof typeof iconMap],
+        modalContent: (onClose: any) => <RedirectPrompt toolName={config.title} url={config.url} onClose={onClose} />,
+      };
+    };
 
     return [
       {
@@ -165,18 +120,8 @@ export const ResourcesTools: React.FC = () => {
         isFeatured: true,
         ctaText: 'Abrir Directorio'
       },
-      {
-        id: 'tool4a',
-        ...regionalTool4a,
-        modalContent: (onClose: any) => <RedirectPrompt toolName={regionalTool4a.title} url={regionalTool4a.url} onClose={onClose} />,
-        isPremium: false,
-      },
-      {
-        id: 'tool5a',
-        ...regionalTool5a,
-        modalContent: (onClose: any) => <RedirectPrompt toolName={regionalTool5a.title} url={regionalTool5a.url} onClose={onClose} />,
-        isPremium: false,
-      },
+      { id: 'tool4a', ...getToolConfig('tool4a'), isPremium: false },
+      { id: 'tool5a', ...getToolConfig('tool5a'), isPremium: false },
       {
         id: 'tool4',
         icon: <GlobeAltIcon className="w-10 h-10" />,
