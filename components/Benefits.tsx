@@ -1,10 +1,11 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams } from 'react-router-dom';
-import { Benefit, Testimonial } from '../types';
+import { Benefit } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
 import { regions } from './NationalRegionSelector';
+import { Testimonials } from './Testimonials';
 
 // --- DATA --- //
 const benefitsData: Benefit[] = [
@@ -45,37 +46,6 @@ const benefitsData: Benefit[] = [
   },
 ];
 
-const testimonialsData: Testimonial[] = [
-    { 
-        id: 't1', 
-        quote: 'Gracias a Conexión EC-CA, encontré un mentor en mi campo que fue clave para conseguir mi primer trabajo en Toronto. ¡La comunidad es increíblemente solidaria!', 
-        author: 'Sofía Martínez', 
-        role: 'Ingeniera de Software', 
-        imageUrl: 'https://randomuser.me/api/portraits/women/34.jpg' 
-    },
-    { 
-        id: 't2', 
-        quote: 'El taller de adaptación de CV fue un antes y un después. En una semana, empecé a recibir llamadas para entrevistas después de meses de silencio. 100% recomendado.', 
-        author: 'Carlos Jiménez', 
-        role: 'Gerente de Proyectos', 
-        imageUrl: 'https://randomuser.me/api/portraits/men/46.jpg' 
-    },
-    { 
-        id: 't3', 
-        quote: 'Como emprendedora, el directorio comunitario me dio la visibilidad que necesitaba para lanzar mi negocio de catering. Mis primeros clientes fueron ecuatorianos que encontraron mi perfil aquí.', 
-        author: 'Gabriela Andrade', 
-        role: 'Fundadora de Sabor de Casa', 
-        imageUrl: 'https://randomuser.me/api/portraits/women/22.jpg' 
-    },
-];
-
-// --- Animation Variants --- //
-const slideVariants = {
-    enter: (direction: number) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
-    center: { zIndex: 1, x: 0, opacity: 1 },
-    exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? '100%' : '-100%', opacity: 0 })
-};
-
 export const Benefits: React.FC = () => {
   const { region: regionId } = useParams<{ region: string }>();
   const region = regions.find(r => r.id === regionId);
@@ -85,19 +55,25 @@ export const Benefits: React.FC = () => {
   const benefitRefs = useRef<Map<string, HTMLElement>>(new Map());
   const auth = useContext(AuthContext);
 
-  const [[testimonialIndex, direction], setTestimonialState] = useState([0, 0]);
+  const [[mobileBenefitIndex, direction], setMobileBenefitState] = useState([0, 0]);
 
-  const paginate = (newDirection: number) => {
-    let newIndex = testimonialIndex + newDirection;
-    if (newIndex < 0) newIndex = testimonialsData.length - 1;
-    else if (newIndex >= testimonialsData.length) newIndex = 0;
-    setTestimonialState([newIndex, newDirection]);
+  const paginateMobile = (newDirection: number) => {
+    let newIndex = mobileBenefitIndex + newDirection;
+    if (newIndex < 0) newIndex = benefitsData.length - 1;
+    else if (newIndex >= benefitsData.length) newIndex = 0;
+    setMobileBenefitState([newIndex, newDirection]);
   };
 
-  const setTestimonialIndex = (newIndex: number) => {
-    const newDirection = newIndex > testimonialIndex ? 1 : -1;
-    setTestimonialState([newIndex, newDirection]);
+  const setMobileIndex = (newIndex: number) => {
+    const newDirection = newIndex > mobileBenefitIndex ? 1 : -1;
+    setMobileBenefitState([newIndex, newDirection]);
   }
+
+  const slideVariants = {
+    enter: (direction: number) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
+    center: { zIndex: 1, x: 0, opacity: 1 },
+    exit: (direction: number) => ({ zIndex: 0, x: direction < 0 ? '100%' : '-100%', opacity: 0 })
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -185,64 +161,80 @@ export const Benefits: React.FC = () => {
           </div>
       </div>
 
-      {/* --- TESTIMONIALS SECTION (CINEMATIC CAROUSEL) --- */}
-      <div className="py-16 md:py-24 bg-ecuador-blue text-white">
-        <div className="container mx-auto px-6 max-w-4xl">
-            <motion.div className="text-center mb-12" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6 }}>
-                <h2 className="text-3xl md:text-4xl font-bold mb-4 font-montserrat">Lo que Nuestra Comunidad Dice</h2>
-                <p className="text-lg text-blue-200 max-w-3xl mx-auto">Historias reales de miembros que han transformado su vida en {regionName} con nuestro apoyo.</p>
-            </motion.div>
-            <div className="relative h-96">
-                <AnimatePresence initial={false} custom={direction}>
-                    <motion.div
-                        key={testimonialIndex}
-                        custom={direction}
-                        variants={slideVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.2}
-                        onDragEnd={(e, { offset }) => { Math.abs(offset.x) > 50 && paginate(offset.x > 0 ? -1 : 1); }}
-                        className="absolute w-full h-full bg-white/10 backdrop-blur-md p-8 md:p-12 rounded-2xl shadow-2xl flex items-center justify-center"
-                    >
-                        <div className="text-center max-w-xl">
-                            <img src={testimonialsData[testimonialIndex].imageUrl} alt={testimonialsData[testimonialIndex].author} className="w-24 h-24 rounded-full object-cover mx-auto mb-6 border-4 border-ecuador-yellow" />
-                            <p className="text-xl md:text-2xl font-medium leading-relaxed mb-6">"{testimonialsData[testimonialIndex].quote}"</p>
-                            <div>
-                                <p className="font-bold text-xl text-ecuador-yellow">{testimonialsData[testimonialIndex].author}</p>
-                                <p className="text-blue-200">{testimonialsData[testimonialIndex].role}</p>
-                            </div>
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-            <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between left-0 right-0 px-0 md:-px-16 max-w-5xl mx-auto">
-                <button onClick={() => paginate(-1)} className="bg-white/10 hover:bg-white/30 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors z-10"><ChevronLeftIcon className="w-6 h-6" /></button>
-                <button onClick={() => paginate(1)} className="bg-white/10 hover:bg-white/30 text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors z-10"><ChevronRightIcon className="w-6 h-6" /></button>
-            </div>
-            <div className="flex justify-center gap-3 mt-8">
-                {testimonialsData.map((_, i) => (
-                    <button key={i} onClick={() => setTestimonialIndex(i)} className={`w-3 h-3 rounded-full transition-all duration-300 ${testimonialIndex === i ? 'bg-ecuador-yellow scale-125' : 'bg-white/30 hover:bg-white/50'}`} aria-label={`Ir al testimonio ${i + 1}`} />
-                ))}
-            </div>
-        </div>
-      </div>
+      <Testimonials regionName={regionName} />
 
-      {/* --- Mobile-only Benefit Display --- */}
-      <div className="md:hidden container mx-auto px-6 py-12 space-y-16">
-          {benefitsData.map(benefit => (
-              <div key={benefit.id} className="text-center">
-                  <img src={benefit.imageUrl} alt={benefit.title} className="w-full h-auto max-h-[50vh] object-contain rounded-2xl shadow-xl mb-6" />
-                  <h3 className="text-2xl font-bold text-ecuador-blue mb-3">{benefit.title.replace('{regionName}', regionName)}</h3>
-                  <p className="text-gray-700 leading-relaxed">{benefit.detailedDescription.replace('{regionName}', regionName)}</p>
-              </div>
-          ))}
-          <div className="text-center pt-8">
-              <button onClick={openRegister} className="bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg">¡Quiero ser miembro!</button>
-          </div>
+      {/* --- Mobile-only Benefit Carousel --- */}
+      <div className="md:hidden container mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-ecuador-blue mb-4 font-montserrat">Un Ecosistema de Apoyo Real</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Más que una membresía, es tu acceso a un conjunto de herramientas y conexiones para el éxito en {regionName}.
+            </p>
+        </div>
+
+        <div className="relative h-[550px] sm:h-[600px] flex items-center">
+            <AnimatePresence initial={false} custom={direction}>
+                <motion.div
+                    key={mobileBenefitIndex}
+                    custom={direction}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 }
+                    }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(e, { offset }) => {
+                        if (Math.abs(offset.x) > 50) {
+                            paginateMobile(offset.x > 0 ? -1 : 1);
+                        }
+                    }}
+                    className="absolute w-full"
+                >
+                    <div className="text-center px-4">
+                        <img 
+                            src={benefitsData[mobileBenefitIndex].imageUrl} 
+                            alt={benefitsData[mobileBenefitIndex].title.replace('{regionName}', regionName)} 
+                            className="w-full h-auto max-h-[35vh] object-contain rounded-2xl shadow-xl mb-6" 
+                        />
+                        <h3 className="text-2xl font-bold text-ecuador-blue mb-3">
+                            {benefitsData[mobileBenefitIndex].title.replace('{regionName}', regionName)}
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                            {benefitsData[mobileBenefitIndex].detailedDescription.replace('{regionName}', regionName)}
+                        </p>
+                    </div>
+                </motion.div>
+            </AnimatePresence>
+
+            <button onClick={() => paginateMobile(-1)} className="absolute top-1/2 -translate-y-1/2 left-1 bg-white/50 hover:bg-white/80 backdrop-blur-sm text-ecuador-blue rounded-full w-10 h-10 flex items-center justify-center transition-colors z-10 shadow-md" aria-label="Anterior beneficio">
+                <ChevronLeftIcon className="w-6 h-6" />
+            </button>
+            <button onClick={() => paginateMobile(1)} className="absolute top-1/2 -translate-y-1/2 right-1 bg-white/50 hover:bg-white/80 backdrop-blur-sm text-ecuador-blue rounded-full w-10 h-10 flex items-center justify-center transition-colors z-10 shadow-md" aria-label="Siguiente beneficio">
+                <ChevronRightIcon className="w-6 h-6" />
+            </button>
+        </div>
+
+        <div className="flex justify-center gap-3 mt-4">
+            {benefitsData.map((_, i) => (
+                <button 
+                    key={i} 
+                    onClick={() => setMobileIndex(i)} 
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${mobileBenefitIndex === i ? 'bg-ecuador-yellow scale-125' : 'bg-gray-300 hover:bg-gray-400'}`}
+                    aria-label={`Ir al beneficio ${i + 1}`}
+                />
+            ))}
+        </div>
+
+        <div className="text-center pt-8">
+            <button onClick={openRegister} className="bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg">
+                ¡Quiero ser miembro!
+            </button>
+        </div>
       </div>
     </section>
   );
