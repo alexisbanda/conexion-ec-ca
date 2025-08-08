@@ -2,12 +2,12 @@ import React, { useState, useMemo, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { regions } from './NationalRegionSelector';
-import { Resource, Tool, ModalState, ModalContentType } from '../types'; // Asegúrate de que Tool tenga backgroundImageUrl y ctaText
+import { Resource, Tool, ModalState, ModalContentType } from '../types';
 import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
 import { AuthContext } from '../contexts/AuthContext';
-import { AdSlot } from './AdSlot'; // Importamos el componente AdSlot
+import { AdSlot } from './AdSlot';
 
 interface AccordionItem {
   title: string;
@@ -39,7 +39,6 @@ const Accordion: React.FC<{ items: AccordionItem[] }> = ({ items }) => {
     );
 };
 
-// --- NUEVO COMPONENTE: Redirección a Enlace Externo ---
 interface RedirectPromptProps {
     toolName: string;
     url: string;
@@ -79,79 +78,62 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
     );
 };
 
-// --- DATOS DE GUÍAS ESENCIALES (MODIFICADOS PARA downloadUrl y answers) ---
-// La definición de essentialGuidesData se queda dentro del componente ResourcesTools como antes.
-
-// --- DATOS DE HERRAMIENTAS (REORGANIZADOS Y EXPANDIDOS CON IMÁGENES DE FONDO Y ctaText) ---
-const toolsData: Tool[] = [
-  { // 1. Directorio Comunitario (DESTACADO AHORA)
-    id: 'tool3',
-    icon: <MapPinIcon className="w-10 h-10" />,
-    title: 'Directorio Comunitario',
-    description: 'Encuentra negocios y servicios ofrecidos por miembros de la comunidad.',
-    modalContent: <CommunityDirectory />,
-    isPremium: true,
-    isFeatured: true,
-    ctaText: 'Abrir Directorio' // CTA específico
+const regionalToolsConfig = {
+  bc: {
+    tool4a: {
+      icon: <GiftIcon className="w-10 h-10" />,
+      title: 'Aquí todo es Gratis Vancouver',
+      description: 'Encuentra artículos gratuitos en la comunidad de British Columbia.',
+      url: 'https://www.facebook.com/groups/aquitodoesgratisvancouver/',
+      backgroundImageUrl: 'https://picsum.photos/seed/bc_free/600/400',
+      ctaText: 'Ir a Grupo BC'
+    },
+    tool5a: {
+      icon: <IdeaIcon className="w-10 h-10" />,
+      title: 'Guía del Ecuatoriano Sabio - BC',
+      description: 'Tips y secretos para ecuatorianos viviendo en British Columbia.',
+      url: 'https://www.facebook.com/groups/ecuatorianosenelmundo/',
+      backgroundImageUrl: 'https://picsum.photos/seed/bc_guide/600/400',
+      ctaText: 'Ver Guía BC'
+    }
   },
-  { // 2. AquiTodoEsGratis (CON IMAGEN DE FONDO)
-    id: 'tool4a',
-    icon: <GiftIcon className="w-10 h-10" />,
-    title: 'Aquí todo es Gratis',
-    description: 'Portal donde se ofrece y se pide todo GRATIS!.',
-    modalContent: (onClose: any) => <RedirectPrompt toolName="Aquí todo es Gratis" url="https://ejemplo.com/aquitodoesgratis" onClose={onClose} />,
-    isPremium: false,
-    backgroundImageUrl: 'https://picsum.photos/seed/free_stuff/600/400',
-    ctaText: 'Ir al Portal Gratis' // CTA específico
+  on: {
+    tool4a: {
+      icon: <GiftIcon className="w-10 h-10" />,
+      title: 'Regalos y Donaciones Toronto',
+      description: 'Conecta con la comunidad de Ontario para intercambiar artículos gratis.',
+      url: 'https://www.facebook.com/groups/1539993676261839/',
+      backgroundImageUrl: 'https://picsum.photos/seed/on_free/600/400',
+      ctaText: 'Ir a Grupo ON'
+    },
+    tool5a: {
+      icon: <IdeaIcon className="w-10 h-10" />,
+      title: 'Guía del Ecuatoriano Sabio - ON',
+      description: 'Tips y secretos para ecuatorianos viviendo en Ontario.',
+      url: 'https://www.facebook.com/groups/ecuatorianosenelmundo/',
+      backgroundImageUrl: 'https://picsum.photos/seed/on_wise/600/400',
+      ctaText: 'Ver Guía ON'
+    }
   },
-  { // 3. GuiaDelEcuatorianoSabido (CON IMAGEN DE FONDO)
-    id: 'tool5a',
-    icon: <IdeaIcon className="w-10 h-10" />,
-    title: 'Guía del Ecuatoriano Sabio',
-    description: 'Las mejores sugerencias y tips para los que extrañan el país.',
-    modalContent: (onClose: any) => <RedirectPrompt toolName="Guía del Ecuatoriano Sabio" url="https://ejemplo.com/guiasabio" onClose={onClose} />,
-    isPremium: false,
-    backgroundImageUrl: 'https://picsum.photos/seed/wise_ecuadorian/600/400',
-    ctaText: 'Ir a la Guía' // CTA específico
-  },
-  { // 4. Enlace a IRCC
-    id: 'tool4',
-    icon: <GlobeAltIcon className="w-10 h-10" />,
-    title: 'Portal Oficial IRCC',
-    description: 'Accede a información oficial sobre inmigración, visas y ciudadanía.',
-    modalContent: (onClose: any) => <RedirectPrompt toolName="Portal Oficial IRCC" url="https://www.canada.ca/en/immigration-refugees-citizenship.html" onClose={onClose} />,
-    isPremium: false,
-    ctaText: 'Visitar IRCC' // CTA específico
-  },
-  { // 5. Enlace a Job Bank
-    id: 'tool5',
-    icon: <BriefcaseIcon className="w-10 h-10" />,
-    title: 'Bolsa de Empleo Nacional',
-    description: 'Explora miles de ofertas de trabajo en todo Canadá.',
-    modalContent: (onClose: any) => <RedirectPrompt toolName="Job Bank de Canadá" url="https://www.jobbank.gc.ca/" onClose={onClose} />,
-    isPremium: false,
-    ctaText: 'Ir a Job Bank' // CTA específico
-  },
-  { // 6. Enlace a Conversor de Dinero (Ahora como enlace externo)
-    id: 'tool7',
-    icon: <CurrencyDollarIcon className="w-10 h-10" />,
-    title: 'Conversor USD-CAD',
-    description: 'Tasa de cambio entre monedas en tiempo real.',
-    modalContent: (onClose: any) => <RedirectPrompt toolName="Conversor de Divisas" url="https://www.xe.com/currencyconverter/" onClose={onClose} />,
-    isPremium: false,
-    ctaText: 'Abrir Conversor' // CTA específico
-  },
-  { // 7. Enlace a Salud Mental
-    id: 'tool8',
-    icon: <HeartIcon className="w-10 h-10" />,
-    title: 'Recursos Salud Mental',
-    description: 'Directorio de apoyo psicológico y bienestar en tu comunidad.',
-    modalContent: (onClose: any) => <RedirectPrompt toolName="Recursos de Salud Mental" url="https://www.camh.ca/en/professionals/professionals--projects/immigrant-and-refugee-mental-health-project" onClose={onClose} />,
-    isPremium: false,
-    ctaText: 'Ver Recursos' // CTA específico
-  },
-];
-
+  default: {
+    tool4a: {
+      icon: <GiftIcon className="w-10 h-10" />,
+      title: 'Aquí todo es Gratis',
+      description: 'Portal donde se ofrece y se pide todo GRATIS!.',
+      url: 'https://www.facebook.com/groups/toutestgratuitmontreal/',
+      backgroundImageUrl: 'https://picsum.photos/seed/free_stuff/600/400',
+      ctaText: 'Ir al Portal Gratis'
+    },
+    tool5a: {
+      icon: <IdeaIcon className="w-10 h-10" />,
+      title: 'Guía del Ecuatoriano Sabio',
+      description: 'Las mejores sugerencias y tips para los que extrañan el país.',
+      url: 'https://www.facebook.com/groups/ecuatorianosenelmundo/',
+      backgroundImageUrl: 'https://picsum.photos/seed/wise_ecuadorian/600/400',
+      ctaText: 'Ir a la Guía'
+    }
+  }
+};
 
 export const ResourcesTools: React.FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
@@ -165,6 +147,74 @@ export const ResourcesTools: React.FC = () => {
   const currentRegion = regions.find(r => r.path === location.pathname);
   const regionName = currentRegion ? currentRegion.name : 'Canadá';
   const shortName = currentRegion ? currentRegion.shortName : 'CA';
+  const regionId = currentRegion ? currentRegion.id : 'default';
+
+  const toolsData = useMemo(() => {
+    const regionalConfig = regionalToolsConfig[regionId as keyof typeof regionalToolsConfig] || regionalToolsConfig.default;
+    const regionalTool4a = regionalConfig.tool4a;
+    const regionalTool5a = regionalConfig.tool5a;
+
+    return [
+      {
+        id: 'tool3',
+        icon: <MapPinIcon className="w-10 h-10" />,
+        title: 'Directorio Comunitario',
+        description: 'Encuentra negocios y servicios ofrecidos por miembros de la comunidad.',
+        modalContent: <CommunityDirectory />,
+        isPremium: true,
+        isFeatured: true,
+        ctaText: 'Abrir Directorio'
+      },
+      {
+        id: 'tool4a',
+        ...regionalTool4a,
+        modalContent: (onClose: any) => <RedirectPrompt toolName={regionalTool4a.title} url={regionalTool4a.url} onClose={onClose} />,
+        isPremium: false,
+      },
+      {
+        id: 'tool5a',
+        ...regionalTool5a,
+        modalContent: (onClose: any) => <RedirectPrompt toolName={regionalTool5a.title} url={regionalTool5a.url} onClose={onClose} />,
+        isPremium: false,
+      },
+      {
+        id: 'tool4',
+        icon: <GlobeAltIcon className="w-10 h-10" />,
+        title: 'Portal Oficial IRCC',
+        description: 'Accede a información oficial sobre inmigración, visas y ciudadanía.',
+        modalContent: (onClose: any) => <RedirectPrompt toolName="Portal Oficial IRCC" url="https://www.canada.ca/en/immigration-refugees-citizenship.html" onClose={onClose} />,
+        isPremium: false,
+        ctaText: 'Visitar IRCC'
+      },
+      {
+        id: 'tool5',
+        icon: <BriefcaseIcon className="w-10 h-10" />,
+        title: 'Bolsa de Empleo Nacional',
+        description: 'Explora miles de ofertas de trabajo en todo Canadá.',
+        modalContent: (onClose: any) => <RedirectPrompt toolName="Job Bank de Canadá" url="https://www.jobbank.gc.ca/" onClose={onClose} />,
+        isPremium: false,
+        ctaText: 'Ir a Job Bank'
+      },
+      {
+        id: 'tool7',
+        icon: <CurrencyDollarIcon className="w-10 h-10" />,
+        title: 'Conversor USD-CAD',
+        description: 'Tasa de cambio entre monedas en tiempo real.',
+        modalContent: (onClose: any) => <RedirectPrompt toolName="Conversor de Divisas" url="https://www.xe.com/currencyconverter/" onClose={onClose} />,
+        isPremium: false,
+        ctaText: 'Abrir Conversor'
+      },
+      {
+        id: 'tool8',
+        icon: <HeartIcon className="w-10 h-10" />,
+        title: 'Recursos Salud Mental',
+        description: 'Directorio de apoyo psicológico y bienestar en tu comunidad.',
+        modalContent: (onClose: any) => <RedirectPrompt toolName="Recursos de Salud Mental" url="https://www.camh.ca/en/professionals/professionals--projects/immigrant-and-refugee-mental-health-project" onClose={onClose} />,
+        isPremium: false,
+        ctaText: 'Ver Recursos'
+      },
+    ];
+  }, [regionId]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -383,19 +433,17 @@ export const ResourcesTools: React.FC = () => {
   };
 
   const openToolModal = (tool: Tool) => {
-    // Si la herramienta es premium y el usuario NO está autenticado
     if (tool.isPremium && !authContext?.isAuthenticated) {
-      authContext?.openLoginModal(); // Abrir modal de login
-      return; // Detener la ejecución
+      authContext?.openLoginModal();
+      return;
     }
 
-    // Si la herramienta tiene modalContent como una función (para RedirectPrompt)
     if (typeof tool.modalContent === 'function') {
         setModalState({
             isOpen: true,
             title: tool.title,
-            content: tool.modalContent(closeModal), // Pasa closeModal a RedirectPrompt
-            type: ModalContentType.TOOL_CONTENT, // O un tipo específico si lo necesitas
+            content: tool.modalContent(closeModal),
+            type: ModalContentType.TOOL_CONTENT,
         });
         return;
     }
@@ -429,7 +477,6 @@ export const ResourcesTools: React.FC = () => {
 
           {/* --- SECCIÓN DE GUÍAS ESENCIALES --- */}
           <div className="mb-16">
-            {/* Título de sección estilizado */}
             <motion.h3
               className="text-2xl font-semibold text-ecuador-blue mb-8 font-montserrat relative pb-2 border-b-2 border-ecuador-red inline-block"
               initial="hidden"
@@ -439,7 +486,6 @@ export const ResourcesTools: React.FC = () => {
             >
                 Guías Esenciales para Recién Llegados
             </motion.h3>
-            {/* Contenedor principal de guías */}
             <motion.div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 [grid-auto-rows:minmax(200px,auto)]"
               variants={containerVariants}
@@ -447,7 +493,6 @@ export const ResourcesTools: React.FC = () => {
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
             >
-              {/* --- GUÍA DESTACADA (Primera Guía) --- */}
               {essentialGuidesData.length > 0 && (
                 <motion.div
                     variants={itemVariants}
@@ -472,10 +517,8 @@ export const ResourcesTools: React.FC = () => {
                 </motion.div>
               )}
 
-              {/* --- RESTO DE GUÍAS --- */}
               {essentialGuidesData.slice(1, 6).map((resource, index) => {
-                // La guía de validación de títulos ahora es de tamaño normal
-                const isWideCard = resource.id === 'guide4_disabled'; // Desactivamos la tarjeta ancha por ahora
+                const isWideCard = resource.id === 'guide4_disabled';
                 const layoutClasses = isWideCard ? 'lg:col-span-2' : 'lg:col-span-1';
                 
                 return (
@@ -502,7 +545,6 @@ export const ResourcesTools: React.FC = () => {
                   </motion.div>
                 )
               })}
-              {/* --- ANUNCIO DE GUÍAS --- */}
               <motion.div variants={itemVariants} className="h-full lg:col-span-1 lg:row-span-1 rounded-2xl">
                 <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
@@ -511,7 +553,6 @@ export const ResourcesTools: React.FC = () => {
 
           {/* --- SECCIÓN DE HERRAMIENTAS --- */}
           <div>
-            {/* Título de sección estilizado */}
             <motion.h3
               className="text-2xl font-semibold text-ecuador-blue mb-8 font-montserrat relative pb-2 border-b-2 border-ecuador-red inline-block"
               initial="hidden"
@@ -521,7 +562,6 @@ export const ResourcesTools: React.FC = () => {
             >
                 Herramientas del Día a Día
             </motion.h3>
-            {/* Contenedor principal de herramientas */}
             <motion.div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 [grid-auto-rows:minmax(200px,auto)]"
               variants={containerVariants}
@@ -529,7 +569,6 @@ export const ResourcesTools: React.FC = () => {
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
             >
-              {/* --- HERRAMIENTA DESTACADA (Directorio Comunitario) --- */}
               {toolsData.length > 0 && (
                 <motion.div
                     key={toolsData[0].id}
@@ -540,7 +579,6 @@ export const ResourcesTools: React.FC = () => {
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(toolsData[0])}
                     aria-label={`Abrir herramienta ${toolsData[0].title}`}
                 >
-                    {/* Background Image & Overlay */}
                     <div className="absolute inset-0">
                         <img 
                             src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
@@ -550,10 +588,8 @@ export const ResourcesTools: React.FC = () => {
                         <div className="absolute inset-0 bg-gradient-to-br from-green-600/80 to-green-800/90"></div>
                     </div>
 
-                    {/* Elemento decorativo en la esquina */}
                     <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-10 transform rotate-45 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
                     
-                    {/* Premium Lock */}
                     {toolsData[0].isPremium && !authContext?.isAuthenticated && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-lg font-bold rounded-2xl z-20">
                           <LockClosedIcon className="w-8 h-8 mr-2" />
@@ -561,7 +597,6 @@ export const ResourcesTools: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Content Container */}
                     <div className="relative z-10 flex flex-col justify-between items-center h-full p-8">
                         <div>
                             <div className="text-white mb-4">{toolsData[0].icon}</div>
@@ -575,14 +610,13 @@ export const ResourcesTools: React.FC = () => {
                 </motion.div>
               )}
 
-              {/* --- RESTO DE HERRAMIENTAS (excluyendo el último item para el anuncio) --- */}
               {toolsData.slice(1, 6).map((tool, index) => {
                 const layoutClasses = [
-                    'lg:col-span-1 lg:row-span-1', // Herramienta 2
-                    'lg:col-span-1 lg:row-span-2', // Herramienta 3 (alta)
-                    'lg:col-span-1 lg:row-span-1', // Herramienta 4
-                    'lg:col-span-1 lg:row-span-1', // Herramienta 5
-                    'lg:col-span-1 lg:row-span-1', // Herramienta 6
+                    'lg:col-span-1 lg:row-span-1',
+                    'lg:col-span-1 lg:row-span-2',
+                    'lg:col-span-1 lg:row-span-1',
+                    'lg:col-span-1 lg:row-span-1',
+                    'lg:col-span-1 lg:row-span-1',
                 ];
                 return (
                   <motion.div
@@ -597,7 +631,6 @@ export const ResourcesTools: React.FC = () => {
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(tool)}
                       aria-label={`Abrir herramienta ${tool.title}`}
                   >
-                    {/* Overlay para contenido premium o para texto sobre imagen de fondo */}
                     {(tool.isPremium && !authContext?.isAuthenticated) || tool.backgroundImageUrl ? (
                         <div className={`absolute inset-0 flex items-center justify-center rounded-2xl z-10 
                                 ${tool.isPremium && !authContext?.isAuthenticated ? 'bg-black bg-opacity-50 text-white text-lg font-bold' : 'bg-black bg-opacity-30'}
@@ -608,20 +641,18 @@ export const ResourcesTools: React.FC = () => {
                         </div>
                     ) : null}
 
-                    {/* Contenido de la tarjeta sobre el overlay (si hay imagen de fondo) */}
                     <div className="relative z-20 flex flex-col items-center text-center h-full w-full">
                         <div className={`${tool.backgroundImageUrl ? 'text-white' : 'text-ecuador-red'} mb-4`}>{tool.icon}</div>
                         <h4 className={`${tool.backgroundImageUrl ? 'text-white' : 'text-ecuador-blue'} text-lg font-semibold mb-2`}>{tool.title}</h4>
                         <p className={`${tool.backgroundImageUrl ? 'text-gray-200' : 'text-gray-600'} text-sm flex-grow`}>{tool.description}</p>
                         <button className={`mt-4 text-sm font-semibold self-center transition-colors 
                                 ${tool.backgroundImageUrl ? 'text-white hover:text-gray-200' : 'text-ecuador-red hover:text-red-700'}`}>
-                          {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : tool.ctaText || 'Abrir herramienta'} &rarr; {/* Usamos tool.ctaText */}
+                          {tool.isPremium && !authContext?.isAuthenticated ? 'Iniciar Sesión' : tool.ctaText || 'Abrir herramienta'} &rarr;
                         </button>
                     </div>
                   </motion.div>
                 )
               })}
-              {/* --- ANUNCIO DE HERRAMIENTAS --- */}
                <motion.div variants={itemVariants} className="h-full lg:col-span-2 lg:row-span-1 rounded-2xl">
                 <AdSlot location="tools_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-blue-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
