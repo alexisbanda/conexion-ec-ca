@@ -1,34 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Testimonial } from '../types';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons';
+import testimonialsData from '../testimonials.json';
+import { regions } from './NationalRegionSelector';
 
-// --- DATA --- //
-const testimonialsData: Testimonial[] = [
-    {
-        id: 't1',
-        quote: 'Gracias a Conexión EC-CA, encontré un mentor en mi campo que fue clave para conseguir mi primer trabajo en Toronto. ¡La comunidad es increíblemente solidaria!',
-        author: 'Sofía Martínez',
-        role: 'Ingeniera de Software',
-        imageUrl: 'https://randomuser.me/api/portraits/women/34.jpg'
-    },
-    {
-        id: 't2',
-        quote: 'El taller de adaptación de CV fue un antes y un después. En una semana, empecé a recibir llamadas para entrevistas después de meses de silencio. 100% recomendado.',
-        author: 'Carlos Jiménez',
-        role: 'Gerente de Proyectos',
-        imageUrl: 'https://randomuser.me/api/portraits/men/46.jpg'
-    },
-    {
-        id: 't3',
-        quote: 'Como emprendedora, el directorio comunitario me dio la visibilidad que necesitaba para lanzar mi negocio de catering. Mis primeros clientes fueron ecuatorianos que encontraron mi perfil aquí.',
-        author: 'Gabriela Andrade',
-        role: 'Fundadora de Sabor de Casa',
-        imageUrl: 'https://randomuser.me/api/portraits/women/22.jpg'
-    },
-];
-
-// --- Animation Variants --- //
 const slideVariants = {
     enter: (direction: number) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
     center: { zIndex: 1, x: 0, opacity: 1 },
@@ -40,12 +17,20 @@ interface TestimonialsProps {
 }
 
 export const Testimonials: React.FC<TestimonialsProps> = ({ regionName }) => {
+    const location = useLocation();
+    const currentRegion = useMemo(() => regions.find(r => r.path === location.pathname), [location.pathname]);
+    const regionId = useMemo(() => currentRegion?.id || 'default', [currentRegion]);
+
+    const activeTestimonials = useMemo(() => {
+        return testimonialsData[regionId as keyof typeof testimonialsData] || testimonialsData.default;
+    }, [regionId]);
+
     const [[testimonialIndex, direction], setTestimonialState] = useState([0, 0]);
 
     const paginate = (newDirection: number) => {
         let newIndex = testimonialIndex + newDirection;
-        if (newIndex < 0) newIndex = testimonialsData.length - 1;
-        else if (newIndex >= testimonialsData.length) newIndex = 0;
+        if (newIndex < 0) newIndex = activeTestimonials.length - 1;
+        else if (newIndex >= activeTestimonials.length) newIndex = 0;
         setTestimonialState([newIndex, newDirection]);
     };
 
@@ -53,6 +38,12 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ regionName }) => {
         const newDirection = newIndex > testimonialIndex ? 1 : -1;
         setTestimonialState([newIndex, newDirection]);
     }
+
+    if (!activeTestimonials || activeTestimonials.length === 0) {
+        return null; // No renderizar nada si no hay testimonios
+    }
+
+    const currentTestimonial = activeTestimonials[testimonialIndex];
 
     return (
         <div className="py-16 md:py-24 bg-ecuador-blue text-white">
@@ -78,11 +69,11 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ regionName }) => {
                             className="absolute inset-0 bg-white/10 backdrop-blur-md p-8 md:p-12 rounded-2xl shadow-2xl flex items-center justify-center"
                         >
                             <div className="text-center max-w-xl">
-                                <img src={testimonialsData[testimonialIndex].imageUrl} alt={testimonialsData[testimonialIndex].author} className="w-24 h-24 rounded-full object-cover mx-auto mb-6 border-4 border-ecuador-yellow" />
-                                <p className="text-xl md:text-2xl font-medium leading-relaxed mb-6">"{testimonialsData[testimonialIndex].quote}"</p>
+                                <img src={currentTestimonial.imageUrl} alt={currentTestimonial.author} className="w-24 h-24 rounded-full object-cover mx-auto mb-6 border-4 border-ecuador-yellow" />
+                                <p className="text-xl md:text-2xl font-medium leading-relaxed mb-6">"{currentTestimonial.quote}"</p>
                                 <div>
-                                    <p className="font-bold text-xl text-ecuador-yellow">{testimonialsData[testimonialIndex].author}</p>
-                                    <p className="text-blue-200">{testimonialsData[testimonialIndex].role}</p>
+                                    <p className="font-bold text-xl text-ecuador-yellow">{currentTestimonial.author}</p>
+                                    <p className="text-blue-200">{currentTestimonial.role}</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -105,7 +96,7 @@ export const Testimonials: React.FC<TestimonialsProps> = ({ regionName }) => {
                     </div>
                 </div>
                 <div className="flex justify-center gap-3 mt-8">
-                    {testimonialsData.map((_, i) => (
+                    {activeTestimonials.map((_, i) => (
                         <button key={i} onClick={() => setTestimonialIndex(i)} className={`w-3 h-3 rounded-full transition-all duration-300 ${testimonialIndex === i ? 'bg-ecuador-yellow scale-125' : 'bg-white/30 hover:bg-white/50'}`} aria-label={`Ir al testimonio ${i + 1}`} />
                     ))}
                 </div>

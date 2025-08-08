@@ -1,0 +1,173 @@
+{
+  "bc": [
+    {
+      "id": "t1-bc",
+      "quote": "Gracias a la Asociación, encontré un mentor en mi campo que fue clave para conseguir mi primer trabajo en Vancouver. ¡La comunidad es increíblemente solidaria!",
+      "author": "Ana García",
+      "role": "Diseñadora UX/UI",
+      "imageUrl": "https://randomuser.me/api/portraits/women/40.jpg"
+    },
+    {
+      "id": "t2-bc",
+      "quote": "Los eventos de networking en Surrey me abrieron puertas que no imaginaba. Pude presentar mi proyecto de importación a potenciales socios.",
+      "author": "David Chávez",
+      "role": "Emprendedor",
+      "imageUrl": "https://randomuser.me/api/portraits/men/50.jpg"
+    },
+    {
+      "id": "t3-bc",
+      "quote": "La guía de vivienda fue súper útil. Encontramos nuestro primer apartamento en Burnaby sin complicaciones y evitando las estafas comunes.",
+      "author": "Lucía Morales",
+      "role": "Estudiante Internacional",
+      "imageUrl": "https://randomuser.me/api/portraits/women/51.jpg"
+    },
+    {
+      "id": "t4-bc",
+      "quote": "Conecté con una familia ecuatoriana en Victoria a través del directorio. Ahora nuestros hijos juegan juntos y nos sentimos como en casa.",
+      "author": "Ricardo Zambrano",
+      "role": "Ingeniero Civil",
+      "imageUrl": "https://randomuser.me/api/portraits/men/52.jpg"
+    },
+    {
+      "id": "t5-bc",
+      "quote": "El apoyo para validar mis estudios fue fundamental. El proceso es complejo, pero con la orientación de la comunidad, todo fue más claro.",
+      "author": "Mónica Valdivieso",
+      "role": "Enfermera Registrada",
+      "imageUrl": "https://randomuser.me/api/portraits/women/53.jpg"
+    }
+  ],
+  "on": [
+    {
+      "id": "t1-on",
+      "quote": "El taller de adaptación de CV fue un antes y un después. En una semana, empecé a recibir llamadas para entrevistas en Toronto después de meses de silencio.",
+      "author": "Carlos Jiménez",
+      "role": "Gerente de Proyectos",
+      "imageUrl": "https://randomuser.me/api/portraits/men/46.jpg"
+    },
+    {
+      "id": "t2-on",
+      "quote": "Como emprendedora, el directorio comunitario me dio la visibilidad que necesitaba para lanzar mi negocio de catering en Ottawa. Mis primeros clientes fueron ecuatorianos que encontraron mi perfil aquí.",
+      "author": "Gabriela Andrade",
+      "role": "Fundadora de Sabor de Casa",
+      "imageUrl": "https://randomuser.me/api/portraits/women/22.jpg"
+    },
+    {
+      "id": "t3-on",
+      "quote": "Encontrar asesoría legal a bajo costo a través de los recursos de la plataforma me ahorró muchos dolores de cabeza con mi proceso migratorio.",
+      "author": "Javier Castillo",
+      "role": "Analista Financiero",
+      "imageUrl": "https://randomuser.me/api/portraits/men/23.jpg"
+    },
+    {
+      "id": "t4-on",
+      "quote": "Los eventos culturales en Mississauga son lo máximo. Me encanta poder compartir nuestras tradiciones y sentirme cerca de mi tierra.",
+      "author": "Isabela Torres",
+      "role": "Contadora",
+      "imageUrl": "https://randomuser.me/api/portraits/women/24.jpg"
+    },
+    {
+      "id": "t5-on",
+      "quote": "La bolsa de trabajo exclusiva para miembros me permitió encontrar una oportunidad en el sector tecnológico de Waterloo que no había visto en otros portales.",
+      "author": "Andrés Villacís",
+      "role": "Desarrollador Full-Stack",
+      "imageUrl": "https://randomuser.me/api/portraits/men/25.jpg"
+    }
+  ],
+  "mb": [
+    {
+      "id": "t1-mb",
+      "quote": "No sabía qué esperar de Winnipeg, pero la comunidad ecuatoriana aquí es pequeña pero muy unida. Conexión EC-CA fue el primer puente para conocerlos.",
+      "author": "Verónica Sosa",
+      "role": "Trabajadora Social",
+      "imageUrl": "https://randomuser.me/api/portraits/women/60.jpg"
+    },
+    {
+      "id": "t2-mb",
+      "quote": "La vida en Manitoba es más tranquila y asequible. Gracias a la guía de finanzas, pude planificar mis ahorros y comprar mi primera casa en Brandon.",
+      "author": "Miguel Ángel Vera",
+      "role": "Técnico en Manufactura",
+      "imageUrl": "https://randomuser.me/api/portraits/men/61.jpg"
+    },
+    {
+      "id": "t3-mb",
+      "quote": "Inicié mi pequeño negocio de artesanías y el directorio me ayudó a conseguir mis primeros clientes en el mercado local. ¡Increíble apoyo!",
+      "author": "Elena Paz",
+      "role": "Artesana y Emprendedora",
+      "imageUrl": "https://randomuser.me/api/portraits/women/62.jpg"
+    },
+    {
+      "id": "t4-mb",
+      "quote": "El proceso de nominación provincial (MPNP) es complejo. La información y los contactos que obtuve aquí fueron de gran ayuda para mi familia.",
+      "author": "Fernando Rojas",
+      "role": "Ingeniero Agrónomo",
+      "imageUrl": "https://randomuser.me/api/portraits/men/63.jpg"
+    },
+    {
+      "id": "t5-mb",
+      "quote": "Como estudiante en la Universidad de Manitoba, los recursos sobre vida académica y social me ayudaron a adaptarme rápidamente y a no sentirme solo.",
+      "author": "Paola Gutiérrez",
+      "role": "Estudiante de Ciencias",
+      "imageUrl": "https://randomuser.me/api/portraits/women/64.jpg"
+    }
+  ],
+  "ab": [
+    {
+      "id": "t1-ab",
+      "quote": "Calgary tiene una energía increíble. La plataforma me conectó con otros ingenieros ecuatorianos y rápidamente me sentí parte de una red profesional sólida.",
+      "author": "Diego Saltos",
+      "role": "Ingeniero de Petróleo",
+      "imageUrl": "https://randomuser.me/api/portraits/men/70.jpg"
+    },
+    {
+      "id": "t2-ab",
+      "quote": "Mi familia y yo amamos las montañas. Los eventos de senderismo organizados por la comunidad en Banff son nuestra actividad favorita de fin de semana.",
+      "author": "Marcela Nieto",
+      "role": "Fisioterapeuta",
+      "imageUrl": "https://randomuser.me/api/portraits/women/71.jpg"
+    },
+    {
+      "id": "t3-ab",
+      "quote": "Abrí mi restaurante de comida ecuatoriana en Edmonton y la publicidad en el directorio fue clave para el despegue. ¡La comunidad respondió enseguida!",
+      "author": "José Cárdenas",
+      "role": "Chef y Propietario",
+      "imageUrl": "https://randomuser.me/api/portraits/men/72.jpg"
+    },
+    {
+      "id": "t4-ab",
+      "quote": "Encontrar trabajo como soldador fue más rápido de lo que pensé gracias a los contactos que hice en un evento de Conexión EC-CA en Red Deer.",
+      "author": "Luis Tipán",
+      "role": "Técnico Soldador",
+      "imageUrl": "https://randomuser.me/api/portraits/men/73.jpg"
+    },
+    {
+      "id": "t5-ab",
+      "quote": "La guía sobre el sistema de salud en Alberta me ayudó a entender cómo registrar a mi familia y acceder a los servicios médicos sin confusiones.",
+      "author": "Carolina Tapia",
+      "role": "Madre y Administradora",
+      "imageUrl": "https://randomuser.me/api/portraits/women/74.jpg"
+    }
+  ],
+  "default": [
+    {
+        "id": "t1-default",
+        "quote": "Gracias a Conexión EC-CA, encontré un mentor en mi campo que fue clave para conseguir mi primer trabajo en Canadá. ¡La comunidad es increíblemente solidaria!",
+        "author": "Sofía Martínez",
+        "role": "Ingeniera de Software",
+        "imageUrl": "https://randomuser.me/api/portraits/women/34.jpg"
+    },
+    {
+        "id": "t2-default",
+        "quote": "El taller de adaptación de CV fue un antes y un después. En una semana, empecé a recibir llamadas para entrevistas después de meses de silencio. 100% recomendado.",
+        "author": "Carlos Jiménez",
+        "role": "Gerente de Proyectos",
+        "imageUrl": "https://randomuser.me/api/portraits/men/46.jpg"
+    },
+    {
+        "id": "t3-default",
+        "quote": "Como emprendedora, el directorio comunitario me dio la visibilidad que necesitaba para lanzar mi negocio. Mis primeros clientes fueron ecuatorianos que encontraron mi perfil aquí.",
+        "author": "Gabriela Andrade",
+        "role": "Fundadora de Sabor de Casa",
+        "imageUrl": "https://randomuser.me/api/portraits/women/22.jpg"
+    }
+  ]
+}
