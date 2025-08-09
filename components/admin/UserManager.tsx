@@ -8,6 +8,7 @@ import { CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '../icons';
 import { sendApprovalEmail } from '../../services/emailService';
 import { Modal } from '../Modal';
 import { UserDetailsDisplay } from '../UserDetailsDisplay';
+import { cityData } from '../../constants';
 
 // --- Componentes de UI Reutilizables ---
 const ActionButton: React.FC<{ onClick: () => void; className: string; children: React.ReactNode; disabled?: boolean }> = ({ onClick, className, children, disabled }) => (
@@ -30,8 +31,27 @@ const UserManager: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('Pendiente');
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const [provinceFilter, setProvinceFilter] = useState<string>('');
+    const [cityFilter, setCityFilter] = useState<string>('');
+    const [registrationDateStart, setRegistrationDateStart] = useState<string>('');
+    const [registrationDateEnd, setRegistrationDateEnd] = useState<string>('');
+    const [arrivalDateStart, setArrivalDateStart] = useState<string>('');
+    const [arrivalDateEnd, setArrivalDateEnd] = useState<string>('');
     const [isUserDetailsModalOpen, setIsUserDetailsModalOpen] = useState(false);
     const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
+
+    const provinces = useMemo(() => cityData.map(data => data.provincia), []);
+    const cities = useMemo(() => {
+        if (!provinceFilter) return [];
+        const selectedProvince = cityData.find(data => data.provincia === provinceFilter);
+        return selectedProvince ? selectedProvince.ciudades : [];
+    }, [provinceFilter]);
+
+    const formatDate = (timestamp: any) => {
+        if (!timestamp) return 'N/A';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString('es-CA'); // Formato YYYY-MM-DD
+    };
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -84,9 +104,54 @@ const UserManager: React.FC = () => {
             const searchMatch = searchQuery === '' ||
                 (user.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (user.email || '').toLowerCase().includes(searchQuery.toLowerCase());
-            return statusMatch && searchMatch;
+            
+            const provinceMatch = provinceFilter === '' || user.province === provinceFilter;
+            const cityMatch = cityFilter === '' || user.city === cityFilter;
+
+            const registrationDate = user.createdAt ? (user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt)) : null;
+            const arrivalDate = user.arrivalDateCanada ? (user.arrivalDateCanada.toDate ? user.arrivalDateCanada.toDate() : new Date(user.arrivalDateCanada)) : null;
+
+            const registrationDateMatch = (() => {
+                if (!registrationDateStart && !registrationDateEnd) return true;
+                if (!registrationDate) return false;
+
+                if (registrationDateStart) {
+                    const startDate = new Date(registrationDateStart);
+                    startDate.setUTCHours(0, 0, 0, 0);
+                    if (registrationDate < startDate) return false;
+                }
+
+                if (registrationDateEnd) {
+                    const endDate = new Date(registrationDateEnd);
+                    endDate.setUTCHours(23, 59, 59, 999);
+                    if (registrationDate > endDate) return false;
+                }
+
+                return true;
+            })();
+
+            const arrivalDateMatch = (() => {
+                if (!arrivalDateStart && !arrivalDateEnd) return true;
+                if (!arrivalDate) return false;
+
+                if (arrivalDateStart) {
+                    const startDate = new Date(arrivalDateStart);
+                    startDate.setUTCHours(0, 0, 0, 0);
+                    if (arrivalDate < startDate) return false;
+                }
+
+                if (arrivalDateEnd) {
+                    const endDate = new Date(arrivalDateEnd);
+                    endDate.setUTCHours(23, 59, 59, 999);
+                    if (arrivalDate > endDate) return false;
+                }
+
+                return true;
+            })();
+
+            return statusMatch && searchMatch && provinceMatch && cityMatch && registrationDateMatch && arrivalDateMatch;
         });
-    }, [allUsers, statusFilter, searchQuery]);
+    }, [allUsers, statusFilter, searchQuery, provinceFilter, cityFilter, registrationDateStart, registrationDateEnd, arrivalDateStart, arrivalDateEnd]);
 
     const badgeClasses: Record<string, string> = {
         [UserStatus.APROBADO]: 'bg-green-100 text-green-800',
@@ -106,6 +171,34 @@ const UserManager: React.FC = () => {
                         <option value={UserStatus.APROBADO}>Aprobado</option>
                         <option value={UserStatus.RECHAZADO}>Rechazado</option>
                     </select>
+                    <select value={provinceFilter} onChange={e => { setProvinceFilter(e.target.value); setCityFilter(''); }} className="p-2 border border-gray-300 rounded-md text-sm">
+                        <option value="">Todas las Provincias</option>
+                        {provinces.map(province => (
+                            <option key={province} value={province}>{province}</option>
+                        ))}
+                    </select>
+                    <select value={cityFilter} onChange={e => setCityFilter(e.target.value)} className="p-2 border border-gray-300 rounded-md text-sm" disabled={!provinceFilter}>
+                        <option value="">Todas las Ciudades</option>
+                        {cities.map(city => (
+                            <option key={city} value={city}>{city}</option>
+                        ))}
+                    </select>
+                    <div>
+                        <label htmlFor="registrationDateStart" className="text-sm text-gray-600">Registro (desde)</label>
+                        <input id="registrationDateStart" type="date" value={registrationDateStart} onChange={e => setRegistrationDateStart(e.target.value)} className="p-2 border border-gray-300 rounded-md text-sm w-full" />
+                    </div>
+                    <div>
+                        <label htmlFor="registrationDateEnd" className="text-sm text-gray-600">Registro (hasta)</label>
+                        <input id="registrationDateEnd" type="date" value={registrationDateEnd} onChange={e => setRegistrationDateEnd(e.target.value)} className="p-2 border border-gray-300 rounded-md text-sm w-full" />
+                    </div>
+                    <div>
+                        <label htmlFor="arrivalDateStart" className="text-sm text-gray-600">Llegada (desde)</label>
+                        <input id="arrivalDateStart" type="date" value={arrivalDateStart} onChange={e => setArrivalDateStart(e.target.value)} className="p-2 border border-gray-300 rounded-md text-sm w-full" />
+                    </div>
+                    <div>
+                        <label htmlFor="arrivalDateEnd" className="text-sm text-gray-600">Llegada (hasta)</label>
+                        <input id="arrivalDateEnd" type="date" value={arrivalDateEnd} onChange={e => setArrivalDateEnd(e.target.value)} className="p-2 border border-gray-300 rounded-md text-sm w-full" />
+                    </div>
                 </div>
                 {loading ? <p>Cargando...</p> : (
                     <div className="overflow-x-auto">
@@ -114,6 +207,11 @@ const UserManager: React.FC = () => {
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Provincia</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ciudad</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teléfono</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha de Registro</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha de Llegada</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                             </tr>
@@ -123,6 +221,11 @@ const UserManager: React.FC = () => {
                                 <tr key={user.id}>
                                     <td className="px-4 py-3 font-medium text-gray-900">{user.name}</td>
                                     <td className="px-4 py-3 text-gray-600">{user.email}</td>
+                                    <td className="px-4 py-3 text-gray-600">{user.province || 'N/A'}</td>
+                                    <td className="px-4 py-3 text-gray-600">{user.city || 'N/A'}</td>
+                                    <td className="px-4 py-3 text-gray-600">{user.phone || 'N/A'}</td>
+                                    <td className="px-4 py-3 text-gray-600">{formatDate(user.createdAt)}</td>
+                                    <td className="px-4 py-3 text-gray-600">{formatDate(user.arrivalDateCanada)}</td>
                                     <td className="px-4 py-3"><StatusBadge text={user.status || 'Pendiente'} className={badgeClasses[user.status || 'Pendiente']} /></td>
                                     <td className="px-4 py-3 space-x-2 flex items-center">
                                         <ActionButton onClick={() => handleOpenUserDetails(user)} className="bg-blue-100 text-blue-800 hover:bg-blue-200"><InformationCircleIcon className="w-4 h-4 inline mr-1" /> Detalles</ActionButton>
@@ -137,7 +240,7 @@ const UserManager: React.FC = () => {
                 )}
             </div>
             <Modal isOpen={isUserDetailsModalOpen} onClose={handleCloseUserDetails} title={`Detalles de ${selectedUserForDetails?.name || 'Usuario'}`}>
-                {selectedUserForDetails && <UserDetailsDisplay user={selectedUserForDetails} />}
+                {selectedUserForDetails && <UserDetailsDisplay user={selectedUserForDetails} />} 
             </Modal>
         </>
     );

@@ -104,6 +104,7 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
     const [formData, setFormData] = useState<Omit<RegistrationData, 'password'>>({
         name: '',
         email: '',
+        province: '',
         city: '',
         arrivalDateCanada: undefined,
         immigrationStatus: '',
@@ -131,6 +132,19 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
 
         if (name === "newsletterSubscription") {
             setFormData(prev => ({ ...prev, [name]: checked }));
+        } else if (name === 'city') {
+            const selectedCity = value;
+            let province = '';
+            if (selectedCity) {
+                // Encontrar la provincia correspondiente a la ciudad seleccionada
+                for (const provinceData of cityData) {
+                    if (provinceData.ciudades.includes(selectedCity)) {
+                        province = provinceData.provincia;
+                        break;
+                    }
+                }
+            }
+            setFormData(prev => ({ ...prev, city: selectedCity, province }));
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
         }

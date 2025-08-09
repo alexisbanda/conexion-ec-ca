@@ -124,6 +124,7 @@ export interface User {
   // --- Datos del Registro Inicial ---
   arrivalDateCanada?: Timestamp;
   city?: string;
+  province?: string;
   immigrationStatus?: string;
   supportNeeded?: string[];
   message?: string;
@@ -196,6 +197,7 @@ export interface RegistrationData {
   password?: string;
   arrivalDateCanada?: Date;
   city?: string;
+  province?: string;
   immigrationStatus?: string;
   supportNeeded?: string[];
   message?: string;

@@ -1,7 +1,7 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/services/userService.ts
 import { db } from '../firebaseConfig';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, updateDoc, Timestamp } from 'firebase/firestore';
-import { User, RegistrationData, UserStatus } from '../types';
+import { User, RegistrationData, UserStatus, ServiceCategory } from '../types';
 
 /**
  * Crea un nuevo documento de usuario en Firestore con los datos del registro inicial.
@@ -22,6 +22,7 @@ export const createUserDocument = async (uid: string, data: RegistrationData): P
             name: userData.name,
             email: userData.email,
             city: userData.city || '',
+            province: userData.province || '',
             immigrationStatus: userData.immigrationStatus || '',
             supportNeeded: userData.supportNeeded || [],
             message: userData.message || '',
@@ -127,13 +128,14 @@ export const updateUserStatus = async (userId: string, status: UserStatus): Prom
  * Actualiza los datos de un perfil de usuario desde el modal de perfil.
  * Solo permite modificar un subconjunto de campos.
  */
-export const updateUserProfile = async (uid: string, data: Partial<Pick<User, 'city' | 'message' | 'immigrationStatus' | 'supportNeeded' | 'arrivalDateCanada'>>): Promise<void> => {
+export const updateUserProfile = async (uid: string, data: Partial<Pick<User, 'city' | 'province' | 'message' | 'immigrationStatus' | 'supportNeeded' | 'arrivalDateCanada'>>): Promise<void> => {
     if (!db) throw new Error("Firestore no está inicializado.");
     const userDocRef = doc(db, 'users', uid);
     try {
         const updatableData: { [key: string]: any } = {};
 
         if (data.city !== undefined) updatableData.city = data.city;
+        if (data.province !== undefined) updatableData.province = data.province;
         if (data.message !== undefined) updatableData.message = data.message;
         if (data.immigrationStatus !== undefined) updatableData.immigrationStatus = data.immigrationStatus;
         if (data.supportNeeded !== undefined) updatableData.supportNeeded = data.supportNeeded;
