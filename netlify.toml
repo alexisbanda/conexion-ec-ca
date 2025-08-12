@@ -8,4 +8,10 @@
     [functions]
       # Directorio donde vivirán tus funciones serverless
       directory = "netlify/functions"
+
+    # Regla de redirección para SPAs (Single Page Applications)
+    [[redirects]]
+      from = "/*"
+      to = "/index.html"
+      status = 200
     
