@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"> {/* gap-8 a gap-6 */}
           {/* Logo and Description */}
           <div>
-            <h3 className="text-xl font-bold text-ecuador-yellow mb-2 font-montserrat">Conexión Migrante</h3> {/* mb-3 a mb-2 */}
+            <h3 className="text-xl font-bold text-ecuador-yellow mb-2 font-montserrat">Conexión Ecuatoriana en Canada</h3> {/* mb-3 a mb-2 */}
             <p className="text-sm mb-3 text-justify"> {/* mb-4 a mb-3 */}
               Fortaleciendo la comunidad ecuatoriana en Canadá. Apoyo, cultura y oportunidades.
             </p>
@@ -52,8 +52,8 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-lg font-semibold text-white mb-2">Contacto y Apoyo</h4> {/* mb-3 a mb-2 */}
             <ul className="space-y-1 text-sm mb-3"> {/* space-y-2 a space-y-1, mb-4 a mb-3 */}
-              <li>Email: <a href="mailto:info@conexionmigrante.ca" className="hover:text-ecuador-yellow transition-colors">info@conexionmigrante.ca</a></li>
-              <li>Teléfono: <span className="hover:text-ecuador-yellow transition-colors">+1 (XXX) XXX-XXXX</span></li>
+              <li>Email: <a href="mailto:info@conexionmigrante.ca" className="hover:text-ecuador-yellow transition-colors">admin@ecuatorianos.ca</a></li>
+              <li>Teléfono: <span className="hover:text-ecuador-yellow transition-colors">+1 (604) 841-1221</span></li>
             </ul>
             <p className="text-sm mb-2">Suscríbete para novedades:</p>
             <div className="flex">
@@ -66,9 +66,9 @@ export const Footer: React.FC = () => {
         <div className="border-t border-gray-700 pt-6 text-center text-sm"> {/* pt-8 a pt-6 */}
           <p>&copy; {currentYear} Conexión Migrante EC-CA. Todos los derechos reservados.</p>
           <div className="mt-2 space-x-4">
-            <a href="#privacy" className="hover:text-ecuador-yellow transition-colors">Política de Privacidad</a>
+            <a href="/privacy-policy" className="hover:text-ecuador-yellow transition-colors">Política de Privacidad</a>
             <span>|</span>
-            <a href="#terms" className="hover:text-ecuador-yellow transition-colors">Términos de Servicio</a>
+            <a href="/terms-of-service" className="hover:text-ecuador-yellow transition-colors">Términos de Servicio</a>
           </div>
         </div>
       </div>

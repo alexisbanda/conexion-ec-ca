@@ -266,7 +266,7 @@ const RegisterForm: React.FC<{ onSwitchToLogin: () => void; }> = ({ onSwitchToLo
             </div>
 
             <p className="text-xs text-gray-500 mt-4">
-                Al crear una cuenta, aceptas nuestra <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:underline">Política de Privacidad</a> y los <a href="/terminos-de-servicio" target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:underline">Términos de Servicio</a>. Tus datos serán utilizados para personalizar tu experiencia y mejorar nuestros servicios.
+                Al crear una cuenta, aceptas nuestra <a href="/politica-de-privacidad" target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:underline">Política de Privacidad</a> y los <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-ecuador-blue hover:underline">Términos de Servicio</a>. Tus datos serán utilizados para personalizar tu experiencia y mejorar nuestros servicios.
             </p>
             <button type="submit" disabled={isSubmitting} className={btnPrimary}>{isSubmitting ? 'Registrando...' : 'Crear Cuenta'}</button>
             <p className="text-sm text-center text-gray-600">¿Ya tienes cuenta?{' '}<button type="button" onClick={onSwitchToLogin} className="font-medium text-ecuador-red hover:text-red-700">Inicia sesión</button></p>

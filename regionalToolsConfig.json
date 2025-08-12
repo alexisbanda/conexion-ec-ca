@@ -27,12 +27,12 @@
       "ctaText": "Ir a Grupo ON"
     },
     "tool5a": {
-      "icon": "IdeaIcon",
-      "title": "Red Social Ecuatoriano en Toronto",
-      "description": "Comunidad de ecuatorianos viviendo en Ontario en Instagram!",
-      "url": "https://www.facebook.com/groups/ecuatorianosenelmundo/",
-      "backgroundImageUrl": "https://picsum.photos/seed/on_wise/600/400",
-      "ctaText": "Ver Guía ON"
+      "icon": "UserGroupIcon",
+      "title": "Red Social Ecuatorianos en Toronto",
+      "description": "Comunidad de ecuatorianos viviendo en Toronto en Instagram!",
+      "url": "https://www.instagram.com/ecuadorentoronto/",
+      "backgroundImageUrl": "https://cdn.pixabay.com/photo/2021/06/15/12/14/instagram-6338393_1280.png",
+      "ctaText": "Instagram de la comunidad"
     }
   },
   "mb": {

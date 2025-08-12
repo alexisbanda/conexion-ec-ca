@@ -22,6 +22,8 @@ import { MemberDashboard } from './components/MemberDashboard';
 import AdminRoute from './components/AdminRoute';
 import { EventDetailPage } from './components/EventDetailPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import { Chatbot } from './components/Chatbot';
 import AdminLayout from './components/admin/layout/AdminLayout';
 import NationalRegionSelector from './components/NationalRegionSelector';
@@ -107,7 +109,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const App: React.FC = () => {
     const location = useLocation();
-    const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/onboarding');
+    const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/onboarding') || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service';
     const isRegionSelectorPage = location.pathname === '/';
 
     useEffect(() => {
@@ -130,6 +132,8 @@ const App: React.FC = () => {
                         <Route path="/:region" element={<LandingPage />} />
                         <Route path="/pending-approval" element={<PendingApprovalPage />} />
                         <Route path="/events/:eventId" element={<EventDetailPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                        <Route path="/terms-of-service" element={<TermsOfService />} />
                         <Route
                             path="/dashboard"
                             element={
