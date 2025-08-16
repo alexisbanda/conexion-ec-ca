@@ -179,9 +179,9 @@ export const EventsNews: React.FC = () => {
             ) : error ? (
                 <p className="text-center text-red-500">{error}</p>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex overflow-x-auto space-x-4 pb-4 md:grid md:grid-cols-2 md:gap-6 md:space-x-0">
                   {filteredNews.map((newsItem) => (
-                      <div key={newsItem.id} className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow flex flex-col">
+                      <div key={newsItem.id} className="w-5/6 md:w-auto flex-shrink-0 bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow flex flex-col">
                         <div className="flex justify-between items-start mb-2">
                           <h4 className="text-xl font-semibold text-ecuador-blue mr-2">{newsItem.title}</h4>
                           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ml-auto whitespace-nowrap ${newsItem.province ? 'bg-ecuador-yellow text-ecuador-blue' : 'bg-gray-200 text-gray-800'}`}>

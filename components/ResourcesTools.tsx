@@ -432,7 +432,7 @@ export const ResourcesTools: React.FC = () => {
                 Guías Esenciales para Recién Llegados
             </motion.h3>
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 [grid-auto-rows:minmax(200px,auto)]"
+              className="mt-6 flex overflow-x-auto md:overflow-visible space-x-4 pb-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6 md:space-x-0 [grid-auto-rows:minmax(200px,auto)]"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -443,7 +443,7 @@ export const ResourcesTools: React.FC = () => {
                     variants={itemVariants}
                     whileHover={{ scale: 1.03, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
                     key={essentialGuidesData[0].id}
-                    className="lg:col-span-2 lg:row-span-1 bg-gradient-to-r from-ecuador-blue to-blue-700 p-6 rounded-2xl shadow-xl cursor-pointer flex items-center relative overflow-hidden group"
+                    className="w-5/6 md:w-auto flex-shrink-0 lg:col-span-2 lg:row-span-1 bg-gradient-to-r from-ecuador-blue to-blue-700 p-6 rounded-2xl shadow-xl cursor-pointer flex items-center relative overflow-hidden group"
                     onClick={() => openResourceModal(essentialGuidesData[0])}
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(essentialGuidesData[0])}
                     aria-label={`Abrir detalles de ${essentialGuidesData[0].title}`}
@@ -471,7 +471,7 @@ export const ResourcesTools: React.FC = () => {
                       key={resource.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                      className={`${layoutClasses} bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
+                      className={`w-5/6 md:w-auto flex-shrink-0 ${layoutClasses} bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
                       onClick={() => openResourceModal(resource)}
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
                       aria-label={`Abrir detalles de ${resource.title}`}
@@ -490,7 +490,7 @@ export const ResourcesTools: React.FC = () => {
                   </motion.div>
                 )
               })}
-              <motion.div variants={itemVariants} className="h-full lg:col-span-1 lg:row-span-1 rounded-2xl">
+              <motion.div variants={itemVariants} className="w-5/6 md:w-auto flex-shrink-0 h-full lg:col-span-1 lg:row-span-1 rounded-2xl">
                 <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
             </motion.div>
@@ -508,7 +508,7 @@ export const ResourcesTools: React.FC = () => {
                 Herramientas del Día a Día
             </motion.h3>
             <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 [grid-auto-rows:minmax(200px,auto)]"
+              className="mt-6 flex overflow-x-auto md:overflow-visible space-x-4 pb-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6 md:space-x-0 [grid-auto-rows:minmax(200px,auto)]"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -519,7 +519,7 @@ export const ResourcesTools: React.FC = () => {
                     key={toolsData[0].id}
                     variants={itemVariants}
                     whileHover={{ y: -5, boxShadow: "0px 15px 30px rgba(0,0,0,0.2)" }}
-                    className="lg:col-span-2 lg:row-span-2 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between text-center relative overflow-hidden group"
+                    className="w-5/6 md:w-auto flex-shrink-0 lg:col-span-2 lg:row-span-2 rounded-2xl shadow-xl cursor-pointer flex flex-col justify-between text-center relative overflow-hidden group"
                     onClick={() => openToolModal(toolsData[0])}
                     role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openToolModal(toolsData[0])}
                     aria-label={`Abrir herramienta ${toolsData[0].title}`}
@@ -568,7 +568,7 @@ export const ResourcesTools: React.FC = () => {
                       key={tool.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                      className={`${layoutClasses[index]} p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative overflow-hidden
+                      className={`w-5/6 md:w-auto flex-shrink-0 ${layoutClasses[index]} p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative overflow-hidden
                           ${tool.backgroundImageUrl ? 'bg-cover bg-center' : 'bg-ecuador-blue-light'}
                           ${tool.isPremium && !authContext?.isAuthenticated ? 'cursor-not-allowed' : ''}`}
                       style={tool.backgroundImageUrl ? { backgroundImage: `url(${tool.backgroundImageUrl})` } : {}}
@@ -598,7 +598,7 @@ export const ResourcesTools: React.FC = () => {
                   </motion.div>
                 )
               })}
-               <motion.div variants={itemVariants} className="h-full lg:col-span-2 lg:row-span-1 rounded-2xl">
+               <motion.div variants={itemVariants} className="w-5/6 md:w-auto flex-shrink-0 h-full lg:col-span-2 lg:row-span-1 rounded-2xl">
                 <AdSlot location="tools_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-blue-light" className="col-span-1 h-full rounded-2xl" />
               </motion.div>
             </motion.div>
