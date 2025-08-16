@@ -51,7 +51,9 @@ import {
     faGift,
     faLightbulb,
     faTag,
-    faTrophy
+    faTrophy,
+    faArrowTrendUp,
+    faBuilding
 } from '@fortawesome/free-solid-svg-icons';
 // Importa el componente FontAwesomeIcon para usar los iconos en React
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -314,4 +316,16 @@ export const TrophyIcon: React.FC<IconProps> = (props) => (
 
 export const AchievementsIndicators: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faTrophy} {...props} />
+);
+
+export const ArrowTrendingUpIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faArrowTrendUp} {...props} />
+);
+
+export const BuildingLibraryIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faBuilding} {...props} />
+);
+
+export const SparklesIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faBuilding} {...props} />
 );

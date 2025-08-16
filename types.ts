@@ -58,6 +58,8 @@ export interface Testimonial {
   imageUrl?: string;
 }
 
+export type GuideStage = 'Recién Llegado' | 'Estableciéndose' | 'Residente Establecido';
+
 export interface Resource {
   id: string;
   icon: React.ReactNode;
@@ -67,6 +69,7 @@ export interface Resource {
   isPremium?: boolean;
   knowledgePoints?: { question: string, answer: string }[];
   downloadUrl?: string;
+  stage: GuideStage;
 }
 
 export interface Tool {

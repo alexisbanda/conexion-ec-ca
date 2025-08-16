@@ -2,8 +2,8 @@ import React, { useState, useMemo, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { regions } from './NationalRegionSelector';
-import { Resource, Tool, ModalState, ModalContentType } from '../types';
-import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon } from './icons';
+import { Resource, Tool, ModalState, ModalContentType, GuideStage } from '../types';
+import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon, BuildingLibraryIcon, ArrowTrendingUpIcon, SparklesIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
 import { AuthContext } from '../contexts/AuthContext';
@@ -86,6 +86,7 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
 
 export const ResourcesTools: React.FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
+  const [activeTab, setActiveTab] = useState<GuideStage>('Recién Llegado');
   const authContext = useContext(AuthContext);
 
   const closeModal = () => {
@@ -195,109 +196,108 @@ export const ResourcesTools: React.FC = () => {
 
 
   const essentialGuidesData: Resource[] = useMemo(() => ([
+    // Etapa 1: Recién Llegado
     {
       id: 'guide1',
       icon: <HomeIcon className="w-10 h-10" />,
       title: `Guía de Vivienda en ${regionName}`,
       description: 'Aprende a buscar, entender contratos y conocer tus derechos como inquilino.',
-      details: `Encontrar tu primer hogar en ${regionName} puede ser un desafío. Esta guía te lleva de la mano, desde la búsqueda inicial hasta la firma del contrato, para que tomes decisiones informadas y seguras.`,
+      stage: 'Recién Llegado',
       isPremium: true,
       downloadUrl: `/${shortName}/guia-vivienda-premium.pdf`,
-      knowledgePoints: [
-          { question: '¿Cuáles son mis derechos y obligaciones como inquilino?', answer: 'Tus derechos incluyen privacidad, un lugar seguro y el derecho a no ser discriminado.' },
-          { question: '¿Cómo identificar y evitar estafas de alquiler comunes?', answer: 'Desconfía de precios demasiado bajos, presión para pagar rápido o solicitudes de información personal excesiva.' },
-          { question: '¿Qué significan los términos "damage deposit" y "utilities"?', answer: 'El "damage deposit" es un depósito reembolsable por daños. "Utilities" son servicios públicos como luz, agua, gas.' },
-          { question: '¿Necesito un historial de crédito para poder alquilar?', answer: 'No siempre es obligatorio, pero ayuda. Puedes ofrecer referencias de empleadores o de arrendadores anteriores.' },
-      ]
-    },
-    {
-      id: 'guide2',
-      icon: <BriefcaseIcon className="w-10 h-10" />,
-      title: `Guía Laboral en ${regionName}`,
-      description: `Adapta tu CV, optimiza tu LinkedIn y prepárate para las entrevistas de trabajo en ${regionName}.`,
-      details: `El mercado laboral de ${regionName} tiene sus propias reglas. Te enseñamos a "traducir" tu experiencia al formato local, a crear un perfil de LinkedIn que atrae reclutadores y a responder con confianza en las entrevistas.`,
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-laboral-premium.pdf`,
-      knowledgePoints: [
-          { question: `¿Cuál es la diferencia clave entre un "resume" y un CV en ${regionName}?`, answer: `En ${regionName}, "resume" es más común y conciso (1-2 páginas), mientras CV (Curriculum Vitae) es más largo y detallado para academia/investigación.` },
-          { question: '¿Cómo responder a la pregunta "Háblame de ti" (Tell me about yourself)?', answer: 'Usa la fórmula "presente-pasado-futuro": quién eres ahora, qué hiciste relevante y qué buscas a futuro.' },
-          { question: `¿Debo incluir una foto o mi edad en el currículum en ${regionName}?`, answer: `No, en ${regionName} no se recomienda incluir foto, edad o estado civil para evitar discriminación.` },
-          { question: '¿Qué son las "soft skills" y por qué son tan importantes aquí?', answer: 'Son habilidades interpersonales como comunicación, trabajo en equipo, resolución de problemas; son cruciales para el éxito en el ambiente laboral canadiense.' },
-      ]
     },
     {
       id: 'guide3',
       icon: <CurrencyDollarIcon className="w-10 h-10" />,
       title: 'Finanzas para Recién Llegados',
       description: 'Abre una cuenta bancaria, entiende el puntaje de crédito y los impuestos básicos.',
-      details: `Navegar el sistema financiero es clave para tu estabilidad en ${regionName}. Esta guía desmitifica conceptos como el puntaje de crédito y los impuestos, dándote una base sólida para empezar con el pie derecho.`,
+      stage: 'Recién Llegado',
       isPremium: false,
       downloadUrl: `/${shortName}/guia-finanzas-publica.pdf`,
-      knowledgePoints: [
-          { question: `¿Qué necesito para abrir mi primera cuenta bancaria en ${regionName}?`, answer: `Identificación (pasaporte), prueba de residencia, y tu número de Seguro Social (SIN).` },
-          { question: '¿Qué es el "credit score" y cómo empiezo a construirlo desde cero?', answer: 'Es un número que evalúa tu riesgo crediticio. Empieza pagando tus cuentas a tiempo, obteniendo una tarjeta de crédito asegurada y usándola responsablemente.' },
-          { question: '¿Tengo que declarar impuestos en mi primer año aunque no haya trabajado?', answer: 'Sí, es recomendable. Puedes recibir beneficios y reembolsos, incluso si tus ingresos son bajos.' },
-          { question: '¿Qué son las TFSA y RRSP y cuál me conviene más?', answer: 'TFSA (Tax-Free Savings Account) permite crecer dinero libre de impuestos. RRSP (Registered Retirement Savings Plan) es para ahorros de jubilación con ventajas fiscales. Depende de tus objetivos.' },
-      ]
     },
     {
       id: 'guide4',
       icon: <AcademicCapIcon className="w-10 h-10" />,
       title: 'Validación de Títulos',
       description: `Descubre cómo iniciar el proceso para que tu profesión sea reconocida en ${regionName}.`,
-      details: `¿Eres ingeniero, médico o contador? El proceso para validar tus credenciales en ${regionName} puede ser complejo. Te damos el mapa inicial con los organismos clave (como WES) y los pasos a seguir para que tu valiosa experiencia sea reconocida aquí.`,
+      stage: 'Recién Llegado',
       isPremium: false,
       downloadUrl: `/${shortName}/guia-titulos-publica.pdf`,
-      knowledgePoints: [
-          { question: '¿Qué es una Evaluación de Credenciales Educativas (ECA) y para qué sirve?', answer: 'Es un informe que verifica que tu diploma extranjero es válido y equivalente a uno canadiense. Se necesita para algunos programas de inmigración.' },
-          { question: '¿Cuál es la diferencia entre WES, ICAS e IQAS?', answer: 'Son diferentes organismos de evaluación. WES es el más reconocido para fines de inmigración y empleo general. Los otros son provinciales o para profesiones específicas.' },
-          { question: '¿Mi título será reconocido automáticamente o necesito certificaciones adicionales?', answer: 'No siempre es automático. Muchas profesiones están reguladas y requieren licencias o certificaciones adicionales en Canadá.' },
-          { question: '¿Dónde puedo encontrar información sobre los cuerpos regulatorios de mi profesión?', answer: 'Cada provincia tiene sus propios organismos reguladores. Busca en el sitio web de CICIC (Canadian Information Centre for International Credentials).' },
-      ]
-    },
-    {
-      id: 'guide5',
-      icon: <HeartIcon className="w-10 h-10" />,
-      title: 'Salud Mental y Bienestar',
-      description: `Recursos y apoyo para navegar el bienestar emocional en tu nueva vida en ${regionName}.`,
-      details: `La migración puede ser un reto emocional. Esta guía te ofrece herramientas y contactos para cuidar tu salud mental, entender los servicios disponibles y encontrar el apoyo que necesitas para florecer en ${regionName}.`,
-      isPremium: false,
-      downloadUrl: `/${shortName}/guia-salud-mental.pdf`,
-      knowledgePoints: [
-          { question: `¿Dónde puedo encontrar apoyo psicológico y culturalmente sensible en ${regionName}?`, answer: `Existen organizaciones comunitarias y servicios de salud mental que ofrecen apoyo en varios idiomas y con perspectiva cultural.` },
-          { question: '¿Cómo funciona el sistema de salud mental en Canadá?', answer: 'Generalmente se accede a través de tu médico de cabecera, quien puede referirte a especialistas o servicios comunitarios. Algunos servicios de telemedicina también están disponibles.' },
-          { question: '¿Es normal sentirse solo o estresado al emigrar?', answer: 'Sí, es muy común. La adaptación cultural y la separación familiar pueden generar estrés, ansiedad o tristeza. Buscar apoyo es una señal de fortaleza.' },
-      ]
     },
     {
       id: 'guide6',
       icon: <BookOpenIcon className="w-10 h-10" />,
       title: 'Navegación Legal Básica',
       description: `Guía simple sobre tus derechos y responsabilidades legales en ${regionName}.`,
-      details: `Entender las leyes en ${regionName} es fundamental. Esta guía simplifica conceptos legales clave sobre tus derechos laborales, el sistema judicial y cómo acceder a asistencia legal gratuita si lo necesitas.`,
+      stage: 'Recién Llegado',
       isPremium: false,
       downloadUrl: `/${shortName}/guia-legal-basica.pdf`,
-      knowledgePoints: [
-          { question: `¿Cuáles son mis derechos fundamentales como residente o trabajador en ${regionName}?`, answer: `Derechos laborales (salario mínimo, horas de trabajo, ambiente seguro), derecho a la privacidad, y protección contra la discriminación.` },
-          { question: '¿Dónde puedo obtener asistencia legal gratuita o de bajo costo?', answer: 'Organizaciones de Legal Aid, clínicas legales universitarias y algunas ONGs ofrecen servicios gratuitos o a bajo costo para inmigrantes.' },
-          { question: '¿Qué es el "common law" y cómo me afecta?', answer: 'Es la ley basada en decisiones judiciales anteriores. Afecta varias áreas, incluyendo relaciones de pareja y derechos de propiedad.' },
-      ]
+    },
+    // Etapa 2: Estableciéndose
+    {
+      id: 'guide2',
+      icon: <BriefcaseIcon className="w-10 h-10" />,
+      title: `Guía Laboral en ${regionName}`,
+      description: `Adapta tu CV, optimiza tu LinkedIn y prepárate para las entrevistas de trabajo en ${regionName}.`,
+      stage: 'Estableciéndose',
+      isPremium: true,
+      downloadUrl: `/${shortName}/guia-laboral-premium.pdf`,
     },
     {
       id: 'guide7',
       icon: <UsersIcon className="w-10 h-10" />,
       title: 'Participación Comunitaria',
       description: `Descubre cómo involucrarte, hacer amigos y expandir tu red en ${regionName}.`,
-      details: `La integración va más allá del trabajo. Esta guía te muestra cómo unirte a grupos, participar en eventos locales y encontrar oportunidades de voluntariado para construir tu red social y sentirte parte de la comunidad en ${regionName}.`,
+      stage: 'Estableciéndose',
       isPremium: false,
       downloadUrl: `/${shortName}/guia-participacion-comunitaria.pdf`,
-      knowledgePoints: [
-          { question: `¿Cómo puedo conocer gente nueva en mi ciudad en ${regionName}?`, answer: `Participa en eventos comunitarios, únete a clubes o grupos de interés (ej. a través de Meetup), o a través de voluntariado.` },
-          { question: '¿Qué tipos de grupos comunitarios existen para migrantes?', answer: 'Hay grupos basados en nacionalidad, idioma, profesión, pasatiempos, y organizaciones de apoyo a recién llegados.' },
-          { question: '¿Por qué es importante el voluntariado para mi integración?', answer: 'Es una excelente forma de ganar experiencia canadiense, mejorar el idioma, hacer contactos y contribuir a la comunidad.' },
-      ]
+    },
+    {
+      id: 'guide-new-1',
+      icon: <ArrowTrendingUpIcon className="w-10 h-10" />,
+      title: 'Optimiza tu Crédito',
+      description: 'Estrategias probadas para mejorar tu puntaje de crédito y acceder a mejores productos financieros.',
+      stage: 'Estableciéndose',
+      isPremium: true,
+    },
+    {
+      id: 'guide-new-2',
+      icon: <HomeIcon className="w-10 h-10" />,
+      title: 'Comprando tu Primera Casa',
+      description: 'El proceso de compra de vivienda en Canadá, desde el down payment hasta la hipoteca.',
+      stage: 'Estableciéndose',
+      isPremium: true,
+    },
+    // Etapa 3: Residente Establecido
+    {
+      id: 'guide-new-3',
+      icon: <BuildingLibraryIcon className="w-10 h-10" />,
+      title: 'El Camino a la Ciudadanía',
+      description: 'Requisitos, proceso de aplicación y preparación para el examen de ciudadanía.',
+      stage: 'Residente Establecido',
+      isPremium: true,
+    },
+    {
+      id: 'guide-new-4',
+      icon: <SparklesIcon className="w-10 h-10" />,
+      title: 'Invirtiendo en Canadá',
+      description: 'Una introducción a RRSP, TFSA y otras opciones de inversión para hacer crecer tu patrimonio.',
+      stage: 'Residente Establecido',
+      isPremium: true,
+    },
+    {
+      id: 'guide-new-5',
+      icon: <BriefcaseIcon className="w-10 h-10" />,
+      title: 'Emprendimiento 101',
+      description: 'Pasos iniciales para registrar y lanzar tu propio negocio en Canadá.',
+      stage: 'Residente Establecido',
+      isPremium: true,
     },
   ]), [regionName, shortName]);
+
+  const filteredGuides = useMemo(() => {
+    return essentialGuidesData.filter(guide => guide.stage === activeTab);
+  }, [activeTab, essentialGuidesData]);
 
 
   const openResourceModal = (resource: Resource) => {
@@ -422,63 +422,63 @@ export const ResourcesTools: React.FC = () => {
 
           {/* --- SECCIÓN DE GUÍAS ESENCIALES --- */}
           <div className="mb-16">
-            <motion.h3
-              className="text-2xl font-semibold text-ecuador-blue mb-8 font-montserrat relative pb-2 border-b-2 border-ecuador-red inline-block"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.5 }}
-              variants={titleVariants}
-            >
-                Guías Esenciales para Recién Llegados
-            </motion.h3>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <h3 className="text-2xl font-semibold text-ecuador-blue font-montserrat relative pb-2 border-b-2 border-ecuador-red inline-block whitespace-nowrap">
+                    Guías por Etapa
+                </h3>
+
+                {/* Mobile Dropdown */}
+                <div className="w-full md:hidden relative">
+                    <select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value as GuideStage)}
+                        className="appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-gray-500 focus:ring-2 focus:ring-ecuador-yellow"
+                        aria-label="Seleccionar etapa de migrante"
+                    >
+                        {(['Recién Llegado', 'Estableciéndose', 'Residente Establecido'] as GuideStage[]).map(tab => (
+                            <option key={tab} value={tab}>{tab}</option>
+                        ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <ChevronDownIcon className="w-5 h-5" />
+                    </div>
+                </div>
+
+                {/* Desktop Tabs */}
+                <div className="hidden md:flex items-center gap-2 p-1 rounded-full bg-ecuador-blue-light">
+                    {(['Recién Llegado', 'Estableciéndose', 'Residente Establecido'] as GuideStage[]).map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`${activeTab === tab ? 'bg-white text-ecuador-blue shadow' : 'text-gray-600 hover:bg-white/60'} px-4 py-2 text-sm font-semibold rounded-full transition-all whitespace-nowrap`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             <motion.div
               className="mt-6 flex overflow-x-auto md:overflow-visible space-x-4 pb-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-6 md:space-x-0 [grid-auto-rows:minmax(200px,auto)]"
+              key={activeTab} // Add key to re-trigger animations
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
+              animate="visible"
+              exit="hidden"
             >
-              {essentialGuidesData.length > 0 && (
-                <motion.div
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.03, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                    key={essentialGuidesData[0].id}
-                    className="w-5/6 md:w-auto flex-shrink-0 lg:col-span-2 lg:row-span-1 bg-gradient-to-r from-ecuador-blue to-blue-700 p-6 rounded-2xl shadow-xl cursor-pointer flex items-center relative overflow-hidden group"
-                    onClick={() => openResourceModal(essentialGuidesData[0])}
-                    role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(essentialGuidesData[0])}
-                    aria-label={`Abrir detalles de ${essentialGuidesData[0].title}`}
-                >
-                    {essentialGuidesData[0].isPremium && (
-                        <div className="absolute top-3 right-3 flex items-center bg-ecuador-red text-white text-xs font-bold px-2 py-1 rounded-full z-10">
-                            <LockClosedIcon className="w-3 h-3 mr-1" /> Exclusivo
-                        </div>
-                    )}
-                    <div className="mr-5 text-white bg-white/20 p-3 rounded-full">{essentialGuidesData[0].icon}</div>
-                    <div className="flex-grow">
-                        <h4 className="text-xl font-bold text-white mb-1">{essentialGuidesData[0].title}</h4>
-                        <p className="text-blue-100 text-sm">{essentialGuidesData[0].description}</p>
-                    </div>
-                    <ChevronRightIcon className="w-10 h-10 text-ecuador-yellow ml-5 transform transition-transform group-hover:translate-x-1" />
-                </motion.div>
-              )}
-
-              {essentialGuidesData.slice(1, 6).map((resource, index) => {
-                const isWideCard = resource.id === 'guide4_disabled';
-                const layoutClasses = isWideCard ? 'lg:col-span-2' : 'lg:col-span-1';
-                
-                return (
+              {filteredGuides.map((resource) => (
                   <motion.div
                       key={resource.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
-                      className={`w-5/6 md:w-auto flex-shrink-0 ${layoutClasses} bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
+                      className={`w-5/6 md:w-auto flex-shrink-0 bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
                       onClick={() => openResourceModal(resource)}
                       role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
                       aria-label={`Abrir detalles de ${resource.title}`}
                   >
                     {resource.isPremium && (
                       <div className="absolute top-2 right-2 flex items-center bg-ecuador-red text-white text-xs font-bold px-2 py-1 rounded-full">
-                        <LockClosedIcon className="w-3 h-3 mr-1" /> Con Registro
+                        <LockClosedIcon className="w-3 h-3 mr-1" /> {resource.isPremium ? 'Exclusivo' : 'Con Registro'}
                       </div>
                     )}
                     <div className="text-ecuador-red mb-4">{resource.icon}</div>
@@ -489,10 +489,7 @@ export const ResourcesTools: React.FC = () => {
                     </span>
                   </motion.div>
                 )
-              })}
-              <motion.div variants={itemVariants} className="w-5/6 md:w-auto flex-shrink-0 h-full lg:col-span-1 lg:row-span-1 rounded-2xl">
-                <AdSlot location="guides_section_ad_demo" isDemoPlaceholder={true} baseBgColorClass="bg-ecuador-yellow-light" className="col-span-1 h-full rounded-2xl" />
-              </motion.div>
+              )}
             </motion.div>
           </div>
 
