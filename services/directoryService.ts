@@ -123,17 +123,19 @@ export const updateService = async (serviceId: string, data: Partial<CommunitySe
 };
 
 /**
- * Obtiene todos los servicios para el panel de administración, sin importar su estado.
+ * Obtiene todos los servicios para el panel de administración, con filtros opcionales.
  */
-export const getAllServicesForAdmin = async (): Promise<CommunityServiceItem[]> => {
+export const getAllServicesForAdmin = async (filters?: { province?: string }): Promise<CommunityServiceItem[]> => {
     if (!db) throw new Error("Firestore no está inicializado.");
     try {
         const servicesCollection = collection(db, 'services');
-        const q = query(
-            servicesCollection,
-            // where('status', '==', ServiceStatus.PENDIENTE), // Temporalmente comentado para pruebas
-            orderBy('createdAt', 'asc')
-        );
+        const queryConstraints = [orderBy('createdAt', 'asc')];
+
+        if (filters?.province) {
+            queryConstraints.push(where('province', '==', filters.province));
+        }
+
+        const q = query(servicesCollection, ...queryConstraints);
         const querySnapshot = await getDocs(q);
 
         const services: CommunityServiceItem[] = [];
@@ -142,7 +144,7 @@ export const getAllServicesForAdmin = async (): Promise<CommunityServiceItem[]> 
         });
         return services;
     } catch (error) {
-        console.error("Error al obtener los servicios pendientes: ", error);
+        console.error("Error al obtener los servicios para admin: ", error);
         return [];
     }
 };

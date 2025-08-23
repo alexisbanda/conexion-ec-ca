@@ -53,7 +53,8 @@ import {
     faTag,
     faTrophy,
     faArrowTrendUp,
-    faBuilding
+    faBuilding,
+    faPencilSquare
 } from '@fortawesome/free-solid-svg-icons';
 // Importa el componente FontAwesomeIcon para usar los iconos en React
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -328,4 +329,8 @@ export const BuildingLibraryIcon: React.FC<IconProps> = (props) => (
 
 export const SparklesIcon: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faBuilding} {...props} />
+);
+
+export const PencilSquareIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faPencilSquare} {...props} />
 );

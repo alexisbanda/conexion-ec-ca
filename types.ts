@@ -119,7 +119,8 @@ export interface User {
   id: string;
   name: string | null; // Nombre completo del registro
   email: string | null;
-  role?: 'admin' | 'member';
+  role?: 'admin' | 'regional_admin' | 'member';
+  managedProvince?: string; // Solo para regional_admin
   status?: UserStatus;
   createdAt?: Timestamp;
   onboardingCompleted?: boolean;
@@ -337,7 +338,7 @@ export interface UserForAdmin {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'member';
+  role: 'admin' | 'regional_admin' | 'member';
   status: UserStatus;
   createdAt: Timestamp;
   onboardingCompleted: boolean;

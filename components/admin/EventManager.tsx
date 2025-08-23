@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { ContentManager } from '../ContentManager';
 import * as eventService from '../../services/eventService';
 import { Timestamp } from 'firebase/firestore';
 import { EventItem } from '../../types';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const eventApi = {
     getAll: eventService.getAllEventsForAdmin,
@@ -26,6 +27,11 @@ const eventColumns = [
 ];
 
 const EventManager: React.FC = () => {
+    const auth = useContext(AuthContext);
+
+    const queryFilter = auth?.user?.role === 'regional_admin' && auth.user.managedProvince
+        ? { province: auth.user.managedProvince }
+        : undefined;
 
     return (
         <ContentManager
@@ -33,6 +39,7 @@ const EventManager: React.FC = () => {
             itemType="event"
             api={eventApi}
             columns={eventColumns}
+            queryFilter={queryFilter}
         />
     );
 };

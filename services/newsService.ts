@@ -67,10 +67,17 @@ export const getPaginatedPublicNews = async (lastVisible: DocumentSnapshot | nul
 
 
 // Obtiene todas las noticias para el panel de admin
-export const getAllNews = async (): Promise<NewsItem[]> => {
+export const getAllNews = async (filters?: { province?: string }): Promise<NewsItem[]> => {
     if (!db) throw new Error("Firestore no inicializado.");
     const newsCollection = collection(db, 'news');
-    const q = query(newsCollection, orderBy('publishedAt', 'desc'));
+    
+    const queryConstraints = [orderBy('publishedAt', 'desc')];
+
+    if (filters?.province) {
+        queryConstraints.push(where('province', '==', filters.province));
+    }
+
+    const q = query(newsCollection, ...queryConstraints);
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
 };

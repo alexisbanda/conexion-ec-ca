@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { AdSlotItem } from '../../types';
 import { getAds, deleteAd } from '../../services/adService';
@@ -6,6 +6,7 @@ import { AdForm } from './AdForm';
 import { Modal } from '../Modal';
 import { PlusCircleIcon } from '../icons';
 import { Timestamp } from 'firebase/firestore';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const formatDate = (timestamp: Timestamp | null | undefined) => {
     if (!timestamp) return 'Siempre';
@@ -20,11 +21,11 @@ const locationDisplayNames: { [key: string]: string } = {
     directory_sidebar: 'Directorio (Lateral)',
     sticky_banner_left: 'Banner Fijo (Izq)',
     sticky_banner_right: 'Banner Fijo (Der)',
-    // Añade un valor por defecto por si acaso
     default: 'Ubicación Desconocida'
 };
 
 export const AdManager: React.FC = () => {
+    const auth = useContext(AuthContext);
     const [ads, setAds] = useState<AdSlotItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -35,7 +36,10 @@ export const AdManager: React.FC = () => {
     const fetchAds = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await getAds();
+            const filters = auth?.user?.role === 'regional_admin' && auth.user.managedProvince
+                ? { province: auth.user.managedProvince }
+                : {};
+            const data = await getAds(filters);
             setAds(data);
         } catch (error) {
             toast.error('Error al cargar los anuncios.');
@@ -43,7 +47,7 @@ export const AdManager: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [auth?.user]);
 
     useEffect(() => {
         fetchAds();

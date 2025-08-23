@@ -4,12 +4,12 @@ import toast from 'react-hot-toast';
 import { Modal } from './Modal';
 import { ContentForm } from './ContentForm';
 import { PlusCircleIcon } from './icons';
-import { Timestamp } from 'firebase/firestore';
 
 // Tipos genéricos para que el gestor sea reutilizable
 type ContentItem = { id: string; published: boolean; [key: string]: any };
+type QueryFilter = { [key: string]: any } | undefined;
 type ApiClient = {
-    getAll: () => Promise<any[]>;
+    getAll: (filter?: QueryFilter) => Promise<any[]>;
     create: (data: any) => Promise<void>;
     update: (id: string, data: any) => Promise<void>;
     remove: (id: string) => Promise<void>;
@@ -25,9 +25,10 @@ interface ContentManagerProps {
     itemType: 'event' | 'news';
     api: ApiClient;
     columns: Column[];
+    queryFilter?: QueryFilter;
 }
 
-export const ContentManager: React.FC<ContentManagerProps> = ({ title, itemType, api, columns }) => {
+export const ContentManager: React.FC<ContentManagerProps> = ({ title, itemType, api, columns, queryFilter }) => {
     const [items, setItems] = useState<ContentItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,7 +39,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ title, itemType,
     const fetchItems = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await api.getAll();
+            const data = await api.getAll(queryFilter);
             setItems(data);
         } catch (error) {
             toast.error(`Error al cargar ${title.toLowerCase()}.`);
@@ -46,7 +47,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ title, itemType,
         } finally {
             setLoading(false);
         }
-    }, [api, title]);
+    }, [api, title, queryFilter]);
 
     useEffect(() => {
         fetchItems();

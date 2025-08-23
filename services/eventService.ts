@@ -86,12 +86,19 @@ export const getEventsByCity = async (city: string, limitNum: number): Promise<E
 // --- Funciones para el Administrador ---
 
 /**
- * Obtiene TODOS los eventos para el panel de administración.
+ * Obtiene TODOS los eventos para el panel de administración, con filtros opcionales.
  */
-export const getAllEventsForAdmin = async (): Promise<EventItem[]> => {
+export const getAllEventsForAdmin = async (filters?: { province?: string }): Promise<EventItem[]> => {
     if (!db) return [];
     const eventsCollection = collection(db, 'events');
-    const q = query(eventsCollection, orderBy('date', 'desc'));
+    
+    const queryConstraints = [orderBy('date', 'desc')];
+
+    if (filters?.province) {
+        queryConstraints.push(where('province', '==', filters.province));
+    }
+
+    const q = query(eventsCollection, ...queryConstraints);
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
 };

@@ -10,7 +10,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (auth.loading) return <div>Verificando autenticación...</div>;
 
     // Redirige si no está autenticado O si no es admin
-    if (!auth.isAuthenticated || auth.user?.role !== 'admin') {
+    if (!auth.isAuthenticated || (auth.user?.role !== 'admin' && auth.user?.role !== 'regional_admin')) {
         // Podríamos mostrar un mensaje de "Acceso denegado" o simplemente redirigir a la home.
         console.warn("Acceso de administrador denegado.");
         return <Navigate to="/" replace />;

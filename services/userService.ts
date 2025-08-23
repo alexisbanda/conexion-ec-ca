@@ -86,12 +86,19 @@ export const getUserData = async (uid: string): Promise<User | null> => {
 };
 
 /**
- * Obtiene todos los usuarios para el panel de administración.
+ * Obtiene todos los usuarios para el panel de administración, con filtros opcionales.
  */
-export const getAllUsers = async (): Promise<User[]> => {
+export const getAllUsers = async (filters?: { province?: string }): Promise<User[]> => {
     if (!db) return [];
     const usersCollection = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersCollection);
+
+    const queryConstraints = [];
+    if (filters?.province) {
+        queryConstraints.push(where('province', '==', filters.province));
+    }
+
+    const q = query(usersCollection, ...queryConstraints);
+    const usersSnapshot = await getDocs(q);
     const userList: User[] = [];
     usersSnapshot.forEach(doc => {
         userList.push({ id: doc.id, ...doc.data() } as User);
@@ -115,13 +122,15 @@ export const getPendingUsers = async (): Promise<User[]> => {
 };
 
 /**
- * Actualiza el estado de un usuario (Aprobado, Rechazado).
+ * Actualiza los datos de un usuario de forma genérica.
+ * @param userId El ID del usuario a actualizar.
+ * @param data Un objeto con los campos a actualizar.
  */
-export const updateUserStatus = async (userId: string, status: UserStatus): Promise<void> => {
+export const updateUser = async (userId: string, data: Partial<User>): Promise<void> => {
     if (!db) throw new Error("Firestore no está inicializado.");
     const userDocRef = doc(db, 'users', userId);
-    await updateDoc(userDocRef, { status });
-    console.log(`Estado del usuario ${userId} actualizado a ${status}.`);
+    await updateDoc(userDocRef, data);
+    console.log(`Datos del usuario ${userId} actualizados.`);
 };
 
 /**

@@ -40,8 +40,10 @@ export const createAd = async (
   return docRef.id;
 };
 
-export const getAds = async (): Promise<AdSlotItem[]> => {
-  const q = query(adsCollectionRef, orderBy('createdAt', 'desc'));
+export const getAds = async (filters?: { province?: string }): Promise<AdSlotItem[]> => {
+  const q = filters?.province
+    ? query(adsCollectionRef, where('province', '==', filters.province), orderBy('createdAt', 'desc'))
+    : query(adsCollectionRef, orderBy('createdAt', 'desc'));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(
     (doc) => ({ id: doc.id, ...doc.data() } as AdSlotItem)

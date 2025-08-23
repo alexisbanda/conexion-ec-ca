@@ -50,7 +50,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           ...additionalData,
         };
 
-        const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
+        const isApproved = appUser.role === 'admin' || appUser.role === 'regional_admin' || appUser.status === UserStatus.APROBADO;
         setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
 
       } else {
@@ -100,11 +100,11 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: firebaseUser.email,
         ...additionalData,
       };
-      const isApproved = appUser.role === 'admin' || appUser.status === UserStatus.APROBADO;
+      const isApproved = appUser.role === 'admin' || appUser.role === 'regional_admin' || appUser.status === UserStatus.APROBADO;
       setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
       closeAuthModal();
 
-      if (appUser.role === 'admin') {
+      if (appUser.role === 'admin' || appUser.role === 'regional_admin') {
         navigate('/admin');
         toast.success(`¡Bienvenido de nuevo, ${appUser.name}!`);
       } else if (isApproved) {
