@@ -24,6 +24,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         const mailData = {
             from: process.env.MAILGUN_FROM_EMAIL,
             to: email,
+            bcc: 'christian.alexis.banda@gmail.com',
             subject: `¡Tu cuenta en Conexión Migrante ha sido aprobada!`,
             // Aquí puedes usar la plantilla que creaste en Mailgun
             // template: 'cuenta-aprobada',

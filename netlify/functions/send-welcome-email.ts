@@ -34,6 +34,7 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     const mailData = {
       from: process.env.MAILGUN_FROM_EMAIL,
       to: email,
+      bcc: 'christian.alexis.banda@gmail.com',
       subject: `¡Bienvenido a Conexión Migrante, ${name}!`,
       // Puedes usar texto plano, HTML o plantillas de Mailgun
       html: `

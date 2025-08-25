@@ -3,46 +3,17 @@ import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { regions } from './NationalRegionSelector';
 import { Resource, Tool, ModalState, ModalContentType, GuideStage } from '../types';
-import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon, BuildingLibraryIcon, ArrowTrendingUpIcon, SparklesIcon } from './icons';
+import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon, BuildingLibraryIcon, ArrowTrendingUpIcon, SparklesIcon, CheckCircleIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
 import { AuthContext } from '../contexts/AuthContext';
 import { AdSlot } from './AdSlot';
 import regionalToolsConfig from '../regionalToolsConfig.json';
+import { EmailGateForm } from './EmailGateForm';
 
 const iconMap: { [key: string]: React.ReactElement } = {
   GiftIcon: <GiftIcon className="w-10 h-10" />,
   IdeaIcon: <IdeaIcon className="w-10 h-10" />,
-};
-
-interface AccordionItem {
-  title: string;
-  content: React.ReactNode;
-}
-
-const Accordion: React.FC<{ items: AccordionItem[] }> = ({ items }) => {
-    const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-    const toggleItem = (index: number) => {
-        setOpenIndex(openIndex === index ? null : index);
-    };
-
-    return (
-        <div className="space-y-2">
-            {items.map((item, index) => (
-                <div key={index} className="border rounded-xl">
-                    <button
-                        onClick={() => toggleItem(index)}
-                        className="w-full flex justify-between items-center p-4 text-left font-semibold text-gray-800 hover:bg-gray-50"
-                    >
-                        <span>{item.title}</span>
-                        <ChevronDownIcon className={`w-5 h-5 transition-transform ${openIndex === index ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openIndex === index && <div className="p-4 border-t bg-gray-50">{item.content}</div>}
-                </div>
-            ))}
-        </div>
-    );
 };
 
 interface RedirectPromptProps {
@@ -86,6 +57,7 @@ const RedirectPrompt: React.FC<RedirectPromptProps> = ({ toolName, url, onClose 
 
 export const ResourcesTools: React.FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<GuideStage>('Recién Llegado');
   const authContext = useContext(AuthContext);
 
@@ -259,6 +231,7 @@ export const ResourcesTools: React.FC = () => {
       description: 'Estrategias probadas para mejorar tu puntaje de crédito y acceder a mejores productos financieros.',
       stage: 'Estableciéndose',
       isPremium: true,
+      downloadUrl: `/${shortName}/guia-credito-premium.pdf`,
     },
     {
       id: 'guide-new-2',
@@ -267,6 +240,7 @@ export const ResourcesTools: React.FC = () => {
       description: 'El proceso de compra de vivienda en Canadá, desde el down payment hasta la hipoteca.',
       stage: 'Estableciéndose',
       isPremium: true,
+      downloadUrl: `/${shortName}/guia-compra-casa-premium.pdf`,
     },
     // Etapa 3: Residente Establecido
     {
@@ -276,6 +250,7 @@ export const ResourcesTools: React.FC = () => {
       description: 'Requisitos, proceso de aplicación y preparación para el examen de ciudadanía.',
       stage: 'Residente Establecido',
       isPremium: true,
+      downloadUrl: `/${shortName}/guia-ciudadania-premium.pdf`,
     },
     {
       id: 'guide-new-4',
@@ -284,6 +259,7 @@ export const ResourcesTools: React.FC = () => {
       description: 'Una introducción a RRSP, TFSA y otras opciones de inversión para hacer crecer tu patrimonio.',
       stage: 'Residente Establecido',
       isPremium: true,
+      downloadUrl: `/${shortName}/guia-inversiones-premium.pdf`,
     },
     {
       id: 'guide-new-5',
@@ -292,6 +268,7 @@ export const ResourcesTools: React.FC = () => {
       description: 'Pasos iniciales para registrar y lanzar tu propio negocio en Canadá.',
       stage: 'Residente Establecido',
       isPremium: true,
+      downloadUrl: `/${shortName}/guia-emprendimiento-premium.pdf`,
     },
   ]), [regionName, shortName]);
 
@@ -299,18 +276,19 @@ export const ResourcesTools: React.FC = () => {
     return essentialGuidesData.filter(guide => guide.stage === activeTab);
   }, [activeTab, essentialGuidesData]);
 
+  const handleGuideClick = (resource: Resource) => {
+    if (authContext?.isAuthenticated) {
+      window.open(resource.downloadUrl, '_blank');
+      return;
+    }
 
-  const openResourceModal = (resource: Resource) => {
-    let modalContent;
-
-    if (resource.isPremium && !authContext?.isAuthenticated) {
-      modalContent = (
+    if (resource.isPremium) {
+      const modalContent = (
         <div className="text-center p-6 space-y-4">
           <LockClosedIcon className="w-16 h-16 mx-auto text-ecuador-red" />
           <h4 className="text-xl font-bold text-gray-800">Acceso Exclusivo para Miembros</h4>
           <p className="text-gray-700">
-            Esta guía es un recurso premium. Para ver el contenido completo y descargarla,
-            por favor, inicia sesión o regístrate como miembro de nuestra comunidad.
+            Esta guía es un recurso premium. Para descargarla, por favor, inicia sesión o regístrate.
           </p>
           <div className="flex justify-center gap-4 mt-6">
             <button
@@ -334,47 +312,85 @@ export const ResourcesTools: React.FC = () => {
           </div>
         </div>
       );
+      setModalState({ isOpen: true, title: resource.title, content: modalContent });
     } else {
-      modalContent = (
-        <div className="space-y-4">
-            <p className="text-gray-600 whitespace-pre-line">{resource.details}</p>
-            <h4 className="font-semibold text-gray-800 pt-4 border-t">En esta guía aprenderás sobre:</h4>
-            <Accordion
-                items={(resource.knowledgePoints || []).map(point => ({
-                    title: point.question,
-                    content: (
-                        <div className="p-4 bg-ecuador-yellow-light rounded-xl">
-                            {resource.downloadUrl ? (
-                                <>
-                                    <p className="text-sm text-gray-700 mb-3">Puedes descargar la guía completa aquí:</p>
-                                    <a
-                                        href={resource.downloadUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-block bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl text-sm transition-transform transform hover:scale-105"
-                                    >
-                                        Descargar Guía
-                                    </a>
-                                </>
-                            ) : (
-                                <p className="text-sm text-gray-700">
-                                    {point.answer || 'Contenido disponible al leer. (Descarga no disponible).'}
-                                </p>
-                            )}
-                        </div>
-                    )
-                }))}
-            />
-        </div>
-      );
-    }
+      const handleEmailSubmit = async (email: string) => {
+        setIsSubmitting(true);
+        try {
+          const response = await fetch('/.netlify/functions/send-guide-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email,
+              guideTitle: resource.title,
+              downloadUrl: resource.downloadUrl,
+            }),
+          });
 
-    setModalState({
-      isOpen: true,
-      title: resource.title,
-      content: modalContent,
-      type: ModalContentType.RESOURCE_DETAILS,
-    });
+          if (!response.ok) {
+            throw new Error('Error al enviar el correo.');
+          }
+
+          closeModal();
+
+          // Show confirmation modal
+          setTimeout(() => {
+            setModalState({
+              isOpen: true,
+              title: '¡Correo Enviado!',
+              content: (
+                <div className="text-center p-6">
+                  <CheckCircleIcon className="w-16 h-16 mx-auto text-green-500" />
+                  <h4 className="text-xl font-bold text-gray-800 mt-4">¡Revisa tu Bandeja de Entrada!</h4>
+                  <p className="text-gray-700 mt-2">
+                    Hemos enviado la guía "{resource.title}" a <strong>{email}</strong>.
+                  </p>
+                  <button 
+                    onClick={closeModal}
+                    className="mt-6 bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              ),
+            });
+          }, 300); // Short delay to allow the first modal to close smoothly
+
+        } catch (error: any) {
+          console.error(error);
+          // Show an error message in the modal
+          setModalState({
+            isOpen: true,
+            title: 'Error',
+            content: (
+              <div className="text-center p-6">
+                <p className="text-red-500">{error.message}</p>
+                <button 
+                  onClick={closeModal}
+                  className="mt-6 bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
+                >
+                  Cerrar
+                </button>
+              </div>
+            ),
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+
+      const modalContent = (
+        <EmailGateForm 
+          onEmailSubmit={handleEmailSubmit} 
+          onClose={closeModal} 
+          guideTitle={resource.title} 
+          isSubmitting={isSubmitting}
+        />
+      );
+      setModalState({ isOpen: true, title: "Acceso a Guía Gratuita", content: modalContent });
+    }
   };
 
   const openToolModal = (tool: Tool) => {
@@ -472,20 +488,20 @@ export const ResourcesTools: React.FC = () => {
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
                       className={`w-5/6 md:w-auto flex-shrink-0 bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
-                      onClick={() => openResourceModal(resource)}
-                      role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && openResourceModal(resource)}
+                      onClick={() => handleGuideClick(resource)}
+                      role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && handleGuideClick(resource)}
                       aria-label={`Abrir detalles de ${resource.title}`}
                   >
                     {resource.isPremium && (
                       <div className="absolute top-2 right-2 flex items-center bg-ecuador-red text-white text-xs font-bold px-2 py-1 rounded-full">
-                        <LockClosedIcon className="w-3 h-3 mr-1" /> {resource.isPremium ? 'Exclusivo' : 'Con Registro'}
+                        <LockClosedIcon className="w-3 h-3 mr-1" /> Exclusivo
                       </div>
                     )}
                     <div className="text-ecuador-red mb-4">{resource.icon}</div>
                     <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{resource.title}</h4>
                     <p className="text-gray-600 text-sm flex-grow">{resource.description}</p>
                     <span className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
-                      {resource.isPremium ? 'Acceso Miembros' : resource.downloadUrl ? 'Descargar Guía' : 'Leer Contenido'} &rarr;
+                      Descargar Guía &rarr;
                     </span>
                   </motion.div>
                 )
