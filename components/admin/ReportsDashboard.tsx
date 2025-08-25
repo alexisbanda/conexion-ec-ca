@@ -1,11 +1,11 @@
-
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { User, CommunityServiceItem, EventItem, UserStatus, ServiceStatus } from '../../types';
 import { getAllUsers } from '../../services/userService';
 import { getAllServicesForAdmin } from '../../services/directoryService';
 import { getAllEventsForAdmin } from '../../services/eventService';
 import { UserGroupIcon, BriefcaseIcon, CalendarDaysIcon, ClockIcon } from '../icons';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'; // Sugerencia de librería
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AuthContext } from '../../contexts/AuthContext';
 
 // --- Componentes de UI Internos ---
 
@@ -44,6 +44,7 @@ const ChartContainer: React.FC<{ title: string; children: React.ReactNode }> = (
 
 
 const ReportsDashboard: React.FC = () => {
+    const auth = useContext(AuthContext);
     const [users, setUsers] = useState<User[]>([]);
     const [services, setServices] = useState<CommunityServiceItem[]>([]);
     const [events, setEvents] = useState<EventItem[]>([]);
@@ -51,26 +52,31 @@ const ReportsDashboard: React.FC = () => {
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!auth?.user) return;
             try {
                 setLoading(true);
+                const filters = auth.user.role === 'regional_admin' && auth.user.managedProvince
+                    ? { province: auth.user.managedProvince }
+                    : {};
+
                 const [usersData, servicesData, eventsData] = await Promise.all([
-                    getAllUsers(),
-                    getAllServicesForAdmin(),
-                    getAllEventsForAdmin()
+                    getAllUsers(filters),
+                    getAllServicesForAdmin(filters),
+                    getAllEventsForAdmin(filters)
                 ]);
                 setUsers(usersData);
                 setServices(servicesData);
                 setEvents(eventsData);
             } catch (error) {
                 console.error("Error fetching report data:", error);
-                // Aquí podrías usar un toast para notificar el error
+                toast.error("No se pudieron cargar los datos para los reportes.");
             } finally {
                 setLoading(false);
             }
         };
 
         fetchData();
-    }, []);
+    }, [auth?.user]);
 
     // --- KPIs Calculados con useMemo ---
     const kpis = useMemo(() => {
@@ -119,12 +125,15 @@ const ReportsDashboard: React.FC = () => {
     return (
         <div className="space-y-8">
             <h1 className="text-3xl font-bold text-gray-800 font-montserrat">Dashboard de Reportes</h1>
+            {auth?.user?.role === 'regional_admin' && (
+                <p className="text-xl text-gray-600">Mostrando datos para la provincia de: <span className="font-bold text-ecuador-blue">{auth.user.managedProvince}</span></p>
+            )}
 
             {/* --- KPIs en la parte superior --- */}
             <section>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <KPICard 
-                        title="Total de Usuarios" 
+                        title="Total de Usuarios"
                         value={kpis.totalUsers} 
                         icon={<UserGroupIcon className="w-8 h-8 text-ecuador-blue" />}
                         description={`${kpis.usersPending} usuarios pendientes de aprobación`}
