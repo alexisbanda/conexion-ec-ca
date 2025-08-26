@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface EmailGateFormProps {
-  onEmailSubmit: (email: string) => void;
+  onEmailSubmit: (email: string, consent: boolean) => void;
   onClose: () => void;
   guideTitle: string;
   isSubmitting: boolean;
@@ -9,6 +9,7 @@ interface EmailGateFormProps {
 
 export const EmailGateForm: React.FC<EmailGateFormProps> = ({ onEmailSubmit, onClose, guideTitle, isSubmitting }) => {
   const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,11 +19,10 @@ export const EmailGateForm: React.FC<EmailGateFormProps> = ({ onEmailSubmit, onC
       return;
     }
     setError('');
-    onEmailSubmit(email);
+    onEmailSubmit(email, consent);
   };
 
   const validateEmail = (email: string) => {
-    // Using a simpler, more permissive regex to avoid issues with complex patterns.
     const re = /\S+@\S+\.\S+/;
     return re.test(String(email).toLowerCase());
   };
@@ -50,7 +50,23 @@ export const EmailGateForm: React.FC<EmailGateFormProps> = ({ onEmailSubmit, onC
           />
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
-        <div className="flex justify-center gap-4">
+
+        <div className="text-left py-2">
+            <label className="flex items-center text-sm text-gray-600 cursor-pointer">
+                <input 
+                    type="checkbox" 
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-ecuador-blue focus:ring-ecuador-blue cursor-pointer"
+                    disabled={isSubmitting}
+                />
+                <span className="ml-2">
+                    Sí, me gustaría recibir futuras comunicaciones y noticias de Conexión EC-CA.
+                </span>
+            </label>
+        </div>
+
+        <div className="flex justify-center gap-4 border-t pt-6">
             <button
                 type="button"
                 onClick={onClose}

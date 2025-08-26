@@ -19,7 +19,8 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
   }
 
   try {
-    const { email, guideTitle, downloadUrl } = JSON.parse(event.body || '{}');
+    const { email, guideTitle, downloadUrl, consent } = JSON.parse(event.body || '{}');
+    const mailingListAddress = 'guias@ecuadorencanada.com';
 
     if (!email || !guideTitle || !downloadUrl) {
       return {
@@ -31,7 +32,7 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     const mailData = {
       from: process.env.MAILGUN_FROM_EMAIL,
       to: email,
-      bcc: 'christian.alexis.banda@gmail.com',
+      cc: 'christian.alexis.banda@gmail.com',
       subject: `Tu guía gratuita está aquí: ${guideTitle}`,
       html: `
         <div style="font-family: sans-serif; line-height: 1.6;">
@@ -58,6 +59,18 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     };
 
     await mg.messages.create(process.env.MAILGUN_DOMAIN || '', mailData);
+
+    if (consent) {
+      try {
+        await mg.lists.members.createMember(mailingListAddress, {
+          address: email,
+          subscribed: true,
+          upsert: 'yes'
+        });
+      } catch (listError) {
+        console.error('Error adding user to mailing list:', listError);
+      }
+    }
 
     return {
       statusCode: 200,

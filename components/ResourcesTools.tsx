@@ -314,7 +314,7 @@ export const ResourcesTools: React.FC = () => {
       );
       setModalState({ isOpen: true, title: resource.title, content: modalContent });
     } else {
-      const handleEmailSubmit = async (email: string) => {
+      const handleEmailSubmit = async (email: string, consent: boolean) => {
         setIsSubmitting(true);
         try {
           const response = await fetch('/.netlify/functions/send-guide-email', {
@@ -326,6 +326,7 @@ export const ResourcesTools: React.FC = () => {
               email,
               guideTitle: resource.title,
               downloadUrl: resource.downloadUrl,
+              consent,
             }),
           });
 
