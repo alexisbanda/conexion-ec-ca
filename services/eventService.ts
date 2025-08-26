@@ -16,6 +16,7 @@ import {
     arrayRemove
 } from 'firebase/firestore';
 import { EventItem } from '../types';
+import { getNotificationSettings } from './adminService';
 
 // --- Funciones para el público ---
 
@@ -113,6 +114,7 @@ export const createEvent = async (data: Omit<EventItem, 'id' | 'createdAt' | 'rs
         published: data.published ?? false,
         rsvps: [], // Inicializar la lista de RSVP vacía
         createdAt: serverTimestamp(),
+        isNotified: false,
     });
 };
 
@@ -123,6 +125,20 @@ export const updateEvent = async (id: string, data: Partial<EventItem>): Promise
     if (!db) throw new Error("Firestore no está inicializado.");
     const eventDocRef = doc(db, 'events', id);
     await updateDoc(eventDocRef, data);
+
+    if (data.published) {
+        try {
+            const settings = await getNotificationSettings();
+            if (settings.frequency === 'instant') {
+                await fetch('/.netlify/functions/send-instant-notification', {
+                    method: 'POST',
+                    body: JSON.stringify({ itemId: id, itemType: 'events' })
+                });
+            }
+        } catch (error) {
+            console.error("Error triggering instant notification for event:", error);
+        }
+    }
 };
 
 /**

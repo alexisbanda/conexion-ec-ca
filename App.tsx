@@ -33,6 +33,8 @@ import UserManager from './components/admin/UserManager';
 import ServiceManager from './components/admin/ServiceManager';
 import EventManager from './components/admin/EventManager';
 import NewsManager from './components/admin/NewsManager';
+import SuperAdminRoute from './components/SuperAdminRoute';
+import SettingsPage from './components/admin/SettingsPage';
 
 const PendingApprovalPage: React.FC = () => (
     // ... (código sin cambios)
@@ -164,6 +166,7 @@ const App: React.FC = () => {
                             <Route path="events" element={<EventManager />} />
                             <Route path="news" element={<NewsManager />} />
                             <Route path="services" element={<ServiceManager />} />
+                            <Route path="settings" element={<SuperAdminRoute><SettingsPage /></SuperAdminRoute>} />
                         </Route>
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>

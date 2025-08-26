@@ -1,19 +1,30 @@
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { HomeIcon, NewspaperIcon, UserGroupIcon, CalendarDaysIcon, BriefcaseIcon } from '../../icons';
+import { HomeIcon, NewspaperIcon, UserGroupIcon, CalendarDaysIcon, BriefcaseIcon, InformationCircleIcon } from '../../icons';
+import { AuthContext } from '../../../contexts/AuthContext';
 
 const AdminLayout: React.FC = () => {
     const location = useLocation();
+    const auth = useContext(AuthContext);
+    const user = auth?.user;
 
-    const navItems = [
+    const allNavItems = [
         { href: '/admin', label: 'Dashboard', icon: <HomeIcon className="w-5 h-5" /> },
         { href: '/admin/users', label: 'Usuarios', icon: <UserGroupIcon className="w-5 h-5" /> },
         { href: '/admin/ads', label: 'Anuncios', icon: <NewspaperIcon className="w-5 h-5" /> },
         { href: '/admin/events', label: 'Eventos', icon: <CalendarDaysIcon className="w-5 h-5" /> },
         { href: '/admin/news', label: 'Noticias', icon: <NewspaperIcon className="w-5 h-5" /> },
         { href: '/admin/services', label: 'Servicios', icon: <BriefcaseIcon className="w-5 h-5" /> },
+        { href: '/admin/settings', label: 'Configuración', icon: <InformationCircleIcon className="w-5 h-5" />, adminOnly: true },
     ];
+
+    const navItems = allNavItems.filter(item => {
+        if (item.adminOnly) {
+            return user?.role === 'admin';
+        }
+        return true;
+    });
 
     return (
         <div className="flex flex-1 bg-gray-100">

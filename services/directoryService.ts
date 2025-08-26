@@ -1,6 +1,7 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/src/services/directoryService.ts
 import { db } from '../firebaseConfig';
 import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, where, doc, deleteDoc, updateDoc } from 'firebase/firestore';import { CommunityServiceItem, ServiceStatus } from '../types'; // <-- Importar 'ServiceStatus'
+import { getNotificationSettings } from './adminService';
 
 // Este tipo representa los datos que enviamos para crear un nuevo servicio.
 // Omitimos 'id' (lo genera Firestore) y 'createdAt' (lo genera el servidor de Firestore).
@@ -50,7 +51,8 @@ export const addService = async (serviceData: NewServiceData): Promise<void> => 
         await addDoc(servicesCollection, {
             ...serviceData,
             status: ServiceStatus.PENDIENTE, // <-- ¡LA CLAVE!
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            isNotified: false
         });
         console.log("Servicio agregado con éxito, pendiente de aprobación.");
     } catch (error) {
@@ -158,6 +160,20 @@ export const updateServiceStatus = async (serviceId: string, status: ServiceStat
         const serviceDocRef = doc(db, 'services', serviceId);
         await updateDoc(serviceDocRef, { status });
         console.log(`Estado del servicio ${serviceId} actualizado a ${status}.`);
+
+        if (status === ServiceStatus.APROBADO) {
+            try {
+                const settings = await getNotificationSettings();
+                if (settings.frequency === 'instant') {
+                    await fetch('/.netlify/functions/send-instant-notification', {
+                        method: 'POST',
+                        body: JSON.stringify({ itemId: serviceId, itemType: 'services' })
+                    });
+                }
+            } catch (error) {
+                console.error("Error triggering instant notification:", error);
+            }
+        }
     } catch (error) {
         console.error("Error al actualizar el estado del servicio: ", error);
         throw error;

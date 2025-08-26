@@ -1,17 +1,3 @@
-    # /netlify.toml
-    [build]
-      # Directorio donde Vite genera los archivos de producción
-      publish = "dist" 
-      # Comando para construir tu sitio
-      command = "npm run build"
-
-    [functions]
-      # Directorio donde vivirán tus funciones serverless
-      directory = "netlify/functions"
-
-    # Regla de redirección para SPAs (Single Page Applications)
-    [[redirects]]
-      from = "/*"
-      to = "/index.html"
-      status = 200
-    
+[functions]
+  [functions."send-periodic-notifications"]
+  schedule = "@daily"

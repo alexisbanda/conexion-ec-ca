@@ -18,6 +18,7 @@ export interface EventItem {
   userId?: string; // <-- AÑADIDO
   category?: ServiceCategory;
   referenceUrl?: string;
+  isNotified?: boolean;
 }
 
 export interface NewsItem {
@@ -282,6 +283,7 @@ export interface CommunityServiceItem {
   status: ServiceStatus;
   imageUrl?: string; // URL de la imagen del servicio
   cost?: number; // Costo del servicio (opcional)
+  isNotified?: boolean;
 }
 
 // --- Tipos para Modales ---
@@ -357,6 +359,7 @@ export interface ServiceForAdmin {
   status: ServiceStatus;
   createdAt: Timestamp;
   userId: string;
+  isNotified?: boolean;
 }
 
 export interface EventForAdmin {
@@ -367,6 +370,7 @@ export interface EventForAdmin {
   published: boolean;
   createdAt: Timestamp;
   rsvps: number;
+  isNotified?: boolean;
 }
 
 export interface AdForAdmin {
