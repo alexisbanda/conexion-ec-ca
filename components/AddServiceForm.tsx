@@ -85,19 +85,44 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
         };
 
         try {
-            const promise = isEditing
-                ? updateService(initialData!.id, serviceData)
-                : addService(serviceData);
+            if (isEditing) {
+                // Lógica para actualizar un servicio existente
+                await toast.promise(updateService(initialData!.id, serviceData), {
+                    loading: 'Guardando cambios...',
+                    success: '¡Servicio actualizado con éxito!',
+                    error: 'No se pudo actualizar el servicio.',
+                });
+            } else {
+                // Lógica para agregar un nuevo servicio
+                const newServiceId = await addService(serviceData);
+                toast.success('¡Servicio agregado! Pasará a revisión.');
 
-            await toast.promise(promise, {
-                loading: 'Guardando...',
-                success: `¡Servicio ${isEditing ? 'actualizado' : 'agregado'}! Pasará a revisión.`,
-                error: 'No se pudo guardar el servicio.',
-            });
+                // Enviar correo de confirmación en segundo plano
+                try {
+                    await fetch('/.netlify/functions/send-transactional-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            recipientEmail: auth.user!.email!,
+                            recipientName: auth.user!.name || auth.user!.email!,
+                            emailType: 'submission-confirmation',
+                            item: {
+                                name: serviceData.serviceName,
+                                type: 'Servicio',
+                                id: newServiceId,
+                            },
+                        }),
+                    });
+                } catch (emailError) {
+                    console.error("Submission confirmation email failed to send:", emailError);
+                    // No mostramos error al usuario, es una tarea de fondo
+                }
+            }
 
-            onSuccess();
+            onSuccess(); // Cierra el modal o actualiza la UI
         } catch (err) {
-            console.error("Error al enviar el servicio:", err);
+            console.error("Error submitting service:", err);
+            toast.error('Ocurrió un error al guardar. Inténtalo de nuevo.');
             setError('Ocurrió un error al guardar. Inténtalo de nuevo.');
         } finally {
             setIsSubmitting(false);

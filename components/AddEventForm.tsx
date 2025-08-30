@@ -75,9 +75,32 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({ onSuccess, onCancel,
         userId: auth.user.id,
       };
       
-      await createEvent(eventData);
+      // Asumimos que createEvent devuelve el ID del nuevo evento
+      const newEventId = await createEvent(eventData);
 
-      toast.success('¡Evento creado con éxito!');
+      toast.success('¡Evento creado! Pasará a revisión.');
+
+      // Enviar correo de confirmación en segundo plano
+      try {
+        await fetch('/.netlify/functions/send-transactional-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                recipientEmail: auth.user.email!,
+                recipientName: auth.user.name || auth.user.email!,
+                emailType: 'submission-confirmation',
+                item: {
+                    name: eventData.title,
+                    type: 'Evento',
+                    id: newEventId,
+                },
+            }),
+        });
+      } catch (emailError) {
+          console.error("Submission confirmation email failed to send:", emailError);
+          // No mostramos error al usuario, es una tarea de fondo
+      }
+
       onSuccess();
     } catch (error) {
       toast.error('Hubo un error al crear el evento. Inténtalo de nuevo.');

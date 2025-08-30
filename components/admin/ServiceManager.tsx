@@ -58,13 +58,54 @@ const ServiceManager: React.FC = () => {
     }, [fetchServices, auth?.user?.role, auth?.user?.managedProvince]);
 
     const handleStatusUpdate = async (serviceId: string, newStatus: ServiceStatus) => {
-        const promise = updateServiceStatus(serviceId, newStatus);
-        await toast.promise(promise, {
-            loading: 'Actualizando...',
-            success: `Servicio actualizado a "${newStatus}".`,
-            error: 'Error al actualizar el servicio.',
-        });
-        fetchServices();
+        const service = allServices.find(s => s.id === serviceId);
+        if (!service || !service.contact || !service.contactName) {
+            toast.error("No se puede notificar: faltan datos de contacto en este servicio.");
+            return;
+        }
+
+        let rejectionReason: string | null = null;
+        if (newStatus === ServiceStatus.RECHAZADO) {
+            rejectionReason = prompt("Opcional: Introduce un breve motivo para el rechazo. Se incluirá en el correo al usuario.");
+        }
+
+        const toastId = toast.loading('Actualizando estado...');
+
+        try {
+            // 1. Actualizar el estado en Firestore
+            await updateServiceStatus(serviceId, newStatus);
+            toast.success(`Servicio actualizado a "${newStatus}".`, { id: toastId });
+
+            // 2. Enviar el correo de notificación al usuario
+            try {
+                await fetch('/.netlify/functions/send-transactional-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recipientEmail: service.contact,
+                        recipientName: service.contactName,
+                        emailType: newStatus === ServiceStatus.APROBADO ? 'submission-approved' : 'submission-rejected',
+                        item: {
+                            name: service.serviceName,
+                            type: 'Servicio',
+                            id: service.id,
+                            rejectionReason: rejectionReason || 'El equipo de administración ha revisado el contenido.'
+                        }
+                    })
+                });
+                toast.success("Correo de notificación enviado al usuario.");
+            } catch (emailError) {
+                console.error("Notification email failed to send:", emailError);
+                toast.error("Error al enviar el correo de notificación.");
+            }
+
+            // 3. Refrescar la lista en la UI
+            fetchServices();
+
+        } catch (error) {
+            toast.error("Ocurrió un error al actualizar el estado.", { id: toastId });
+            console.error("Failed to update service status:", error);
+        }
     };
 
     const filteredServices = useMemo(() => {
