@@ -4,3 +4,9 @@
 
 [functions]
   directory = "netlify/functions"
+
+# Regla para que las rutas de la SPA (React Router) funcionen en producción
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
