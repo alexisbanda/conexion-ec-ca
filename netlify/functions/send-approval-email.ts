@@ -41,7 +41,7 @@ const handler: Handler = async (event, _context) => {
 
 function composeApprovalEmail(name: string): string {
     const colors = { primary: '#003366', secondary: '#FFD700', background: '#f4f7f6', cardBackground: '#ffffff', text: '#333333', lightText: '#666666', white: '#ffffff' };
-    const baseUrl = https://www.ecuadorencanada.com';
+    const baseUrl = 'https://www.ecuadorencanada.com';
     const logoUrl = `${baseUrl}/ecuanada.png`;
 
     // El link del CTA principal debe llevar al dashboard o al perfil del usuario
