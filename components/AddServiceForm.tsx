@@ -97,7 +97,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
                 const newServiceId = await addService(serviceData);
                 toast.success('¡Servicio agregado! Pasará a revisión.');
 
-                // Enviar correo de confirmación en segundo plano
+                // Enviar correo de confirmación al usuario
                 try {
                     await fetch('/.netlify/functions/send-transactional-email', {
                         method: 'POST',
@@ -115,7 +115,22 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
                     });
                 } catch (emailError) {
                     console.error("Submission confirmation email failed to send:", emailError);
-                    // No mostramos error al usuario, es una tarea de fondo
+                }
+
+                // Notificar a los administradores relevantes
+                try {
+                    await fetch('/.netlify/functions/notify-admins', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            itemType: 'Servicio',
+                            itemId: newServiceId,
+                            province: serviceData.province,
+                            itemName: serviceData.serviceName,
+                        }),
+                    });
+                } catch (adminEmailError) {
+                    console.error("Admin notification email failed to send:", adminEmailError);
                 }
             }
 

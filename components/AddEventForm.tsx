@@ -80,9 +80,10 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({ onSuccess, onCancel,
 
       toast.success('¡Evento creado! Pasará a revisión.');
 
-      // Enviar correo de confirmación en segundo plano
+      // Enviar correos de notificación (al usuario y a los admins)
       try {
-        await fetch('/.netlify/functions/send-transactional-email', {
+        // 1. Notificación al usuario que crea el evento
+        fetch('/.netlify/functions/send-transactional-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -96,9 +97,22 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({ onSuccess, onCancel,
                 },
             }),
         });
+
+        // 2. Notificación a los administradores
+        fetch('/.netlify/functions/notify-admins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                itemType: 'Evento',
+                itemId: newEventId,
+                province: eventData.province,
+                itemName: eventData.title,
+            }),
+        });
+
       } catch (emailError) {
-          console.error("Submission confirmation email failed to send:", emailError);
-          // No mostramos error al usuario, es una tarea de fondo
+          console.error("Failed to send notification emails:", emailError);
+          // No bloquear al usuario si los correos de fondo fallan
       }
 
       onSuccess();

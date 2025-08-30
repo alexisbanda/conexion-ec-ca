@@ -63,16 +63,38 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (registrationData: RegistrationData): Promise<void> => {
     if (!auth) throw new Error("Firebase auth is not initialized.");
-    const { email, password, name } = registrationData;
-    if (!email || !password || !name) {
-      throw new Error("Nombre, email y contraseña son requeridos.");
+    const { email, password, name, province } = registrationData;
+    if (!email || !password || !name || !province) {
+      throw new Error("Nombre, email, contraseña y provincia son requeridos.");
     }
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     if (userCredential.user) {
       const { user } = userCredential;
       await updateProfile(user, { displayName: name });
       await createUserDocument(user.uid, registrationData);
-      await sendWelcomeEmail({ name, email });
+      
+      // Enviar correos en paralelo
+      try {
+        Promise.all([
+          // 1. Correo de bienvenida al usuario
+          sendWelcomeEmail({ name, email }),
+          // 2. Notificación a los administradores
+          fetch('/.netlify/functions/notify-admins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                itemType: 'Usuario',
+                itemId: user.uid,
+                province: province,
+                itemName: name,
+            }),
+          })
+        ]);
+      } catch (emailError) {
+        console.error("Failed to send registration emails:", emailError);
+        // No bloquear el flujo si los correos fallan
+      }
+
       closeAuthModal();
       toast.success(
           '¡Registro exitoso! Tu cuenta está pendiente de aprobación.',

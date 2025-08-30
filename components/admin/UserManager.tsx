@@ -285,14 +285,16 @@ const UserManager: React.FC = () => {
                                     <td className="px-4 py-3 text-gray-600">{formatDate(user.createdAt)}</td>
                                     <td className="px-4 py-3"><StatusBadge text={user.status || 'Pendiente'} className={badgeClasses[user.status || 'Pendiente']} /></td>
                                     <td className="px-4 py-3 space-x-2 flex items-center">
+                                        {/* Acciones visibles para todos los admins */}
                                         <ActionButton onClick={() => handleOpenUserDetails(user)} className="bg-blue-100 text-blue-800 hover:bg-blue-200"><InformationCircleIcon className="w-4 h-4 inline mr-1" /> Detalles</ActionButton>
-                                        {auth?.user?.role === 'admin' ? (
-                                            <ActionButton onClick={() => handleOpenManageModal(user)} className="bg-purple-100 text-purple-800 hover:bg-purple-200"><PencilSquareIcon className="w-4 h-4 inline mr-1" /> Gestionar Rol</ActionButton>
-                                        ) : (
-                                            <>
-                                                <ActionButton onClick={() => handleStatusUpdate(user.id, UserStatus.APROBADO)} className="bg-green-100 text-green-800 hover:bg-green-200" disabled={user.status === UserStatus.APROBADO}><CheckCircleIcon className="w-4 h-4 inline mr-1" /> Aprobar</ActionButton>
-                                                <ActionButton onClick={() => handleStatusUpdate(user.id, UserStatus.RECHAZADO)} className="bg-red-100 text-red-800 hover:bg-red-200" disabled={user.status === UserStatus.RECHAZADO}><XCircleIcon className="w-4 h-4 inline mr-1" /> Rechazar</ActionButton>
-                                            </>
+                                        <ActionButton onClick={() => handleStatusUpdate(user.id, UserStatus.APROBADO)} className="bg-green-100 text-green-800 hover:bg-green-200" disabled={user.status === UserStatus.APROBADO}><CheckCircleIcon className="w-4 h-4 inline mr-1" /> Aprobar</ActionButton>
+                                        <ActionButton onClick={() => handleStatusUpdate(user.id, UserStatus.RECHAZADO)} className="bg-red-100 text-red-800 hover:bg-red-200" disabled={user.status === UserStatus.RECHAZADO}><XCircleIcon className="w-4 h-4 inline mr-1" /> Rechazar</ActionButton>
+                                        
+                                        {/* Acción solo para admin general */}
+                                        {auth?.user?.role === 'admin' && (
+                                            <ActionButton onClick={() => handleOpenManageModal(user)} className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+                                                <PencilSquareIcon className="w-4 h-4 inline mr-1" /> Gestionar Rol
+                                            </ActionButton>
                                         )}
                                     </td>
                                 </tr>

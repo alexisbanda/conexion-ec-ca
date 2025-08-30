@@ -1,69 +1,78 @@
-// /netlify/functions/send-welcome-email.ts
-import { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
+import { Handler } from "@netlify/functions";
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 
 const mailgun = new Mailgun(formData);
+const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY || '' });
 
-// Inicializamos el cliente de Mailgun con las variables de entorno
-const mg = mailgun.client({
-  username: 'api',
-  key: process.env.MAILGUN_API_KEY || '',
-});
-
-const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
-  // Solo permitimos peticiones POST
+const handler: Handler = async (event, _context) => {
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ message: 'Method Not Allowed' }),
-    };
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
+  if (!event.body) {
+    return { statusCode: 400, body: 'Bad Request: Missing body' };
   }
 
   try {
-    // Parseamos los datos que vienen del frontend
-    const { name, email } = JSON.parse(event.body || '{}');
-
+    const { name, email } = JSON.parse(event.body);
     if (!name || !email) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Name and email are required' }),
-      };
+      return { statusCode: 400, body: 'Name and email are required' };
     }
 
-    const mailData = {
+    const subject = `¡Bienvenido/a a Conexión EC-CA, ${name}!`;
+    const html = composeWelcomeEmail(name);
+
+    await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
       from: process.env.MAILGUN_FROM_EMAIL,
       to: email,
-      bcc: 'christian.alexis.banda@gmail.com',
-      subject: `¡Bienvenido a Conexión Migrante, ${name}!`,
-      // Puedes usar texto plano, HTML o plantillas de Mailgun
-      html: `
-                    <h3>¡Hola ${name}!</h3>
-                    <p>Gracias por registrarte en Conexión Migrante EC-CA.</p>
-                    <p>Tu cuenta está siendo revisada por nuestro equipo. Te notificaremos a este correo cuando sea aprobada.</p>
-                    <p>¡Gracias por tu paciencia!</p>
-                `,
-      // Para usar plantillas:
-      // template: 'nombre-de-tu-plantilla',
-      // 'h:X-Mailgun-Variables': JSON.stringify({ name: name })
-    };
+      bcc:'christian.alexis.banda@gmail.com',
+      subject: subject,
+      html: html,
+    });
 
-    // Enviamos el correo
-    await mg.messages.create(process.env.MAILGUN_DOMAIN || '', mailData);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'Email sent successfully' }),
-    };
+    return { statusCode: 200, body: 'Welcome email sent successfully' };
 
   } catch (error) {
-    console.error('Error sending email:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Error sending email' }),
-    };
+    console.error('Error sending welcome email:', error);
+    return { statusCode: 500, body: 'Error sending email' };
   }
 };
 
+function composeWelcomeEmail(name: string): string {
+    const colors = { primary: '#003366', secondary: '#FFD700', background: '#f4f7f6', cardBackground: '#ffffff', text: '#333333', lightText: '#666666', white: '#ffffff' };
+    const baseUrl = 'https://www.ecuadorencanada.com';
+    const logoUrl = `${baseUrl}/ecuanada.png`;
+
+    const heading = `¡Gracias por unirte, ${name}!`;
+    const text = `Has dado el primer paso para formar parte de la comunidad de ecuatorianos en Canadá. Para asegurar la calidad y seguridad de nuestro portal, revisamos cada nuevo registro manualmente.<br><br>Recibirás un correo de confirmación tan pronto como tu cuenta sea aprobada, usualmente en menos de 24 horas.`;
+    const cta = { text: 'Explorar el Portal', url: baseUrl };
+
+    return `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head><meta charset="UTF-8"></head>
+    <body style="margin: 0; padding: 0; background-color: ${colors.background}; font-family: Arial, sans-serif;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: ${colors.background};">
+            <tr>
+                <td align="center">
+                    <table width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 20px auto;">
+                        <tr><td align="center" style="padding: 20px 0;"><img src="${logoUrl}" alt="Conexión EC-CA Logo" width="180" style="display: block;"></td></tr>
+                        <tr>
+                            <td style="background-color: ${colors.cardBackground}; padding: 40px 30px; border-radius: 8px;">
+                                <h1 style="color: ${colors.primary}; font-size: 28px; margin-top: 0; margin-bottom: 15px;">${heading}</h1>
+                                <p style="color: ${colors.text}; font-size: 16px; line-height: 1.6;">${text}</p>
+                                <a href="${cta.url}" target="_blank" style="background-color: ${colors.primary}; color: ${colors.white}; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block; margin-top: 20px;">
+                                    ${cta.text}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr><td align="center" style="padding: 20px 0; font-size: 12px; color: ${colors.lightText};"><p>&copy; ${new Date().getFullYear()} Conexión EC-CA</p></td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>`;
+}
+
 export { handler };
-    

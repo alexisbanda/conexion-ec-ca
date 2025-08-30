@@ -80,7 +80,7 @@ const handler: Handler = async (event, _context) => {
         const email = composeAdminEmail({ itemType, province, itemName, itemId });
 
         await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
-            from: `Alerta de Plataforma <${process.env.MAILGUN_FROM_EMAIL}>`,
+            from: process.env.MAILGUN_FROM_EMAIL,
             to: recipientEmails, // Mailgun maneja el envío a múltiples destinatarios
             subject: email.subject,
             html: email.html,
@@ -97,7 +97,7 @@ const handler: Handler = async (event, _context) => {
 // --- Función para componer el correo ---
 function composeAdminEmail(data: { itemType: string, province: string, itemName?: string, itemId: string }) {
     const { itemType, province, itemName, itemId } = data;
-    const baseUrl = process.env.URL || 'https://www.conexion-ec-ca.com';
+    const baseUrl = 'https://www.ecuadorencanada.com';
     const subject = `Nuevo ${itemType} pendiente de revisión en ${province}`;
     
     let reviewUrl = `${baseUrl}/admin`; // URL genérica por si acaso
