@@ -62,9 +62,9 @@ export const NotificationSettingsSection: React.FC = () => {
         toast.loading('Enviando notificaciones...');
 
         try {
-            const response = await fetch('/.netlify/functions/send-periodic-notifications', {
-                method: 'POST',
-                body: JSON.stringify({ force: true }),
+            // Workaround for netlify dev bug: Use GET with query param instead of POST with body.
+            const response = await fetch('/.netlify/functions/send-periodic-notifications?force=true', {
+                method: 'GET',
             });
 
             toast.dismiss();

@@ -1,29 +1,35 @@
 
 import { Handler } from "@netlify/functions";
-import { initializeApp, FirebaseApp } from "firebase/app";
-import { getFirestore, Firestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getFirestore, Firestore, doc, getDoc, updateDoc, collection, query, where, getDocs, DocumentData } from "firebase/firestore";
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 import { CommunityServiceItem, EventItem, User } from "../../types";
 
 // Initialize Firebase
 const firebaseConfig = {
-    apiKey: process.env.VITE_FIREBASE_API_KEY,
-    authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.VITE_FIREBASE_APP_ID,
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
 };
 
 let app: FirebaseApp;
 let db: Firestore;
 
-try {
-    app = initializeApp(firebaseConfig);
+// More robust initialization for serverless environments
+if (getApps().length === 0) {
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+    } catch (error) {
+        console.error("Error initializing Firebase:", error);
+    }
+} else {
+    app = getApp();
     db = getFirestore(app);
-} catch (error) {
-    console.error("Error initializing Firebase:", error);
 }
 
 // Initialize Mailgun
@@ -33,7 +39,12 @@ const mg = mailgun.client({
   key: process.env.MAILGUN_API_KEY || '',
 });
 
-export const handler: Handler = async (event, context) => {
+export const handler: Handler = async (event, _context) => {
+    if (!db) {
+        console.error("Firestore is not initialized. Exiting function. Check server environment variables.");
+        return { statusCode: 500, body: "Server configuration error: Database not initialized." };
+    }
+
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
@@ -50,12 +61,18 @@ export const handler: Handler = async (event, context) => {
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            item = { id: docSnap.id, ...docSnap.data() } as CommunityServiceItem | EventItem;
+            item = { id: docSnap.id, ...docSnap.data() } as DocumentData as CommunityServiceItem | EventItem;
         } else {
             return { statusCode: 404, body: 'Item not found' };
         }
 
-        const users = await getSubscribedUsers();
+        // --- REFACTOR START ---
+        // Paso 1: Identificar Audiencia Relevante
+        if (!item.category) {
+            return { statusCode: 400, body: "Item does not have a category, cannot send instant notification." };
+        }
+        const users = await getUsersSubscribedToCategory(item.category);
+        // --- REFACTOR END ---
         if (users.length === 0) {
             return { statusCode: 200, body: "No subscribed users." };
         }
@@ -66,7 +83,7 @@ export const handler: Handler = async (event, context) => {
         await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
             from: `Conexión EC-CA <${process.env.MAILGUN_FROM_EMAIL}>`,
             to: "christian.alexis.banda@gmail.com", // For testing
-            // bcc: recipientEmails, // Use in production
+            //bcc: recipientEmails, // Use in production
             subject: `¡Nueva publicación en la comunidad! ${(item as EventItem).title || (item as CommunityServiceItem).serviceName}`,
             html: emailHtml,
         });
@@ -81,13 +98,19 @@ export const handler: Handler = async (event, context) => {
     }
 };
 
-async function getSubscribedUsers(): Promise<User[]> {
-    const q = query(
-        collection(db, 'users'),
-        where('newsletterSubscription', '==', true)
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as User);
+async function getUsersSubscribedToCategory(category: string): Promise<User[]> {
+    try {
+        const q = query(
+            collection(db, 'users'),
+            where('newsletterSubscription', '==', true),
+            where('subscribedServiceCategories', 'array-contains', category)
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => doc.data() as User);
+    } catch (error) {
+        console.error("Error fetching from 'users' collection. Check for data type inconsistencies. 'newsletterSubscription' should be boolean and 'subscribedServiceCategories' should be an array.", error);
+        throw new Error("Failed to fetch users for instant notification");
+    }
 }
 
 function composeEmail(item: CommunityServiceItem | EventItem, itemType: string): string {
