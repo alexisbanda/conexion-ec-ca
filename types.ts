@@ -164,6 +164,7 @@ export interface User {
   // --- Campos de Gamificación y Conteo ---
   membershipLevel?: string; // e.g., 'Socio', 'Socio Full', 'Embajador'
   points?: number;
+  badges?: string[]; // Insignias ganadas por el usuario
   servicesCount?: number;
   eventsCount?: number;
 }

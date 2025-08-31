@@ -73,49 +73,36 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({ onSuccess, onCancel,
         ...formData,
         date: Timestamp.fromDate(new Date(formData.date)),
         userId: auth.user.id,
+        contact: auth.user.email, // Añadimos campos de contacto para la notificación
+        contactName: auth.user.name,
       };
       
-      // Asumimos que createEvent devuelve el ID del nuevo evento
       const newEventId = await createEvent(eventData);
-
       toast.success('¡Evento creado! Pasará a revisión.');
 
-      // Enviar correos de notificación (al usuario y a los admins)
-      try {
-        // 1. Notificación al usuario que crea el evento
+      // Tareas de fondo: se ejecutan en paralelo pero el flujo principal espera a que todas terminen
+      await Promise.all([
         fetch('/.netlify/functions/send-transactional-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                recipientEmail: auth.user.email!,
-                recipientName: auth.user.name || auth.user.email!,
-                emailType: 'submission-confirmation',
-                item: {
-                    name: eventData.title,
-                    type: 'Evento',
-                    id: newEventId,
-                },
-            }),
-        });
-
-        // 2. Notificación a los administradores
+            body: JSON.stringify({ recipientEmail: auth.user.email!, recipientName: auth.user.name || auth.user.email!, emailType: 'submission-confirmation', item: { name: eventData.title, type: 'Evento', id: newEventId } }),
+        }),
         fetch('/.netlify/functions/notify-admins', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                itemType: 'Evento',
-                itemId: newEventId,
-                province: eventData.province,
-                itemName: eventData.title,
-            }),
-        });
-
-      } catch (emailError) {
-          console.error("Failed to send notification emails:", emailError);
-          // No bloquear al usuario si los correos de fondo fallan
-      }
+            body: JSON.stringify({ itemType: 'Evento', itemId: newEventId, province: eventData.province, itemName: eventData.title }),
+        }),
+        fetch('/.netlify/functions/update-gamification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: auth.user.id, actionType: 'CREATE_EVENT' }),
+        })
+      ]).catch(backgroundError => {
+        console.error("Failed to send background notifications or points:", backgroundError);
+      });
 
       onSuccess();
+      
     } catch (error) {
       toast.error('Hubo un error al crear el evento. Inténtalo de nuevo.');
       console.error('Event creation error:', error);

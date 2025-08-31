@@ -170,14 +170,38 @@ export const OnboardingWizard: React.FC = () => {
         }
 
         setIsSubmitting(true);
+        const toastId = toast.loading('Finalizando...');
+
         try {
+            // 1. Guardar los datos del onboarding
             await updateOnboardingData(auth.user.id, formData);
+            toast.success('Perfil guardado.', { id: toastId });
+
+            // 2. Otorgar puntos (y esperar a que termine)
+            toast.loading('Calculando puntos...', { id: toastId });
+            await fetch('/.netlify/functions/update-gamification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: auth.user.id,
+                    actionType: 'COMPLETE_PROFILE',
+                }),
+            });
+            toast.success('¡Has ganado 100 Puntos de Conexión!', { id: toastId });
+
+            // 3. Refrescar los datos del usuario en la app (ahora con los puntos)
             await auth.refreshUserData();
-            toast.success('¡Perfil completado! Bienvenido a tu espacio.');
+            
+            toast.success('¡Bienvenido a tu espacio!', { 
+                icon: '🎉',
+                duration: 4000
+            });
+
             navigate('/dashboard');
+
         } catch (error) {
             console.error("Error al guardar el onboarding:", error);
-            toast.error('No se pudo guardar tu información. Inténtalo de nuevo.');
+            toast.error('No se pudo guardar tu información. Inténtalo de nuevo.', { id: toastId });
         } finally {
             setIsSubmitting(false);
         }

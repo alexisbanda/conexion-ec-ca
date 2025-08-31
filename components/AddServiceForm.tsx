@@ -86,55 +86,40 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onSuccess, onCan
 
         try {
             if (isEditing) {
-                // Lógica para actualizar un servicio existente
                 await toast.promise(updateService(initialData!.id, serviceData), {
                     loading: 'Guardando cambios...',
                     success: '¡Servicio actualizado con éxito!',
                     error: 'No se pudo actualizar el servicio.',
                 });
             } else {
-                // Lógica para agregar un nuevo servicio
                 const newServiceId = await addService(serviceData);
                 toast.success('¡Servicio agregado! Pasará a revisión.');
 
-                // Enviar correo de confirmación al usuario
-                try {
-                    await fetch('/.netlify/functions/send-transactional-email', {
+                // Tareas de fondo: se ejecutan en paralelo pero el flujo principal espera a que todas terminen
+                await Promise.all([
+                    fetch('/.netlify/functions/send-transactional-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            recipientEmail: auth.user!.email!,
-                            recipientName: auth.user!.name || auth.user!.email!,
-                            emailType: 'submission-confirmation',
-                            item: {
-                                name: serviceData.serviceName,
-                                type: 'Servicio',
-                                id: newServiceId,
-                            },
-                        }),
-                    });
-                } catch (emailError) {
-                    console.error("Submission confirmation email failed to send:", emailError);
-                }
-
-                // Notificar a los administradores relevantes
-                try {
-                    await fetch('/.netlify/functions/notify-admins', {
+                        body: JSON.stringify({ recipientEmail: auth.user!.email!, recipientName: auth.user!.name || auth.user!.email!, emailType: 'submission-confirmation', item: { name: serviceData.serviceName, type: 'Servicio', id: newServiceId } }),
+                    }),
+                    fetch('/.netlify/functions/notify-admins', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            itemType: 'Servicio',
-                            itemId: newServiceId,
-                            province: serviceData.province,
-                            itemName: serviceData.serviceName,
-                        }),
-                    });
-                } catch (adminEmailError) {
-                    console.error("Admin notification email failed to send:", adminEmailError);
-                }
+                        body: JSON.stringify({ itemType: 'Servicio', itemId: newServiceId, province: serviceData.province, itemName: serviceData.serviceName }),
+                    }),
+                    fetch('/.netlify/functions/update-gamification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: auth.user!.id, actionType: 'CREATE_SERVICE' }),
+                    })
+                ]).catch(backgroundError => {
+                    // Atrapamos errores aquí para que no detengan el flujo principal
+                    console.error("Failed to send background notifications or points:", backgroundError);
+                });
             }
 
-            onSuccess(); // Cierra el modal o actualiza la UI
+            onSuccess(); // Se llama solo después de que todo el bloque try haya tenido éxito
+
         } catch (err) {
             console.error("Error submitting service:", err);
             toast.error('Ocurrió un error al guardar. Inténtalo de nuevo.');

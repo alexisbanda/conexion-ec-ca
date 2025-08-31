@@ -99,7 +99,25 @@ const ServiceManager: React.FC = () => {
                 toast.error("Error al enviar el correo de notificación.");
             }
 
-            // 3. Refrescar la lista en la UI
+            // 3. Otorgar puntos si es aprobado
+            if (newStatus === ServiceStatus.APROBADO) {
+                try {
+                    await fetch('/.netlify/functions/update-gamification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: service.userId,
+                            actionType: 'SERVICE_APPROVED',
+                        }),
+                    });
+                    toast.success("Puntos de bonificación otorgados.");
+                } catch (gamificationError) {
+                    console.error("Gamification points failed to send:", gamificationError);
+                    // No es crítico, solo loguear
+                }
+            }
+
+            // 4. Refrescar la lista en la UI
             fetchServices();
 
         } catch (error) {

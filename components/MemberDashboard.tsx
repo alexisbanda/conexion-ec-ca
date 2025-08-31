@@ -210,33 +210,73 @@ const MySpaceSection: React.FC<{ user: User; recommendedEvents: EventItem[]; rec
     );
 };
 
-const AchievementsSection: React.FC = () => {
-    const badges = [
-        { name: 'Pionero', icon: <TrophyIcon className="w-8 h-8" />, color: 'from-yellow-300 to-orange-400' },
-        { name: 'Emprendedor', icon: <BriefcaseIcon className="w-8 h-8" />, color: 'from-blue-400 to-indigo-500' },
-        { name: 'Anfitrión', icon: <CalendarDaysIcon className="w-8 h-8" />, color: 'from-green-400 to-teal-500' },
-    ];
+const AchievementsSection: React.FC<{ user: User }> = ({ user }) => {
+    // Manifiesto de todas las insignias posibles en el sistema
+    const allBadges = {
+        '¡Hola, Mundo!': { 
+            icon: <TrophyIcon className="w-8 h-8" />, 
+            color: 'from-yellow-400 to-orange-500',
+            description: 'Completaste tu perfil y diste el primer gran paso.'
+        },
+        'El Emprendedor/a': { 
+            icon: <BriefcaseIcon className="w-8 h-8" />, 
+            color: 'from-blue-400 to-indigo-500',
+            description: 'Publicaste tu primer servicio en la comunidad.'
+        },
+        'El Anfitrión/a': { 
+            icon: <CalendarDaysIcon className="w-8 h-8" />, 
+            color: 'from-green-400 to-teal-500',
+            description: 'Creaste tu primer evento para la comunidad.'
+        },
+        // Aquí se pueden añadir futuras insignias
+    };
+
+    const userBadges = user.badges || [];
+    const earnedBadges = Object.keys(allBadges)
+        .filter(badgeName => userBadges.includes(badgeName))
+        .map(badgeName => ({ name: badgeName, ...allBadges[badgeName] }));
+
+    const pendingChallenges = Object.keys(allBadges)
+        .filter(badgeName => !userBadges.includes(badgeName))
+        .map(badgeName => ({ name: badgeName, ...allBadges[badgeName] }));
 
     return (
         <div>
             <h3 className="text-2xl font-bold text-ecuador-blue font-montserrat mb-6">Mis Logros y Puntos</h3>
             <div className="bg-white p-6 rounded-lg shadow-md">
-                <h4 className="text-xl font-semibold text-gray-800 mb-4 flex items-center"><TrophyIcon className="w-6 h-6 mr-2 text-ecuador-yellow"/> Puntos: <span className="font-bold ml-2">150</span></h4>
-                <h4 className="text-xl font-semibold text-gray-800 mt-6 mb-4 flex items-center"><BookOpenIcon className="w-6 h-6 mr-2 text-ecuador-red"/> Insignias Desbloqueadas</h4>
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-4">
-                    {badges.map(badge => (
-                        <div key={badge.name} className={`p-4 rounded-lg text-white bg-gradient-to-br ${badge.color} flex flex-col items-center justify-center text-center shadow-lg`}>
-                            {badge.icon}
-                            <span className="font-semibold mt-2 text-sm">{badge.name}</span>
-                        </div>
-                    ))}
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mt-6 mb-4 flex items-center"><ChatBubbleLeftRightIcon className="w-6 h-6 mr-2 text-ecuador-blue"/> Desafíos Pendientes</h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                    <li><span className="font-semibold text-ecuador-red">Desafío "Pionero":</span> Completa tu perfil para ganar tu primera insignia.</li>
-                    <li><span className="font-semibold text-ecuador-red">Desafío "Conector":</span> Envía 3 mensajes a otros miembros.</li>
-                    <li><span className="font-semibold text-ecuador-red">Desafío "Anfitrión":</span> Publica tu primer evento en la comunidad.</li>
-                </ul>
+                <h4 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <TrophyIcon className="w-6 h-6 mr-2 text-ecuador-yellow"/> Puntos de Conexión: 
+                    <span className="font-bold ml-2">{user.points || 0}</span>
+                </h4>
+                
+                <h4 className="text-xl font-semibold text-gray-800 mt-6 mb-4 flex items-center">
+                    <BookOpenIcon className="w-6 h-6 mr-2 text-ecuador-red"/> Insignias Desbloqueadas
+                </h4>
+                {earnedBadges.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-4">
+                        {earnedBadges.map(badge => (
+                            <div key={badge.name} title={`${badge.name}: ${badge.description}`} className={`p-4 rounded-lg text-white bg-gradient-to-br ${badge.color} flex flex-col items-center justify-center text-center shadow-lg transform transition-transform hover:scale-110 cursor-help`}>
+                                {badge.icon}
+                                <span className="font-semibold mt-2 text-sm">{badge.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-500 italic">Aún no has desbloqueado insignias. ¡Sigue participando!</p>
+                )}
+
+                <h4 className="text-xl font-semibold text-gray-800 mt-8 mb-4 flex items-center">
+                    <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2 text-ecuador-blue"/> Desafíos Pendientes
+                </h4>
+                {pendingChallenges.length > 0 ? (
+                    <ul className="space-y-2 text-sm text-gray-600 list-disc list-inside">
+                        {pendingChallenges.map(challenge => (
+                            <li key={challenge.name}><span className="font-semibold text-ecuador-red">{challenge.name}:</span> {challenge.description}</li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-sm text-green-600 font-semibold">¡Felicidades! Has completado todos los desafíos actuales.</p>
+                )}
             </div>
         </div>
     );
@@ -453,7 +493,7 @@ export const MemberDashboard: React.FC = () => {
             case TABS.MY_SPACE: return <MySpaceSection user={auth.user} recommendedEvents={recommendedEvents} recommendedServices={recommendedServices} />;
             case TABS.PUBLICATIONS: return <PublicationsSection services={userServices} isLoading={isLoadingServices} onOpenAddModal={handleOpenAddModal} onOpenEditModal={handleOpenEditModal} onOpenDeleteModal={handleOpenDeleteModal} />;
             case TABS.MY_EVENTS: return <MyEventsSection createdEvents={userEvents} attendingEvents={attendingEvents} isLoading={isLoadingEvents} onOpenAddEventModal={handleOpenAddEventModal} />;
-            case TABS.ACHIEVEMENTS: return <AchievementsSection />;
+            case TABS.ACHIEVEMENTS: return <AchievementsSection user={auth.user} />;
             case TABS.NOTIFICATIONS: return <NotificationPreferences />;
             default: return null;
         }

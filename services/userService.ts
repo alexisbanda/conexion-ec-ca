@@ -31,6 +31,9 @@ export const createUserDocument = async (uid: string, data: RegistrationData): P
             status: UserStatus.PENDIENTE,
             onboardingCompleted: false, // El onboarding aún no se ha completado.
             createdAt: serverTimestamp(),
+            // --- Inicialización de campos de gamificación ---
+            points: 0,
+            badges: [],
         };
 
         // Convertimos la fecha de llegada a Timestamp de Firestore si el usuario la proporcionó.
