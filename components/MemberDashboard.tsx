@@ -20,12 +20,17 @@ const TABS = {
 };
 
 const InlineAchievements: React.FC<{ user: User; setActiveTab: (tab: string) => void }> = ({ user, setActiveTab }) => {
-    const achievementsData = useMemo(() => [
-        { id: 'nivel', title: 'Nivel', value: user.membershipLevel || 'Socio', icon: <TrophyIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-blue-500 to-ecuador-blue', targetTab: TABS.ACHIEVEMENTS, tooltip: `Tu nivel actual es ${user.membershipLevel || 'Socio'}.` },
-        { id: 'puntos', title: 'Puntos', value: user.points || 0, icon: <ChatBubbleLeftRightIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-red-500 to-ecuador-red', targetTab: TABS.ACHIEVEMENTS, tooltip: `Has acumulado ${user.points || 0} puntos.` },
-        { id: 'servicios', title: 'Servicios', value: user.servicesCount || 0, icon: <BriefcaseIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-green-500 to-green-700', targetTab: TABS.PUBLICATIONS, tooltip: 'Ver tus servicios publicados' },
-        { id: 'eventos', title: 'Eventos', value: user.eventsCount || 0, icon: <CalendarDaysIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-yellow-500 to-yellow-600', targetTab: TABS.MY_EVENTS, tooltip: 'Ver tus eventos creados' },
-    ], [user]);
+    const achievementsData = useMemo(() => {
+        const latestBadge = user.badges?.[user.badges.length - 1];
+        const memberLevel = latestBadge || user.membershipLevel || 'Socio';
+
+        return [
+            { id: 'nivel', title: 'Nivel', value: memberLevel, icon: <TrophyIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-blue-500 to-ecuador-blue', targetTab: TABS.ACHIEVEMENTS, tooltip: `Tu nivel actual es ${memberLevel}.` },
+            { id: 'puntos', title: 'Puntos', value: user.points || 0, icon: <ChatBubbleLeftRightIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-red-500 to-ecuador-red', targetTab: TABS.ACHIEVEMENTS, tooltip: `Has acumulado ${user.points || 0} puntos.` },
+            { id: 'servicios', title: 'Servicios', value: user.servicesCount || 0, icon: <BriefcaseIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-green-500 to-green-700', targetTab: TABS.PUBLICATIONS, tooltip: 'Ver tus servicios publicados' },
+            { id: 'eventos', title: 'Eventos', value: user.eventsCount || 0, icon: <CalendarDaysIcon className="w-6 h-6" />, colorClass: 'bg-gradient-to-br from-yellow-500 to-yellow-600', targetTab: TABS.MY_EVENTS, tooltip: 'Ver tus eventos creados' },
+        ];
+    }, [user]);
 
     const [currentIndex, setCurrentIndex] = useState(0);
 
