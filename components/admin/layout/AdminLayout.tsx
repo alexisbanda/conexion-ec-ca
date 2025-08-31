@@ -1,7 +1,7 @@
 
 import React, { useContext } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { HomeIcon, NewspaperIcon, UserGroupIcon, CalendarDaysIcon, BriefcaseIcon, InformationCircleIcon } from '../../icons';
+import { HomeIcon, NewspaperIcon, UserGroupIcon, CalendarDaysIcon, BriefcaseIcon, InformationCircleIcon, BookOpenIcon } from '../../icons';
 import { AuthContext } from '../../../contexts/AuthContext';
 
 const AdminLayout: React.FC = () => {
@@ -12,6 +12,7 @@ const AdminLayout: React.FC = () => {
     const allNavItems = [
         { href: '/admin', label: 'Dashboard', icon: <HomeIcon className="w-5 h-5" /> },
         { href: '/admin/users', label: 'Usuarios', icon: <UserGroupIcon className="w-5 h-5" /> },
+        { href: '/admin/guides', label: 'Guías', icon: <BookOpenIcon className="w-5 h-5" /> },
         { href: '/admin/ads', label: 'Anuncios', icon: <NewspaperIcon className="w-5 h-5" /> },
         { href: '/admin/events', label: 'Eventos', icon: <CalendarDaysIcon className="w-5 h-5" /> },
         { href: '/admin/news', label: 'Noticias', icon: <NewspaperIcon className="w-5 h-5" /> },

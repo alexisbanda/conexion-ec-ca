@@ -35,6 +35,7 @@ import EventManager from './components/admin/EventManager';
 import NewsManager from './components/admin/NewsManager';
 import SuperAdminRoute from './components/SuperAdminRoute';
 import SettingsPage from './components/admin/SettingsPage';
+import GuideManagerPage from './components/admin/GuideManagerPage'; // <-- LÍNEA AÑADIDA
 
 const PendingApprovalPage: React.FC = () => (
     // ... (código sin cambios)
@@ -163,6 +164,7 @@ const App: React.FC = () => {
                             <Route index element={<ReportsDashboard />} />
                             <Route path="ads" element={<AdManager />} />
                             <Route path="users" element={<UserManager />} />
+                            <Route path="guides" element={<GuideManagerPage />} />
                             <Route path="events" element={<EventManager />} />
                             <Route path="news" element={<NewsManager />} />
                             <Route path="services" element={<ServiceManager />} />

@@ -1,6 +1,8 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/constants.ts
 import { NavItem } from './types';
 
+export const DEFAULT_REGION = 'Canadá';
+
 export const ECUADOR_COLORS = {
   yellow: '#FFDD00',
   blue: '#0059A3',

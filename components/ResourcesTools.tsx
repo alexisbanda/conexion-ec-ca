@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useContext } from 'react';
+import React, { useState, useMemo, useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { regions } from './NationalRegionSelector';
-import { Resource, Tool, ModalState, ModalContentType, GuideStage } from '../types';
+import { Guide, Tool, ModalState, ModalContentType, GuideStage } from '../types';
 import { BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ScaleIcon, MapPinIcon, LockClosedIcon, ChevronDownIcon, HeartIcon, BookOpenIcon, UsersIcon, GlobeAltIcon, DocumentCheckIcon, GiftIcon, IdeaIcon, TagIcon, ChevronRightIcon, BuildingLibraryIcon, ArrowTrendingUpIcon, SparklesIcon, CheckCircleIcon } from './icons';
 import { Modal } from './Modal';
 import { CommunityDirectory } from './CommunityDirectory';
@@ -10,11 +11,35 @@ import { AuthContext } from '../contexts/AuthContext';
 import { AdSlot } from './AdSlot';
 import regionalToolsConfig from '../regionalToolsConfig.json';
 import { EmailGateForm } from './EmailGateForm';
+import { getPublicGuides } from '../services/guideService'; // IMPORTAMOS EL NUEVO SERVICIO
+import { DEFAULT_REGION } from '../constants';
 
 const iconMap: { [key: string]: React.ReactElement } = {
   GiftIcon: <GiftIcon className="w-10 h-10" />,
   IdeaIcon: <IdeaIcon className="w-10 h-10" />,
+  // Añadimos iconos genéricos para las guías
+  BriefcaseIcon: <BriefcaseIcon className="w-10 h-10" />,
+  AcademicCapIcon: <AcademicCapIcon className="w-10 h-10" />,
+  HomeIcon: <HomeIcon className="w-10 h-10" />,
+  CurrencyDollarIcon: <CurrencyDollarIcon className="w-10 h-10" />,
+  BookOpenIcon: <BookOpenIcon className="w-10 h-10" />,
+  UsersIcon: <UsersIcon className="w-10 h-10" />,
+  ArrowTrendingUpIcon: <ArrowTrendingUpIcon className="w-10 h-10" />,
+  BuildingLibraryIcon: <BuildingLibraryIcon className="w-10 h-10" />,
+  SparklesIcon: <SparklesIcon className="w-10 h-10" />,
 };
+
+// Función para obtener un ícono basado en el título o etapa de la guía
+const getIconForGuide = (guide: Guide): React.ReactElement => {
+    const title = guide.title.toLowerCase();
+    if (title.includes('vivienda') || title.includes('casa')) return iconMap.HomeIcon;
+    if (title.includes('laboral') || title.includes('empleo') || title.includes('emprendimiento')) return iconMap.BriefcaseIcon;
+    if (title.includes('finanzas') || title.includes('crédito') || title.includes('inversiones')) return iconMap.CurrencyDollarIcon;
+    if (title.includes('títulos') || title.includes('ciudadanía')) return iconMap.AcademicCapIcon;
+    if (title.includes('comunitaria')) return iconMap.UsersIcon;
+    return iconMap.BookOpenIcon; // Icono por defecto
+};
+
 
 interface RedirectPromptProps {
     toolName: string;
@@ -61,15 +86,38 @@ export const ResourcesTools: React.FC = () => {
   const [activeTab, setActiveTab] = useState<GuideStage>('Recién Llegado');
   const authContext = useContext(AuthContext);
 
+  // --- NUEVOS ESTADOS PARA DATOS DINÁMICOS ---
+  const [guides, setGuides] = useState<Guide[]>([]);
+  const [isLoadingGuides, setIsLoadingGuides] = useState(true);
+
+
   const closeModal = () => {
     setModalState({ isOpen: false });
   };
 
   const location = useLocation();
   const currentRegion = regions.find(r => r.path === location.pathname);
-  const regionName = currentRegion ? currentRegion.name : 'Canadá';
-  const shortName = currentRegion ? currentRegion.shortName : 'CA';
+  const regionName = currentRegion ? currentRegion.name : DEFAULT_REGION;
   const regionId = currentRegion ? currentRegion.id : 'default';
+
+  // --- CARGA DE DATOS DESDE FIRESTORE --- 
+  useEffect(() => {
+    const fetchGuides = async () => {
+      try {
+        setIsLoadingGuides(true);
+        // Pasamos el nombre de la región actual al servicio para que filtre
+        const fetchedGuides = await getPublicGuides(regionName);
+        setGuides(fetchedGuides);
+      } catch (error) {
+        console.error("Error cargando las guías:", error);
+        toast.error("No se pudieron cargar las guías en este momento.");
+      } finally {
+        setIsLoadingGuides(false);
+      }
+    };
+    fetchGuides();
+  }, [regionName]); // Se ejecuta de nuevo si la región cambia
+
 
   const toolsData = useMemo(() => {
     const regionalConfig = regionalToolsConfig[regionId as keyof typeof regionalToolsConfig] || regionalToolsConfig.default;
@@ -166,123 +214,15 @@ export const ResourcesTools: React.FC = () => {
       }
     };
 
-
-  const essentialGuidesData: Resource[] = useMemo(() => ([
-    // Etapa 1: Recién Llegado
-    {
-      id: 'guide1',
-      icon: <HomeIcon className="w-10 h-10" />,
-      title: `Guía de Vivienda en ${regionName}`,
-      description: 'Aprende a buscar, entender contratos y conocer tus derechos como inquilino.',
-      stage: 'Recién Llegado',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-vivienda-premium.pdf`,
-    },
-    {
-      id: 'guide3',
-      icon: <CurrencyDollarIcon className="w-10 h-10" />,
-      title: 'Finanzas para Recién Llegados',
-      description: 'Abre una cuenta bancaria, entiende el puntaje de crédito y los impuestos básicos.',
-      stage: 'Recién Llegado',
-      isPremium: false,
-      downloadUrl: `/${shortName}/guia-finanzas-publica.pdf`,
-    },
-    {
-      id: 'guide4',
-      icon: <AcademicCapIcon className="w-10 h-10" />,
-      title: 'Validación de Títulos',
-      description: `Descubre cómo iniciar el proceso para que tu profesión sea reconocida en ${regionName}.`,
-      stage: 'Recién Llegado',
-      isPremium: false,
-      downloadUrl: `/${shortName}/guia-titulos-publica.pdf`,
-    },
-    {
-      id: 'guide6',
-      icon: <BookOpenIcon className="w-10 h-10" />,
-      title: 'Navegación Legal Básica',
-      description: `Guía simple sobre tus derechos y responsabilidades legales en ${regionName}.`,
-      stage: 'Recién Llegado',
-      isPremium: false,
-      downloadUrl: `/${shortName}/guia-legal-basica.pdf`,
-    },
-    // Etapa 2: Estableciéndose
-    {
-      id: 'guide2',
-      icon: <BriefcaseIcon className="w-10 h-10" />,
-      title: `Guía Laboral en ${regionName}`,
-      description: `Adapta tu CV, optimiza tu LinkedIn y prepárate para las entrevistas de trabajo en ${regionName}.`,
-      stage: 'Estableciéndose',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-laboral-premium.pdf`,
-    },
-    {
-      id: 'guide7',
-      icon: <UsersIcon className="w-10 h-10" />,
-      title: 'Participación Comunitaria',
-      description: `Descubre cómo involucrarte, hacer amigos y expandir tu red en ${regionName}.`,
-      stage: 'Estableciéndose',
-      isPremium: false,
-      downloadUrl: `/${shortName}/guia-participacion-comunitaria.pdf`,
-    },
-    {
-      id: 'guide-new-1',
-      icon: <ArrowTrendingUpIcon className="w-10 h-10" />,
-      title: 'Optimiza tu Crédito',
-      description: 'Estrategias probadas para mejorar tu puntaje de crédito y acceder a mejores productos financieros.',
-      stage: 'Estableciéndose',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-credito-premium.pdf`,
-    },
-    {
-      id: 'guide-new-2',
-      icon: <HomeIcon className="w-10 h-10" />,
-      title: 'Comprando tu Primera Casa',
-      description: 'El proceso de compra de vivienda en Canadá, desde el down payment hasta la hipoteca.',
-      stage: 'Estableciéndose',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-compra-casa-premium.pdf`,
-    },
-    // Etapa 3: Residente Establecido
-    {
-      id: 'guide-new-3',
-      icon: <BuildingLibraryIcon className="w-10 h-10" />,
-      title: 'El Camino a la Ciudadanía',
-      description: 'Requisitos, proceso de aplicación y preparación para el examen de ciudadanía.',
-      stage: 'Residente Establecido',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-ciudadania-premium.pdf`,
-    },
-    {
-      id: 'guide-new-4',
-      icon: <SparklesIcon className="w-10 h-10" />,
-      title: 'Invirtiendo en Canadá',
-      description: 'Una introducción a RRSP, TFSA y otras opciones de inversión para hacer crecer tu patrimonio.',
-      stage: 'Residente Establecido',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-inversiones-premium.pdf`,
-    },
-    {
-      id: 'guide-new-5',
-      icon: <BriefcaseIcon className="w-10 h-10" />,
-      title: 'Emprendimiento 101',
-      description: 'Pasos iniciales para registrar y lanzar tu propio negocio en Canadá.',
-      stage: 'Residente Establecido',
-      isPremium: true,
-      downloadUrl: `/${shortName}/guia-emprendimiento-premium.pdf`,
-    },
-  ]), [regionName, shortName]);
-
+  // YA NO SE USA LA DATA HARCODEADA. Se filtra el estado que viene de Firestore.
   const filteredGuides = useMemo(() => {
-    return essentialGuidesData.filter(guide => guide.stage === activeTab);
-  }, [activeTab, essentialGuidesData]);
+    return guides.filter(guide => guide.stage === activeTab);
+  }, [activeTab, guides]);
 
-  const handleGuideClick = (resource: Resource) => {
-    if (authContext?.isAuthenticated) {
-      window.open(resource.downloadUrl, '_blank');
-      return;
-    }
-
-    if (resource.isPremium) {
+  // LÓGICA DE CLIC SIMPLIFICADA
+  const handleGuideClick = (guide: Guide) => {
+    if (guide.isPremium && !authContext?.isAuthenticated) {
+      // Muestra el modal de login para contenido premium
       const modalContent = (
         <div className="text-center p-6 space-y-4">
           <LockClosedIcon className="w-16 h-16 mx-auto text-ecuador-red" />
@@ -312,85 +252,11 @@ export const ResourcesTools: React.FC = () => {
           </div>
         </div>
       );
-      setModalState({ isOpen: true, title: resource.title, content: modalContent });
+      setModalState({ isOpen: true, title: guide.title, content: modalContent });
     } else {
-      const handleEmailSubmit = async (email: string, consent: boolean) => {
-        setIsSubmitting(true);
-        try {
-          const response = await fetch('/.netlify/functions/send-guide-email', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email,
-              guideTitle: resource.title,
-              downloadUrl: resource.downloadUrl,
-              consent,
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error('Error al enviar el correo.');
-          }
-
-          closeModal();
-
-          // Show confirmation modal
-          setTimeout(() => {
-            setModalState({
-              isOpen: true,
-              title: '¡Correo Enviado!',
-              content: (
-                <div className="text-center p-6">
-                  <CheckCircleIcon className="w-16 h-16 mx-auto text-green-500" />
-                  <h4 className="text-xl font-bold text-gray-800 mt-4">¡Revisa tu Bandeja de Entrada!</h4>
-                  <p className="text-gray-700 mt-2">
-                    Hemos enviado la guía "{resource.title}" a <strong>{email}</strong>.
-                  </p>
-                  <button 
-                    onClick={closeModal}
-                    className="mt-6 bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
-                  >
-                    Entendido
-                  </button>
-                </div>
-              ),
-            });
-          }, 300); // Short delay to allow the first modal to close smoothly
-
-        } catch (error: any) {
-          console.error(error);
-          // Show an error message in the modal
-          setModalState({
-            isOpen: true,
-            title: 'Error',
-            content: (
-              <div className="text-center p-6">
-                <p className="text-red-500">{error.message}</p>
-                <button 
-                  onClick={closeModal}
-                  className="mt-6 bg-ecuador-blue hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-2xl transition-colors"
-                >
-                  Cerrar
-                </button>
-              </div>
-            ),
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
-      };
-
-      const modalContent = (
-        <EmailGateForm 
-          onEmailSubmit={handleEmailSubmit} 
-          onClose={closeModal} 
-          guideTitle={resource.title} 
-          isSubmitting={isSubmitting}
-        />
-      );
-      setModalState({ isOpen: true, title: "Acceso a Guía Gratuita", content: modalContent });
+      // Para usuarios logueados o guías gratuitas, abre la URL de descarga directamente.
+      // La URL ya es la correcta y viene de Firestore.
+      window.open(guide.downloadUrl, '_blank');
     }
   };
 
@@ -483,29 +349,32 @@ export const ResourcesTools: React.FC = () => {
               animate="visible"
               exit="hidden"
             >
-              {filteredGuides.map((resource) => (
+              {isLoadingGuides ? (
+                <p className="col-span-full text-center">Cargando guías...</p>
+              ) : (
+                filteredGuides.map((guide) => (
                   <motion.div
-                      key={resource.id}
+                      key={guide.id}
                       variants={itemVariants}
                       whileHover={{ scale: 1.05, y: -5, boxShadow: "0px 10px 20px rgba(0,0,0,0.1)" }}
                       className={`w-5/6 md:w-auto flex-shrink-0 bg-ecuador-yellow-light p-6 rounded-2xl shadow-md cursor-pointer flex flex-col items-center text-center relative`}
-                      onClick={() => handleGuideClick(resource)}
-                      role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && handleGuideClick(resource)}
-                      aria-label={`Abrir detalles de ${resource.title}`}
+                      onClick={() => handleGuideClick(guide)}
+                      role="button" tabIndex={0} onKeyPress={(e) => e.key === 'Enter' && handleGuideClick(guide)}
+                      aria-label={`Abrir detalles de ${guide.title}`}
                   >
-                    {resource.isPremium && (
+                    {guide.isPremium && (
                       <div className="absolute top-2 right-2 flex items-center bg-ecuador-red text-white text-xs font-bold px-2 py-1 rounded-full">
                         <LockClosedIcon className="w-3 h-3 mr-1" /> Exclusivo
                       </div>
                     )}
-                    <div className="text-ecuador-red mb-4">{resource.icon}</div>
-                    <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{resource.title}</h4>
-                    <p className="text-gray-600 text-sm flex-grow">{resource.description}</p>
+                    <div className="text-ecuador-red mb-4">{getIconForGuide(guide)}</div>
+                    <h4 className="text-lg font-semibold text-ecuador-blue mb-2">{guide.title}</h4>
+                    <p className="text-gray-600 text-sm flex-grow">{guide.description}</p>
                     <span className="mt-4 text-sm font-semibold text-ecuador-red hover:text-red-700 self-center transition-colors">
                       Descargar Guía &rarr;
                     </span>
                   </motion.div>
-                )
+                ))
               )}
             </motion.div>
           </div>

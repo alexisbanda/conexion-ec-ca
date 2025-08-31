@@ -73,6 +73,18 @@ export interface Resource {
   stage: GuideStage;
 }
 
+// --- NUEVO TIPO PARA GUÍAS DESDE FIRESTORE ---
+export interface Guide {
+  id: string;
+  title: string;
+  description: string;
+  region: string; // 'CA', 'ON', etc.
+  stage: GuideStage;
+  isPremium: boolean;
+  downloadUrl: string;
+  createdAt: Timestamp;
+}
+
 export interface Tool {
   id: string;
   icon: React.ReactNode;

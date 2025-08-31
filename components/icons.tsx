@@ -54,7 +54,9 @@ import {
     faTrophy,
     faArrowTrendUp,
     faBuilding,
-    faPencilSquare
+    faPencilSquare,
+    faTrash,
+    faPencilAlt
 } from '@fortawesome/free-solid-svg-icons';
 // Importa el componente FontAwesomeIcon para usar los iconos en React
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -333,4 +335,12 @@ export const SparklesIcon: React.FC<IconProps> = (props) => (
 
 export const PencilSquareIcon: React.FC<IconProps> = (props) => (
     <FontAwesomeIcon icon={faPencilSquare} {...props} />
+);
+
+export const TrashIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faTrash} {...props} />
+);
+
+export const PencilIcon: React.FC<IconProps> = (props) => (
+    <FontAwesomeIcon icon={faPencilAlt} {...props} />
 );
