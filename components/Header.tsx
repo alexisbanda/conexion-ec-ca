@@ -33,8 +33,8 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
   // --- LÓGICA DE FILTRADO DE ENLACES ---
   const visibleNavItems = useMemo(() => {
     return NAV_ITEMS.filter(item => {
-      // Ocultar si es solo para admin y el usuario no es admin
-      if (item.adminOnly && user?.role !== 'admin') {
+      // Ocultar si es solo para admin y el usuario no es admin o regional_admin
+      if (item.adminOnly && !['admin', 'regional_admin'].includes(user?.role || '')) {
         return false;
       }
       // Ocultar si es premium y el usuario no está autenticado

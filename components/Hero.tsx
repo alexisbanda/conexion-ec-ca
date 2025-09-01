@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 // NUEVOS IMPORTS de la librería
 import { ParallaxBanner, ParallaxBannerLayer } from 'react-scroll-parallax';
 import { regions } from './NationalRegionSelector';
@@ -11,6 +11,9 @@ const DEFAULT_HERO_IMAGE = '/assets/images/Vancouver_Quito_2.png';
 export const Hero: React.FC = () => {
   const auth = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const { isAuthenticated, openRegisterModal } = auth || {};
 
   const heroImageUrl = useMemo(() => {
     const currentPath = location.pathname;
@@ -56,15 +59,26 @@ export const Hero: React.FC = () => {
             Conectando, apoyando y creciendo juntos. Accede a recursos, eventos y una red de contactos invaluable para facilitar tu vida en <span className="text-2xl font-semibold text-white mb-4 font-montserrat">{heroRegionName}</span>.
           </p>
           <div className="mt-10">
-            <button
-              className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
-              onClick={() => auth?.openRegisterModal()}
-            >
-              Únete a la Comunidad
-            </button>
-            <p className="mt-4 text-sm text-white opacity-80">
-              ¡Es gratis y toma menos de un minuto!
-            </p>
+            {isAuthenticated ? (
+              <button
+                className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
+                onClick={() => navigate('/dashboard')}
+              >
+                Mi Espacio
+              </button>
+            ) : (
+              <>
+                <button
+                  className="bg-ecuador-red hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105 shadow-lg"
+                  onClick={() => openRegisterModal && openRegisterModal()}
+                >
+                  Únete a la Comunidad
+                </button>
+                <p className="mt-4 text-sm text-white opacity-80">
+                  ¡Es gratis y toma menos de un minuto!
+                </p>
+              </>
+            )}
           </div>
         </div>
         <div className="absolute bottom-10 transform -translate-x-1/2 z-10 text-center animate-bounce">

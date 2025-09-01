@@ -31,6 +31,7 @@ export const AddGuideForm: React.FC<AddGuideFormProps> = ({ onSuccess, onCancel,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState(BLANK_FORM);
+  const [notifyMembers, setNotifyMembers] = useState(true);
 
   useEffect(() => {
     const getInitialFormState = () => {
@@ -102,6 +103,28 @@ export const AddGuideForm: React.FC<AddGuideFormProps> = ({ onSuccess, onCancel,
         await createGuide(guideData as Omit<Guide, 'id' | 'createdAt'>);
       }
 
+      // Si la casilla está marcada, enviar la notificación.
+      if (notifyMembers) {
+        toast.loading('Enviando notificación a los socios...', { id: 'notifyToast' });
+        try {
+          const response = await fetch('/.netlify/functions/send-guide-notification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              guideTitle: guideData.title,
+              description: guideData.description,
+              region: guideData.region,
+              downloadUrl: guideData.downloadUrl,
+            }),
+          });
+          if (!response.ok) throw new Error('El servidor de notificaciones respondió con un error.');
+          toast.success('¡Notificación enviada!', { id: 'notifyToast' });
+        } catch (notificationError) {
+          console.error("Error al enviar notificación:", notificationError);
+          toast.error('La guía se guardó, pero falló el envío de la notificación.', { id: 'notifyToast' });
+        }
+      }
+
       toast.success(isEditing ? '¡Guía actualizada!' : '¡Guía creada!', { id: toastId });
       onSuccess();
     } catch (error) {
@@ -170,6 +193,11 @@ export const AddGuideForm: React.FC<AddGuideFormProps> = ({ onSuccess, onCancel,
           <label htmlFor="isPremium" className="flex items-center space-x-2 cursor-pointer">
             <input type="checkbox" id="isPremium" name="isPremium" checked={formData.isPremium} onChange={handleChange} className="h-4 w-4 text-ecuador-blue focus:ring-ecuador-blue border-gray-300 rounded" />
             <span className="text-gray-700">¿Es una guía Premium?</span>
+          </label>
+
+          <label htmlFor="notifyMembers" className="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" id="notifyMembers" name="notifyMembers" checked={notifyMembers} onChange={(e) => setNotifyMembers(e.target.checked)} className="h-4 w-4 text-ecuador-blue focus:ring-ecuador-blue border-gray-300 rounded" />
+            <span className="text-gray-700">Notificar a los socios</span>
           </label>
         </div>
 

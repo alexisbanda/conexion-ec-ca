@@ -27,6 +27,7 @@ import TermsOfService from './pages/TermsOfService';
 import { Chatbot } from './components/Chatbot';
 import AdminLayout from './components/admin/layout/AdminLayout';
 import NationalRegionSelector from './components/NationalRegionSelector';
+import Home from './pages/Home';
 import ReportsDashboard from './components/admin/ReportsDashboard';
 import { AdManager } from './components/admin/AdManager';
 import UserManager from './components/admin/UserManager';
@@ -131,7 +132,7 @@ const App: React.FC = () => {
                 {!isRegionSelectorPage && <Header isDashboardPage={isDashboardPage} />}
                 <main className={`flex-grow flex flex-col ${isDashboardPage ? 'pt-16' : ''}`}>
                     <Routes>
-                        <Route path="/" element={<NationalRegionSelector />} />
+                        <Route path="/" element={<Home />} />
                         <Route path="/:region" element={<LandingPage />} />
                         <Route path="/pending-approval" element={<PendingApprovalPage />} />
                         <Route path="/events/:eventId" element={<EventDetailPage />} />
