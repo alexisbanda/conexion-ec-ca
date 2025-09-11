@@ -1,7 +1,6 @@
 
 import { Handler } from "@netlify/functions";
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getFirestore, Firestore, collection, getDocs, query, where } from "firebase/firestore";
+import * as admin from 'firebase-admin';
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 
@@ -18,24 +17,20 @@ interface AdminUser {
     name: string;
 }
 
-const firebaseConfig = { /* ... tu config ... */ }; // Asumimos que las variables de entorno están disponibles
+// Inicializar Firebase Admin SDK
+if (!admin.apps.length) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID}.firebaseio.com`
+    });
+}
+
+const db = admin.firestore();
+
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({ username: 'api', key: process.env.MAILGUN_API_KEY || '' });
 
-let app: FirebaseApp;
-let db: Firestore;
-
-if (getApps().length === 0) {
-    app = initializeApp({ 
-        apiKey: process.env.VITE_FIREBASE_API_KEY, 
-        authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN, 
-        projectId: process.env.VITE_FIREBASE_PROJECT_ID 
-    });
-    db = getFirestore(app);
-} else {
-    app = getApp();
-    db = getFirestore(app);
-}
 
 // --- Handler Principal ---
 const handler: Handler = async (event, _context) => {
@@ -47,16 +42,15 @@ const handler: Handler = async (event, _context) => {
         const { itemType, itemId, province, itemName } = JSON.parse(event.body) as NotifyAdminsRequest;
 
         // 1. Encontrar a los administradores relevantes en paralelo
-        const regionalAdminsQuery = query(
-            collection(db, 'users'),
-            where('role', '==', 'regional_admin'),
-            where('managedProvince', '==', province)
-        );
-        const generalAdminsQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+        const regionalAdminsQuery = db.collection('users')
+            .where('role', '==', 'regional_admin')
+            .where('managedProvince', '==', province);
+            
+        const generalAdminsQuery = db.collection('users').where('role', '==', 'admin');
 
         const [regionalSnapshot, generalSnapshot] = await Promise.all([
-            getDocs(regionalAdminsQuery),
-            getDocs(generalAdminsQuery)
+            regionalAdminsQuery.get(),
+            generalAdminsQuery.get()
         ]);
 
         const regionalAdmins = regionalSnapshot.docs.map(doc => ({ email: doc.data().email, name: doc.data().name || doc.data().email }));
