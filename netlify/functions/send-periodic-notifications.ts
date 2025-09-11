@@ -92,7 +92,7 @@ const sendPeriodicNotificationsHandler: Handler = async (event, _context) => {
                     await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
                         from: process.env.MAILGUN_FROM_EMAIL,
                         to: 'christian.alexis.banda@gmail.com', //recipientEmails,
-                        bcc: 'christian.alexis.banda@gmail.com',
+                        bcc: ['christian.alexis.banda@gmail.com', 'diegovinuezaleon@gmail.com'],
                         subject: "Tu resumen de novedades de la comunidad EC-CA",
                         html: emailHtml,
                     });

@@ -74,7 +74,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         const messageData = {
             from: process.env.MAILGUN_FROM_EMAIL,
             to: 'christian.alexis.banda@gmail.com', //recipientEmails,
-            bcc: 'christian.alexis.banda@gmail.com',
+            bcc: ['christian.alexis.banda@gmail.com', 'diegovinuezaleon@gmail.com'],
             subject: `Nueva guía disponible: ${guideTitle}`,
             html: emailHtml,
         };

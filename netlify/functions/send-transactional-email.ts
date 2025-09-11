@@ -89,7 +89,7 @@ const handler: Handler = async (event, _context) => {
         await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
             from: process.env.MAILGUN_FROM_EMAIL,
             to: recipientEmail,
-            bcc: 'christian.alexis.banda@gmail.com',
+            bcc: ['christian.alexis.banda@gmail.com', 'diegovinuezaleon@gmail.com'],
             subject: subject,
             html: html,
         });
