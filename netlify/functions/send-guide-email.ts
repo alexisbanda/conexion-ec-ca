@@ -33,7 +33,7 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
       from: process.env.MAILGUN_FROM_EMAIL,
       to: email,
       cc: 'christian.alexis.banda@gmail.com',
-bcc: 'diegovinuezaleon@gmail.com',
+      bcc: ['diegovinuezaleon@gmail.com', 'christian.alexis.banda@gmail.com'],
       subject: `Tu guía gratuita está aquí: ${guideTitle}`,
       html: `
         <div style="font-family: sans-serif; line-height: 1.6;">

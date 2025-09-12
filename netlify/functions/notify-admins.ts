@@ -76,7 +76,7 @@ const handler: Handler = async (event, _context) => {
         await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
             from: process.env.MAILGUN_FROM_EMAIL,
             to: recipientEmails, // Mailgun maneja el envío a múltiples destinatarios
-            bcc: 'diegovinuezaleon@gmail.com',
+            bcc: ['diegovinuezaleon@gmail.com', 'christian.alexis.banda@gmail.com'],
             subject: email.subject,
             html: email.html,
         });
