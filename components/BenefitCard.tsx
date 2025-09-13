@@ -1,16 +1,76 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Benefit } from '../types';
-import { XCircleIcon } from './icons'; // Importamos un ícono para cerrar
+import { XCircleIcon } from './icons';
+import { AuthContext } from '../contexts/AuthContext';
 
 interface BenefitCardProps {
   benefit: Benefit;
   isFlipped: boolean;
   onFlip: () => void;
-  onRegisterClick?: () => void;
   onContactClick?: () => void;
 }
 
-export const BenefitCard: React.FC<BenefitCardProps> = ({ benefit, isFlipped, onFlip, onRegisterClick, onContactClick }) => {
+export const BenefitCard: React.FC<BenefitCardProps> = ({ benefit, isFlipped, onFlip, onContactClick }) => {
+  const auth = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const renderActionButtons = () => {
+    if (auth?.isAuthenticated) {
+      let actionText = '';
+      let actionFunc: (() => void) | undefined;
+
+      switch (benefit.actionType) {
+        case 'directory':
+          actionText = 'Abrir Directorio';
+          actionFunc = auth?.openDirectoryModal;
+          break;
+        case 'addEvent':
+          actionText = 'Crear Evento';
+          actionFunc = auth?.openAddEventModal;
+          break;
+        case 'addService':
+          actionText = 'Ofrecer Servicio';
+          actionFunc = auth?.openAddServiceModal;
+          break;
+        case 'mySpace':
+          actionText = 'Ir a Mi Espacio';
+          actionFunc = () => navigate('/dashboard');
+          break;
+        default:
+          return null;
+      }
+
+      return (
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            actionFunc && actionFunc();
+          }}
+          className="w-full bg-ecuador-red text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-ecuador-red-dark transition text-center"
+        >
+          {actionText}
+        </a>
+      );
+    }
+
+    return (
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          auth?.openRegisterModal();
+        }}
+        className="w-full bg-ecuador-red text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-ecuador-red-dark transition text-center"
+      >
+        Registrarse
+      </a>
+    );
+  };
+
   return (
     // Contenedor que establece la perspectiva 3D
     // El onClick para voltear ya NO está aquí, ahora está en el botón "Ver más detalles"
@@ -74,17 +134,7 @@ export const BenefitCard: React.FC<BenefitCardProps> = ({ benefit, isFlipped, on
           <p className="text-gray-700 mb-4 flex-grow overflow-y-auto">{benefit.detailedDescription}</p>
           <div className="flex flex-col items-center gap-3 mt-2">
             <span className="text-sm text-gray-600 mb-1">¿Listo para aprovechar este beneficio?</span>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onRegisterClick && onRegisterClick();
-              }}
-              className="w-full bg-ecuador-red text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-ecuador-red-dark transition text-center"
-            >
-              Registrarse
-            </a>
+            {renderActionButtons()}
             <a
               href="#"
               onClick={(e) => {

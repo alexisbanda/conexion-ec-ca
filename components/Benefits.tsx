@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Benefit } from '../types';
 import { UserGroupIcon, BriefcaseIcon, AcademicCapIcon, HomeIcon, CurrencyDollarIcon, ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { AuthContext } from '../contexts/AuthContext';
@@ -13,36 +13,46 @@ const benefitsData: Benefit[] = [
     id: '1',
     icon: <UserGroupIcon />,
     title: 'Encuentra a tu Gente',
+    shortDescription: 'Accede a una red de profesionales y emprendedores ecuatorianos.',
     detailedDescription: '¿Imaginas tener a tu alcance una red de profesionales y emprendedores ecuatorianos listos para colaborar? Conviértete en miembro y obtén acceso privilegiado a nuestro Directorio Comunitario.',
     imageUrl: '/assets/images/red_contactos.png',
+    actionType: 'directory',
   },
   {
     id: '2',
     icon: <BriefcaseIcon />,
     title: 'Impulsa tu Carrera',
+    shortDescription: 'Bolsa de trabajo con ofertas exclusivas y talleres prácticos.',
     detailedDescription: 'Tu próximo gran paso profesional empieza aquí. Te damos las herramientas para conquistar el mercado laboral canadiense: acceso a una bolsa de trabajo con ofertas exclusivas y talleres prácticos.',
     imageUrl: '/assets/images/oportunidades_laborales.png',
+    actionType: 'addEvent',
   },
   {
     id: '3',
     icon: <CurrencyDollarIcon />,
     title: 'Haz Crecer tu Negocio',
+    shortDescription: 'Gana visibilidad y conéctate con una red de clientes que confían en ti.',
     detailedDescription: 'Te ofrecemos la plataforma perfecta para que toda la comunidad ecuatoriana en {regionName} conozca tu talento. Gana visibilidad y conéctate con una red de clientes que confían en ti.',
     imageUrl: '/assets/images/evento_networking.png',
+    actionType: 'addService',
   },
   {
     id: '4',
     icon: <HomeIcon />,
     title: 'Tu Hogar en {regionName}',
+    shortDescription: 'Guías para vivienda, contratos de alquiler y derechos de inquilino.',
     detailedDescription: 'Te acompañamos en cada paso con guías claras para buscar vivienda, entender los contratos de alquiler y conocer tus derechos como inquilino. Siéntete seguro y en casa desde el primer día.',
     imageUrl: '/assets/images/apoyo_vivienda.png',
+    actionType: 'mySpace',
   },
   {
     id: '5',
     icon: <AcademicCapIcon />,
     title: 'Apoyo Educativo',
+    shortDescription: 'Navega el sistema educativo, postula a becas y convalida títulos.',
     detailedDescription: 'Te proporcionamos el mapa para navegar el sistema educativo: desde elegir el programa perfecto y postular a becas, hasta el crucial proceso de convalidación de tus títulos.',
     imageUrl: '/assets/images/apoyo_educativo.png',
+    actionType: 'mySpace',
   },
 ];
 
@@ -50,6 +60,7 @@ export const Benefits: React.FC = () => {
   const { region: regionId } = useParams<{ region: string }>();
   const region = regions.find(r => r.id === regionId);
   const regionName = region ? region.name : 'Canadá';
+  const navigate = useNavigate();
 
   const [activeBenefitId, setActiveBenefitId] = useState<string>(benefitsData[0].id);
   const benefitRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -88,8 +99,101 @@ export const Benefits: React.FC = () => {
   const handleTitleClick = (id: string) => {
     benefitRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
-  
-  const openRegister = () => auth?.openRegisterModal();
+
+  const renderBenefitAction = (benefit: Benefit) => {
+    if (!auth?.isAuthenticated) {
+      return (
+        <motion.button
+          onClick={() => auth?.openRegisterModal()}
+          className="mt-8 bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg"
+          variants={{
+            hidden: { opacity: 0, scale: 0.8 },
+            visible: { opacity: 1, scale: 1, transition: { delay: 0.3, duration: 0.5 } },
+          }}
+        >
+          ¡Quiero ser miembro!
+        </motion.button>
+      );
+    }
+
+    let actionText = '';
+    let actionFunc: (() => void) | undefined;
+
+    switch (benefit.actionType) {
+      case 'directory':
+        actionText = 'Abrir Directorio';
+        actionFunc = auth?.openDirectoryModal;
+        break;
+      case 'addEvent':
+        actionText = 'Crear Evento';
+        actionFunc = auth?.openAddEventModal;
+        break;
+      case 'addService':
+        actionText = 'Ofrecer Servicio';
+        actionFunc = auth?.openAddServiceModal;
+        break;
+      case 'mySpace':
+        actionText = 'Ir a Mi Espacio';
+        actionFunc = () => navigate('/dashboard');
+        break;
+      default:
+        return null;
+    }
+
+    return (
+      <motion.button
+        onClick={() => actionFunc && actionFunc()}
+        className="mt-8 bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg"
+        variants={{
+          hidden: { opacity: 0, scale: 0.8 },
+          visible: { opacity: 1, scale: 1, transition: { delay: 0.3, duration: 0.5 } },
+        }}
+      >
+        {actionText}
+      </motion.button>
+    );
+  };
+
+  const renderMobileBenefitAction = () => {
+    const benefit = benefitsData[mobileBenefitIndex];
+    if (!auth?.isAuthenticated) {
+        return (
+            <button onClick={() => auth?.openRegisterModal()} className="bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg">
+                ¡Quiero ser miembro!
+            </button>
+        );
+    }
+
+    let actionText = '';
+    let actionFunc: (() => void) | undefined;
+
+    switch (benefit.actionType) {
+        case 'directory':
+            actionText = 'Abrir Directorio';
+            actionFunc = auth?.openDirectoryModal;
+            break;
+        case 'addEvent':
+            actionText = 'Crear Evento';
+            actionFunc = auth?.openAddEventModal;
+            break;
+        case 'addService':
+            actionText = 'Ofrecer Servicio';
+            actionFunc = auth?.openAddServiceModal;
+            break;
+        case 'mySpace':
+            actionText = 'Ir a Mi Espacio';
+            actionFunc = () => navigate('/dashboard');
+            break;
+        default:
+            return null;
+    }
+
+    return (
+        <button onClick={() => actionFunc && actionFunc()} className="bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg">
+            {actionText}
+        </button>
+    );
+  };
 
   return (
     <section id="benefits" className="bg-gray-50">
@@ -147,13 +251,7 @@ export const Benefits: React.FC = () => {
                               >
                                   {benefit.detailedDescription.replace('{regionName}', regionName)}
                               </motion.p>
-                              <motion.button
-                                  onClick={openRegister}
-                                  className="mt-8 bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg"
-                                  variants={{ hidden: { opacity: 0, scale: 0.8 }, visible: { opacity: 1, scale: 1, transition: { delay: 0.3, duration: 0.5 } } }}
-                              >
-                                  ¡Quiero ser miembro!
-                              </motion.button>
+                              {renderBenefitAction(benefit)}
                           </motion.div>
                       </motion.div>
                   </div>
@@ -231,9 +329,7 @@ export const Benefits: React.FC = () => {
         </div>
 
         <div className="text-center pt-8">
-            <button onClick={openRegister} className="bg-ecuador-yellow hover:bg-yellow-400 text-ecuador-blue font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-lg">
-                ¡Quiero ser miembro!
-            </button>
+            {renderMobileBenefitAction()}
         </div>
       </div>
     </section>

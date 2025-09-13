@@ -9,6 +9,9 @@ import toast from 'react-hot-toast';
 import { sendWelcomeEmail } from '../services/emailService';
 // 1. Importar el componente del Directorio
 import { CommunityDirectory } from '../components/CommunityDirectory';
+import { AddEventForm } from '../components/AddEventForm';
+import { AddServiceForm } from '../components/AddServiceForm';
+
 
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
@@ -188,14 +191,31 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // 2. Definir la nueva función para abrir el modal del directorio
   const openDirectoryModal = () => {
     setAuthModalState({
       isOpen: true,
       title: 'Directorio Comunitario',
       content: <CommunityDirectory />,
       type: ModalContentType.COMMUNITY_DIRECTORY,
-      fullWidth: true, // Usamos fullWidth para dar más espacio al directorio
+      fullWidth: true, 
+    });
+  };
+
+  const openAddEventModal = () => {
+    setAuthModalState({
+      isOpen: true,
+      title: 'Crear Nuevo Evento',
+      type: ModalContentType.ADD_EVENT_FORM,
+      fullWidth: true,
+    });
+  };
+
+  const openAddServiceModal = () => {
+    setAuthModalState({
+      isOpen: true,
+      title: 'Agregar Nuevo Servicio',
+      type: ModalContentType.ADD_SERVICE_FORM,
+      fullWidth: true,
     });
   };
 
@@ -210,7 +230,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     openLoginModal,
     openRegisterModal,
     openUserProfileModal,
-    openDirectoryModal, // 3. Añadir la función al valor del contexto
+    openDirectoryModal,
+    openAddEventModal,
+    openAddServiceModal,
     closeAuthModal,
     authModalState,
     refreshUserData,

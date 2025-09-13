@@ -237,6 +237,8 @@ export interface AuthContextType extends AuthState {
   openRegisterModal: () => void;
   openUserProfileModal: () => void;
   openDirectoryModal: () => void;
+  openAddEventModal: () => void;
+  openAddServiceModal: () => void;
   closeAuthModal: () => void;
   authModalState: ModalState;
   refreshUserData: (partialUser?: Partial<User>) => Promise<void>;
@@ -309,6 +311,8 @@ export enum ModalContentType {
   REGISTER_FORM,
   USER_PROFILE,
   COMMUNITY_DIRECTORY,
+  ADD_EVENT_FORM,
+  ADD_SERVICE_FORM,
 }
 
 export interface ModalState {

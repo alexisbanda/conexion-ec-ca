@@ -81,9 +81,8 @@ export const handler: Handler = async (event, _context) => {
         const recipientEmails = users.map(u => u.email).filter(e => e) as string[];
 
         await mg.messages.create(process.env.MAILGUN_DOMAIN || '', {
-            from: `Conexión EC-CA <${process.env.MAILGUN_FROM_EMAIL}>`,
+            from: process.env.MAILGUN_FROM_EMAIL,
             to: "christian.alexis.banda@gmail.com", // For testing
-            bcc: "diegovinuezaleon@gmail.com",
             //bcc: recipientEmails, // Use in production
             subject: `¡Nueva publicación en la comunidad! ${(item as EventItem).title || (item as CommunityServiceItem).serviceName}`,
             html: emailHtml,
