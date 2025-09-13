@@ -7,6 +7,8 @@ import { ModalContentType, User, RegistrationData } from '../types';
 import { EnvelopeIcon, LockClosedIcon, UserCircleIcon } from './icons';
 import { FirebaseError } from 'firebase/app';
 import { UserProfileForm } from './UserProfileForm';
+import { AddEventForm } from './AddEventForm';
+import { AddServiceForm } from './AddServiceForm';
 
 // --- FUNCIÓN DE AYUDA PARA ERRORES ---
 const getFirebaseAuthErrorMessage = (errorCode: string): string => {
@@ -324,6 +326,12 @@ export const AuthModals: React.FC = () => {
             } else {
                 modalContentNode = <p>Cargando perfil...</p>;
             }
+            break;
+        case ModalContentType.ADD_EVENT_FORM:
+            modalContentNode = <AddEventForm onSuccess={closeAuthModal} onCancel={closeAuthModal} />;
+            break;
+        case ModalContentType.ADD_SERVICE_FORM:
+            modalContentNode = <AddServiceForm onSuccess={closeAuthModal} onCancel={closeAuthModal} initialData={null} />;
             break;
         default:
             modalContentNode = authModalState.content;
