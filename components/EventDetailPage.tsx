@@ -87,16 +87,16 @@ export const EventDetailPage: React.FC = () => {
         organizer: {
             '@type': 'Organization',
             name: 'Conexión Ecuador-Canadá',
-            url: 'https://conexion-ecuador-canada.com'
+            url: 'https://ecuadorencanada.com'
         },
         image: event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/400`,
-        url: `https://conexion-ecuador-canada.com/events/${event.id}`,
+        url: `https://ecuadorencanada.com/events/${event.id}`,
         offers: {
             '@type': 'Offer',
             price: '0',
             priceCurrency: 'CAD',
             availability: 'https://schema.org/InStock',
-            url: `https://conexion-ecuador-canada.com/events/${event.id}`
+            url: `https://ecuadorencanada.com/events/${event.id}`
         },
         ...(event as any).performer ? { performer: { '@type': 'Person', name: (event as any).performer } } : {}
     } : undefined;

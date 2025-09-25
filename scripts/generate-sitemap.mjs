@@ -8,7 +8,7 @@ const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '..');
 const PUBLIC_DIR = resolve(ROOT, 'public');
 const CONFIG_PATH = resolve(ROOT, 'regions.config.json');
-const BASE_URL = 'https://conexion-ecuador-canada.com';
+const BASE_URL = 'https://ecuadorencanada.com';
 
 function loadRegions() {
   const raw = readFileSync(CONFIG_PATH, 'utf8');
