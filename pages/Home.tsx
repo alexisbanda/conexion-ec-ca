@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import NationalRegionSelector from '../components/NationalRegionSelector';
 import { cityData } from '../constants';
+import SEO from '../components/SEO';
 
 // Mapeo de nombres de provincia a las abreviaturas usadas en las URLs
 const provinceAbbreviations: { [key: string]: string } = {
@@ -67,7 +68,31 @@ const Home: React.FC = () => {
   }
 
   // Si no hay usuario, o no se pudo determinar la región, mostrar el selector
-  return <NationalRegionSelector />;
+  return (
+    <>
+      <SEO
+        title="Conecta con la Comunidad Ecuatoriana en Canadá"
+        description="Encuentra eventos, recursos, servicios y apoyo para ecuatorianos en Canadá. Únete a la comunidad y participa."
+        keywords="ecuatorianos canada, comunidad ecuatoriana, eventos ecuatorianos canada, migrantes ecuatorianos"
+        url="/"
+        schema={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Conexión Ecuador-Canadá',
+            url: 'https://conexion-ecuador-canada.com',
+            logo: 'https://conexion-ecuador-canada.com/ecuanada.png',
+            sameAs: [
+              'https://www.facebook.com',
+              'https://www.instagram.com'
+            ],
+            description: 'Plataforma de comunidad y recursos para ecuatorianos en Canadá.'
+          }
+        ]}
+      />
+      <NationalRegionSelector />
+    </>
+  );
 };
 
 export default Home;

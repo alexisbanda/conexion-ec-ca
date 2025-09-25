@@ -5,8 +5,49 @@
 [functions]
   directory = "netlify/functions"
 
+# Versión de Node para funciones y build
+[build.environment]
+  NODE_VERSION = "18"
+  TZ = "UTC"
+
 # Regla para que las rutas de la SPA (React Router) funcionen en producción
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# (Opcional) Pre-render para bots (si activas prerendering en panel Netlify)
+#[[prerender]]
+#  path = "/"
+#  path = "/bc"
+#  path = "/on"
+#  path = "/qc"
+#  path = "/ab"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-XSS-Protection = "1; mode=block"
+    Permissions-Policy = "geolocation=(self), microphone=()"
+    Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# Custom 404 (SPA maneja, pero puedes subir un dist/404.html si deseas)
+# Netlify servirá /index.html y luego React mostrará la 404 interna.

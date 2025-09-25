@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "bc",
+    "title": "Comunidad Ecuatoriana en British Columbia",
+    "description": "Eventos, recursos y networking para ecuatorianos en British Columbia (Vancouver y más).",
+    "keywords": "ecuatorianos vancouver, comunidad ecuatoriana british columbia, eventos ecuatorianos vancouver",
+    "priority": 0.9,
+    "changefreq": "weekly"
+  },
+  {
+    "slug": "on",
+    "title": "Comunidad Ecuatoriana en Ontario",
+    "description": "Conecta con ecuatorianos en Ontario: eventos, servicios y oportunidades en Toronto y alrededores.",
+    "keywords": "ecuatorianos toronto, comunidad ecuatoriana ontario, eventos ecuatorianos toronto",
+    "priority": 0.9,
+    "changefreq": "weekly"
+  },
+  {
+    "slug": "qc",
+    "title": "Communauté Équatorienne au Québec",
+    "description": "Ressources, événements et entraide pour les Équatoriens à Montréal et partout au Québec.",
+    "keywords": "équatoriens montréal, communauté équatorienne québec, événements équatoriens montréal",
+    "priority": 0.9,
+    "changefreq": "weekly"
+  },
+  {
+    "slug": "ab",
+    "title": "Comunidad Ecuatoriana en Alberta",
+    "description": "Recursos, eventos y comunidad para ecuatorianos en Alberta (Calgary, Edmonton).",
+    "keywords": "ecuatorianos calgary, comunidad ecuatoriana alberta, eventos ecuatorianos edmonton",
+    "priority": 0.9,
+    "changefreq": "weekly"
+  }
+]

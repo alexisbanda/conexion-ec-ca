@@ -6,6 +6,7 @@ import { getEventById } from '../services/eventService';
 import { CalendarDaysIcon, MapPinIcon, UserGroupIcon, LinkIcon } from './icons';
 import { Timestamp } from 'firebase/firestore';
 import { RsvpSection } from './RsvpSection';
+import SEO from './SEO';
 
 // --- Helper Functions for Formatting ---
 
@@ -63,9 +64,44 @@ export const EventDetailPage: React.FC = () => {
     if (!event) return null;
 
     const mapSrc = `https://maps.google.com/maps?q=${encodeURIComponent(event.city || '')},${encodeURIComponent(event.province || '')}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+    const eventStartISO = event.date?.seconds ? new Date(event.date.seconds * 1000).toISOString() : undefined;
+    const eventSchema = eventStartISO ? {
+        '@context': 'https://schema.org',
+        '@type': 'Event',
+        name: event.title,
+        description: event.description,
+        startDate: eventStartISO,
+        eventStatus: 'https://schema.org/EventScheduled',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        location: {
+            '@type': 'Place',
+            name: event.city || event.province || 'Canada',
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: event.city || '',
+                addressRegion: event.province || '',
+                addressCountry: 'CA'
+            }
+        },
+        organizer: {
+            '@type': 'Organization',
+            name: 'Conexión Ecuador-Canadá',
+            url: 'https://conexion-ecuador-canada.com'
+        },
+        image: event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/400`,
+        url: `https://conexion-ecuador-canada.com/events/${event.id}`
+    } : undefined;
 
     return (
         <div className="bg-gray-50 min-h-screen font-sans">
+            <SEO
+                title={event.title}
+                description={event.description?.slice(0, 150)}
+                image={event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/630`}
+                url={`/events/${event.id}`}
+                type="article"
+                schema={eventSchema}
+            />
             {/* --- Hero Banner --- */}
             <motion.div 
                 className="relative w-full h-72 md:h-96 bg-gray-400"

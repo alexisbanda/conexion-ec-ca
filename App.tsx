@@ -1,5 +1,5 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/App.tsx
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { AuthContext } from './contexts/AuthContext';
 import { UserStatus } from './types';
@@ -20,23 +20,26 @@ import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { AuthModals } from './components/AuthModals';
 import { MemberDashboard } from './components/MemberDashboard';
 import AdminRoute from './components/AdminRoute';
-import { EventDetailPage } from './components/EventDetailPage';
-import { OnboardingPage } from './pages/OnboardingPage';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
+const EventDetailPage = lazy(() => import('./components/EventDetailPage').then(m => ({ default: m.EventDetailPage })));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
 import { Chatbot } from './components/Chatbot';
 import AdminLayout from './components/admin/layout/AdminLayout';
 import NationalRegionSelector from './components/NationalRegionSelector';
 import Home from './pages/Home';
-import ReportsDashboard from './components/admin/ReportsDashboard';
-import { AdManager } from './components/admin/AdManager';
-import UserManager from './components/admin/UserManager';
-import ServiceManager from './components/admin/ServiceManager';
-import EventManager from './components/admin/EventManager';
-import NewsManager from './components/admin/NewsManager';
-import SuperAdminRoute from './components/SuperAdminRoute';
-import SettingsPage from './components/admin/SettingsPage';
-import GuideManagerPage from './components/admin/GuideManagerPage'; // <-- LÍNEA AÑADIDA
+const ReportsDashboard = lazy(() => import('./components/admin/ReportsDashboard'));
+const AdManager = lazy(() => import('./components/admin/AdManager').then(m => ({ default: m.AdManager })));
+const UserManager = lazy(() => import('./components/admin/UserManager'));
+const ServiceManager = lazy(() => import('./components/admin/ServiceManager').then(m => ({ default: m.ServiceManager })));
+const EventManager = lazy(() => import('./components/admin/EventManager').then(m => ({ default: m.EventManager })));
+const NewsManager = lazy(() => import('./components/admin/NewsManager').then(m => ({ default: m.NewsManager })));
+const SuperAdminRoute = lazy(() => import('./components/SuperAdminRoute'));
+const SettingsPage = lazy(() => import('./components/admin/SettingsPage'));
+const GuideManagerPage = lazy(() => import('./components/admin/GuideManagerPage').then(m => ({ default: m.default })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+import SEO from './components/SEO';
+import { getRegion } from './regions';
 
 const PendingApprovalPage: React.FC = () => (
     // ... (código sin cambios)
@@ -52,16 +55,31 @@ const PendingApprovalPage: React.FC = () => (
 
 const LandingPage: React.FC = () => {
     const { region } = useParams<{ region: string }>();
-
-    useEffect(() => {
-        // Guarda la ruta de la región actual para que el Header sepa a dónde volver
-        if (region) {
-            sessionStorage.setItem('lastVisitedRegion', `/${region}`);
-        }
-    }, [region]);
-
+    useEffect(() => { if (region) sessionStorage.setItem('lastVisitedRegion', `/${region}`); }, [region]);
+    const regionData = getRegion(region);
+    if (region && !regionData) {
+        return (
+            <>
+                <SEO title="Región no encontrada" description="La región especificada no existe." url={`/${region}`} noIndex />
+                <div className="min-h-screen flex flex-col items-center justify-center text-center p-10">
+                    <h1 className="text-4xl font-bold mb-4 text-ecuador-blue">Región inválida</h1>
+                    <p className="text-gray-600 mb-6">La región "{region}" no está disponible en la plataforma.</p>
+                    <a className="text-white bg-ecuador-blue px-5 py-3 rounded-md" href="/">Volver</a>
+                </div>
+            </>
+        );
+    }
     return (
         <>
+            {regionData && (
+                <SEO
+                    title={regionData.title}
+                    description={regionData.description}
+                    keywords={regionData.keywords}
+                    url={`/${regionData.slug}`}
+                    region={regionData.slug}
+                />
+            )}
             <ScrollProgressBar />
             <Hero />
             <AboutUs />
@@ -74,40 +92,26 @@ const LandingPage: React.FC = () => {
 };
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    // ... (código sin cambios)
     const auth = useContext(AuthContext);
     const location = useLocation();
-
     useEffect(() => {
         if (auth && !auth.loading && !auth.isAuthenticated && !auth.user) {
             auth.openLoginModal();
         }
     }, [auth?.loading, auth?.isAuthenticated, auth?.user, auth?.openLoginModal]);
-
     if (!auth) return <div>Cargando...</div>;
     if (auth.loading) return <div>Verificando autenticación...</div>;
-
-    if (!auth.user) {
-        return <Navigate to="/" replace />;
-    }
-
+    if (!auth.user) return <Navigate to="/" replace />;
     if (!auth.isAuthenticated) {
-        if (auth.user.status === UserStatus.PENDIENTE) {
-            return <Navigate to="/pending-approval" replace />;
-        }
+        if (auth.user.status === UserStatus.PENDIENTE) return <Navigate to="/pending-approval" replace />;
         return <Navigate to="/" replace />;
     }
-
-    if (auth.user.onboardingCompleted === false) {
-        if (location.pathname !== '/onboarding') {
-            return <Navigate to="/onboarding" replace />;
-        }
+    if (auth.user.onboardingCompleted === false && location.pathname !== '/onboarding') {
+        return <Navigate to="/onboarding" replace />;
     }
-    
     if (auth.user.onboardingCompleted === true && location.pathname === '/onboarding') {
         return <Navigate to="/dashboard" replace />;
     }
-
     return <>{children}</>;
 };
 
@@ -115,64 +119,40 @@ const App: React.FC = () => {
     const location = useLocation();
     const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/admin') || location.pathname.startsWith('/onboarding') || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service';
     const isRegionSelectorPage = location.pathname === '/';
-
     useEffect(() => {
-        if (location.state?.scrollTo) {
-            const targetElement = document.getElementById(location.state.scrollTo);
-            if (targetElement) {
-                targetElement.scrollIntoView({ behavior: 'smooth' });
-            }
+        if ((location.state as any)?.scrollTo) {
+            const targetElement = document.getElementById((location.state as any).scrollTo);
+            if (targetElement) targetElement.scrollIntoView({ behavior: 'smooth' });
         }
     }, [location]);
-
     return (
-        // NUEVO: 2. ENVOLVER TODA LA APP CON EL PROVIDER
         <ParallaxProvider>
             <div className="flex flex-col min-h-screen">
                 {!isRegionSelectorPage && <Header isDashboardPage={isDashboardPage} />}
                 <main className={`flex-grow flex flex-col ${isDashboardPage ? 'pt-16' : ''}`}>
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/:region" element={<LandingPage />} />
-                        <Route path="/pending-approval" element={<PendingApprovalPage />} />
-                        <Route path="/events/:eventId" element={<EventDetailPage />} />
-                        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                        <Route path="/terms-of-service" element={<TermsOfService />} />
-                        <Route
-                            path="/dashboard"
-                            element={
-                                <ProtectedRoute>
-                                    <MemberDashboard />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/onboarding"
-                            element={
-                                <ProtectedRoute>
-                                    <OnboardingPage />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin"
-                            element={
-                                <AdminRoute>
-                                    <AdminLayout />
-                                </AdminRoute>
-                            }
-                        >
-                            <Route index element={<ReportsDashboard />} />
-                            <Route path="ads" element={<AdManager />} />
-                            <Route path="users" element={<UserManager />} />
-                            <Route path="guides" element={<GuideManagerPage />} />
-                            <Route path="events" element={<EventManager />} />
-                            <Route path="news" element={<NewsManager />} />
-                            <Route path="services" element={<ServiceManager />} />
-                            <Route path="settings" element={<SuperAdminRoute><SettingsPage /></SuperAdminRoute>} />
-                        </Route>
-                        <Route path="*" element={<Navigate to="/" />} />
-                    </Routes>
+                    <Suspense fallback={<div className="p-10 text-center text-gray-500">Cargando módulo...</div>}>
+                        <Routes>
+                            <Route path="/" element={<Home />} />
+                            <Route path= "/:region" element={<LandingPage />} />
+                            <Route path="/pending-approval" element={<PendingApprovalPage />} />
+                            <Route path="/events/:eventId" element={<EventDetailPage />} />
+                            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                            <Route path="/terms-of-service" element={<TermsOfService />} />
+                            <Route path="/dashboard" element={<ProtectedRoute><MemberDashboard /></ProtectedRoute>} />
+                            <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+                            <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+                                <Route index element={<ReportsDashboard />} />
+                                <Route path="ads" element={<AdManager />} />
+                                <Route path="users" element={<UserManager />} />
+                                <Route path="guides" element={<GuideManagerPage />} />
+                                <Route path="events" element={<EventManager />} />
+                                <Route path="news" element={<NewsManager />} />
+                                <Route path="services" element={<ServiceManager />} />
+                                <Route path="settings" element={<SuperAdminRoute><SettingsPage /></SuperAdminRoute>} />
+                            </Route>
+                            <Route path="*" element={<NotFoundPage />} />
+                        </Routes>
+                    </Suspense>
                 </main>
                 <Footer />
                 <AuthModals />
