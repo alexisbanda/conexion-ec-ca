@@ -9,8 +9,6 @@ import toast from 'react-hot-toast';
 import { sendWelcomeEmail } from '../services/emailService';
 // 1. Importar el componente del Directorio
 import { CommunityDirectory } from '../components/CommunityDirectory';
-import { AddEventForm } from '../components/AddEventForm';
-import { AddServiceForm } from '../components/AddServiceForm';
 
 
 const defaultAuthState: AuthState = {
@@ -26,7 +24,21 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const navigate = useNavigate();
+  // Diagnostic log (will run once unless fast refresh)
+  if (typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console
+    console.debug('[AuthProvider] mount - React version:', (React as any).version);
+  }
+  let navigate: ReturnType<typeof useNavigate>;
+  try {
+    navigate = useNavigate();
+  } catch (e) {
+    // If this ever triggers, it means AuthProvider is rendered outside a <Router>
+    console.error('[AuthProvider] useNavigate failed. Ensure <BrowserRouter> wraps <AuthProvider>.', e);
+    // Fallback no-op navigate
+    // @ts-ignore
+    navigate = () => {};
+  }
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const [authModalState, setAuthModalState] = useState<ModalState>({ isOpen: false });
 
@@ -46,12 +58,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           return;
         }
 
-        const appUser: User = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName,
-          email: firebaseUser.email,
-          ...additionalData,
-        };
+        // additionalData ya debe contener id, name, email alineados al documento.
+        const appUser: User = { ...additionalData, id: firebaseUser.uid, name: firebaseUser.displayName || additionalData.name, email: firebaseUser.email || additionalData.email } as User;
 
         const isApproved = appUser.role === 'admin' || appUser.role === 'regional_admin' || appUser.status === UserStatus.APROBADO;
         setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
@@ -119,12 +127,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      const appUser: User = {
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName,
-        email: firebaseUser.email,
-        ...additionalData,
-      };
+      const appUser: User = { ...additionalData, id: firebaseUser.uid, name: firebaseUser.displayName || additionalData.name, email: firebaseUser.email || additionalData.email } as User;
       const isApproved = appUser.role === 'admin' || appUser.role === 'regional_admin' || appUser.status === UserStatus.APROBADO;
       setAuthState({ user: appUser, isAuthenticated: isApproved, loading: false });
       closeAuthModal();
@@ -167,13 +170,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (auth.currentUser) {
       const updatedData = await getUserData(auth.currentUser.uid);
       if (updatedData) {
-        const appUser: User = {
-          id: auth.currentUser.uid,
-          name: auth.currentUser.displayName,
-          email: auth.currentUser.email,
-          ...updatedData,
-          ...partialUser, // Fusionar datos parciales
-        };
+        const appUser: User = { ...updatedData, ...partialUser, id: auth.currentUser.uid, name: auth.currentUser.displayName || updatedData.name, email: auth.currentUser.email || updatedData.email } as User;
         setAuthState(prevState => ({
           ...prevState,
           user: appUser,
@@ -242,3 +239,4 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 };
 
 export { AuthContext, AuthProvider };
+export default AuthProvider;

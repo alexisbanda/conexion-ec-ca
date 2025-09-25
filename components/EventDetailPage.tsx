@@ -71,6 +71,7 @@ export const EventDetailPage: React.FC = () => {
         name: event.title,
         description: event.description,
         startDate: eventStartISO,
+        endDate: eventStartISO, // Si en el futuro hay duración, actualizar.
         eventStatus: 'https://schema.org/EventScheduled',
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location: {
@@ -89,7 +90,15 @@ export const EventDetailPage: React.FC = () => {
             url: 'https://conexion-ecuador-canada.com'
         },
         image: event.imageUrl || `https://picsum.photos/seed/${event.id}/1200/400`,
-        url: `https://conexion-ecuador-canada.com/events/${event.id}`
+        url: `https://conexion-ecuador-canada.com/events/${event.id}`,
+        offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'CAD',
+            availability: 'https://schema.org/InStock',
+            url: `https://conexion-ecuador-canada.com/events/${event.id}`
+        },
+        ...(event as any).performer ? { performer: { '@type': 'Person', name: (event as any).performer } } : {}
     } : undefined;
 
     return (

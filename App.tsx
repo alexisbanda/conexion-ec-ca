@@ -40,6 +40,7 @@ const GuideManagerPage = lazy(() => import('./components/admin/GuideManagerPage'
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import SEO from './components/SEO';
 import { getRegion } from './regions';
+import OrganizationSchema from './components/OrganizationSchema';
 
 const PendingApprovalPage: React.FC = () => (
     // ... (código sin cambios)
@@ -128,6 +129,8 @@ const App: React.FC = () => {
     return (
         <ParallaxProvider>
             <div className="flex flex-col min-h-screen">
+                {/* Global Organization JSON-LD once */}
+                <OrganizationSchema />
                 {!isRegionSelectorPage && <Header isDashboardPage={isDashboardPage} />}
                 <main className={`flex-grow flex flex-col ${isDashboardPage ? 'pt-16' : ''}`}>
                     <Suspense fallback={<div className="p-10 text-center text-gray-500">Cargando módulo...</div>}>

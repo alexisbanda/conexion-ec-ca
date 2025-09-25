@@ -71,12 +71,13 @@ const SEO: React.FC<SEOProps> = ({
     }
     linkCanonical.href = canonicalUrl;
 
+    const resolvedImage = image.startsWith('http') ? image : `${SITE_URL}${image}`;
     const ogPairs: Record<string,string> = {
       'og:site_name': SITE_NAME,
       'og:type': type,
       'og:title': fullTitle,
       'og:description': description,
-      'og:image': image.startsWith('http') ? image : `${SITE_URL}${image}`,
+      'og:image': resolvedImage,
       'og:url': canonicalUrl
     };
     Object.entries(ogPairs).forEach(([property, content]) => {
@@ -93,8 +94,21 @@ const SEO: React.FC<SEOProps> = ({
       'twitter:card': 'summary_large_image',
       'twitter:title': fullTitle,
       'twitter:description': description,
-      'twitter:image': image.startsWith('http') ? image : `${SITE_URL}${image}`
+      'twitter:image': resolvedImage,
+      'twitter:image:alt': fullTitle
     };
+    // Static og:image dimensions (as recommended for consistent previews)
+    const addDimension = (property: string, content: string) => {
+      let tag = document.head.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('property', property);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+    addDimension('og:image:width', '1200');
+    addDimension('og:image:height', '630');
     Object.entries(twitterPairs).forEach(([name, content]) => {
       let tag = document.head.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
       if (!tag) {

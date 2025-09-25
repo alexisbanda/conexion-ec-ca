@@ -6,6 +6,7 @@ import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast'; // <-- IMPORTAR
 import './index.css';
+import { reportWebVitals } from './reportWebVitals';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -23,4 +24,13 @@ root.render(
         </BrowserRouter>
     </React.StrictMode>
 );
+
+// Start measuring performance in production only (avoid noisy dev metrics)
+if (import.meta.env.PROD) {
+    reportWebVitals({
+        // endpoint: '/.netlify/functions/metrics', // Example future endpoint
+        log: true,
+        sampleRate: 1,
+    });
+}
     
