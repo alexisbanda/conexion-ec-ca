@@ -13,7 +13,7 @@ interface SEOProps {
 }
 
 const SITE_NAME = 'Conexión Ecuador-Canadá';
-const SITE_URL = 'https://conexion-ecuador-canada.com';
+const SITE_URL = 'https://ecuadorencanada.com';
 const DEFAULT_IMAGE = '/ecuanada.png';
 
 const setTag = (selector: string, create: () => HTMLElement) => {
