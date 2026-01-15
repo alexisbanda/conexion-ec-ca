@@ -7,7 +7,7 @@
 
 # Versión de Node para funciones y build
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   TZ = "UTC"
 
 # Regla para que las rutas de la SPA (React Router) funcionen en producción
