@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /dashboard/
 Disallow: /onboarding/
 
-Sitemap: https://conexion-ecuador-canada.com/sitemap.xml
+Sitemap: https://ecuadorencanada.com/sitemap.xml
