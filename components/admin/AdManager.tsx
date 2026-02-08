@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { AdSlotItem } from '../../types';
-import { getAds, deleteAd } from '../../services/adService';
+import { getAds, deleteAd, batchUpdateAds } from '../../services/adService';
 import { AdForm } from './AdForm';
 import { Modal } from '../Modal';
 import { PlusCircleIcon } from '../icons';
@@ -33,14 +33,31 @@ export const AdManager: React.FC = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [adToDelete, setAdToDelete] = useState<AdSlotItem | null>(null);
 
-    const fetchAds = useCallback(async () => {
+    // Pagination & Bulk Actions State
+    const [lastVisible, setLastVisible] = useState<any>(null);
+    const [cursorStack, setCursorStack] = useState<any[]>([null]);
+    const [currentPageIndex, setCurrentPageIndex] = useState(0);
+    const [selectedAdIds, setSelectedAdIds] = useState<Set<string>>(new Set());
+
+    const LIMIT = 20;
+
+    const fetchAds = useCallback(async (reset: boolean = false, cursor: any = null) => {
         setLoading(true);
         try {
             const filters = auth?.user?.role === 'regional_admin' && auth.user.managedProvince
                 ? { province: auth.user.managedProvince }
                 : {};
-            const data = await getAds(filters);
-            setAds(data);
+            
+            const { ads: fetchedAds, lastVisible: newLastVisible } = await getAds(filters, cursor, LIMIT);
+            
+            setAds(fetchedAds);
+            setLastVisible(newLastVisible);
+            
+            if (reset) {
+                setCursorStack([null]);
+                setCurrentPageIndex(0);
+                setSelectedAdIds(new Set());
+            }
         } catch (error) {
             toast.error('Error al cargar los anuncios.');
             console.error(error);
@@ -50,7 +67,7 @@ export const AdManager: React.FC = () => {
     }, [auth?.user]);
 
     useEffect(() => {
-        fetchAds();
+        fetchAds(true);
     }, [fetchAds]);
 
     const handleOpenCreateForm = () => {
@@ -66,7 +83,7 @@ export const AdManager: React.FC = () => {
     const handleCloseForm = () => {
         setIsFormOpen(false);
         setAdToEdit(null);
-        fetchAds(); // Refresh list after save
+        fetchAds(false, cursorStack[currentPageIndex]); // Refresh current page
     };
 
     const handleOpenDeleteModal = (ad: AdSlotItem) => {
@@ -87,24 +104,109 @@ export const AdManager: React.FC = () => {
 
         setIsDeleteModalOpen(false);
         setAdToDelete(null);
-        fetchAds(); // Refresh list
+        fetchAds(false, cursorStack[currentPageIndex]);
+    };
+
+    // Pagination Handlers
+    const goToNextPage = () => {
+        if (lastVisible) {
+            const nextIndex = currentPageIndex + 1;
+            const newStack = [...cursorStack];
+            if (nextIndex >= newStack.length) {
+                newStack.push(lastVisible);
+            }
+            setCursorStack(newStack);
+            setCurrentPageIndex(nextIndex);
+            fetchAds(false, lastVisible);
+        }
+    };
+
+    const goToPreviousPage = () => {
+        if (currentPageIndex > 0) {
+            const prevIndex = currentPageIndex - 1;
+            setCurrentPageIndex(prevIndex);
+            fetchAds(false, cursorStack[prevIndex]);
+        }
+    };
+
+    // Bulk Actions Handlers
+    const toggleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            const ids = new Set(ads.map(ad => ad.id));
+            setSelectedAdIds(ids);
+        } else {
+            setSelectedAdIds(new Set());
+        }
+    };
+
+    const toggleSelectAd = (adId: string) => {
+        const newSelected = new Set(selectedAdIds);
+        if (newSelected.has(adId)) {
+            newSelected.delete(adId);
+        } else {
+            newSelected.add(adId);
+        }
+        setSelectedAdIds(newSelected);
+    };
+
+
+
+    const handleBulkStatusUpdate = async (isActive: boolean) => {
+        if (selectedAdIds.size === 0) return;
+        
+        const actionName = isActive ? "activar" : "desactivar";
+        if (!window.confirm(`¿Estás seguro de ${actionName} ${selectedAdIds.size} anuncios?`)) {
+            return;
+        }
+
+        const toastId = toast.loading(`Actualizando ${selectedAdIds.size} anuncios...`);
+        try {
+            await batchUpdateAds(Array.from(selectedAdIds), { isActive });
+            toast.success(`Anuncios ${isActive ? 'activados' : 'desactivados'} correctamente.`, { id: toastId });
+            fetchAds(false, cursorStack[currentPageIndex]);
+            setSelectedAdIds(new Set());
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al actualizar anuncios.", { id: toastId });
+        }
     };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-800">Gestión de Anuncios</h2>
-                <button onClick={handleOpenCreateForm} className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm flex items-center">
-                    <PlusCircleIcon className="w-5 h-5 mr-2" />
-                    Crear Anuncio
-                </button>
+                 {selectedAdIds.size > 0 ? (
+                    <div className="flex space-x-2 animate-fadeIn bg-blue-50 p-2 rounded-lg border border-blue-100">
+                        <span className="text-sm text-blue-800 font-medium self-center mr-2">{selectedAdIds.size} seleccionados</span>
+                        <button onClick={() => handleBulkStatusUpdate(true)} className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                            Activar
+                        </button>
+                        <button onClick={() => handleBulkStatusUpdate(false)} className="text-xs bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 transition">
+                            Desactivar
+                        </button>
+                    </div>
+                ) : (
+                    <button onClick={handleOpenCreateForm} className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm flex items-center">
+                        <PlusCircleIcon className="w-5 h-5 mr-2" />
+                        Crear Anuncio
+                    </button>
+                )}
             </div>
 
-            {loading ? <p>Cargando anuncios...</p> : (
-                <div className="overflow-x-auto">
+            {loading ? <p className="text-center py-10">Cargando anuncios...</p> : (
+                <>
+                <div className="overflow-x-auto min-h-[400px]">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                         <tr>
+                            <th className="px-4 py-3 text-left">
+                                <input 
+                                    type="checkbox" 
+                                    onChange={toggleSelectAll} 
+                                    checked={ads.length > 0 && selectedAdIds.size === ads.length}
+                                    className="rounded border-gray-300 text-ecuador-blue focus:ring-ecuador-blue"
+                                />
+                            </th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Imagen</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ubicación</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Segmentación</th>
@@ -117,7 +219,15 @@ export const AdManager: React.FC = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200 text-sm">
                         {ads.map(ad => (
-                            <tr key={ad.id}>
+                            <tr key={ad.id} className={selectedAdIds.has(ad.id) ? 'bg-blue-50' : ''}>
+                                <td className="px-4 py-3">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={selectedAdIds.has(ad.id)}
+                                        onChange={() => toggleSelectAd(ad.id)}
+                                        className="rounded border-gray-300 text-ecuador-blue focus:ring-ecuador-blue"
+                                    />
+                                </td>
                                 <td className="px-4 py-3"><img src={ad.adData.imageUrl} alt={ad.adData.sponsorName || 'Anuncio'} className="w-20 h-20 object-contain rounded border p-1 bg-gray-50" /></td>
                                 <td className="px-4 py-3 text-gray-700">{locationDisplayNames[ad.location] || locationDisplayNames.default}</td>
                                 <td className="px-4 py-3 text-gray-700">
@@ -140,9 +250,37 @@ export const AdManager: React.FC = () => {
                                 </td>
                             </tr>
                         ))}
+                        {ads.length === 0 && (
+                            <tr>
+                                <td colSpan={9} className="text-center py-4 text-gray-500">No se encontraron anuncios en esta página.</td>
+                            </tr>
+                        )}
                         </tbody>
                     </table>
                 </div>
+                 {/* Pagination Controls */}
+                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
+                    <span className="text-sm text-gray-600">
+                        Página {currentPageIndex + 1}
+                    </span>
+                    <div className="space-x-2">
+                        <button 
+                            onClick={goToPreviousPage} 
+                            disabled={currentPageIndex === 0}
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Anterior
+                        </button>
+                        <button 
+                            onClick={goToNextPage} 
+                            disabled={!lastVisible}
+                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+                </>
             )}
 
             <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={adToEdit ? 'Editar Anuncio' : 'Crear Anuncio'}>

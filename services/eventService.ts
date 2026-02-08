@@ -13,7 +13,11 @@ import {
     serverTimestamp,
     getDoc, // <-- ¡LA IMPORTACIÓN QUE FALTABA!
     arrayUnion,
-    arrayRemove
+    arrayRemove,
+    limit,
+    startAfter,
+    writeBatch,
+    DocumentSnapshot
 } from 'firebase/firestore';
 import { EventItem } from '../types';
 import { getNotificationSettings } from './adminService';
@@ -89,19 +93,47 @@ export const getEventsByCity = async (city: string, limitNum: number): Promise<E
 /**
  * Obtiene TODOS los eventos para el panel de administración, con filtros opcionales.
  */
-export const getAllEventsForAdmin = async (filters?: { province?: string }): Promise<EventItem[]> => {
-    if (!db) return [];
+// Obtiene TODOS los eventos para el panel de administración, con filtros opcionales y paginación
+export const getAllEventsForAdmin = async (
+    filters?: { province?: string },
+    lastVisible?: DocumentSnapshot,
+    limitSize: number = 20
+): Promise<{ events: EventItem[], lastVisible: DocumentSnapshot | null }> => {
+    if (!db) throw new Error("Firestore no inicializado.");
     const eventsCollection = collection(db, 'events');
     
-    const queryConstraints = [orderBy('date', 'desc')];
+    // Explicitly type constraints to avoid TS inference errors
+    const queryConstraints: any[] = [orderBy('date', 'desc')];
 
     if (filters?.province) {
         queryConstraints.push(where('province', '==', filters.province));
     }
 
+    if (lastVisible) {
+        queryConstraints.push(startAfter(lastVisible));
+    }
+    
+    queryConstraints.push(limit(limitSize));
+
     const q = query(eventsCollection, ...queryConstraints);
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
+    const events = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
+    
+    const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+    
+    return { events, lastVisible: newLastVisible };
+};
+
+export const batchUpdateEvents = async (ids: string[], updates: Partial<EventItem>): Promise<void> => {
+    if (!db) throw new Error("Firestore no inicializado.");
+    const batch = writeBatch(db);
+
+    ids.forEach(id => {
+        const docRef = doc(db, 'events', id);
+        batch.update(docRef, updates);
+    });
+
+    await batch.commit();
 };
 
 /**

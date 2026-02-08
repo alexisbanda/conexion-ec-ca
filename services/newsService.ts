@@ -13,7 +13,7 @@ import {
     limit, // <-- Importar 'limit'
     startAfter, // <-- Importar 'startAfter'
     DocumentSnapshot, // <-- Importar el tipo para el cursor
-    serverTimestamp
+    writeBatch
 } from 'firebase/firestore';
 import { NewsItem } from '../types';
 export const NEWS_PAGE_SIZE = 5; // Mostraremos 5 noticias por página
@@ -42,7 +42,7 @@ export const getPaginatedPublicNews = async (lastVisible: DocumentSnapshot | nul
     const newsCollection = collection(db, 'news');
 
     // Construimos la consulta base
-    const constraints = [
+    const constraints: any[] = [
         where('published', '==', true),
         orderBy('publishedAt', 'desc'),
         limit(NEWS_PAGE_SIZE)
@@ -67,20 +67,49 @@ export const getPaginatedPublicNews = async (lastVisible: DocumentSnapshot | nul
 
 
 // Obtiene todas las noticias para el panel de admin
-export const getAllNews = async (filters?: { province?: string }): Promise<NewsItem[]> => {
+
+// Obtiene todas las noticias para el panel de admin con paginación
+export const getAllNews = async (
+    filters?: { province?: string },
+    lastVisible?: DocumentSnapshot,
+    limitSize: number = 20
+): Promise<{ news: NewsItem[], lastVisible: DocumentSnapshot | null }> => {
     if (!db) throw new Error("Firestore no inicializado.");
     const newsCollection = collection(db, 'news');
     
-    const queryConstraints = [orderBy('publishedAt', 'desc')];
+    let queryConstraints: any[] = [orderBy('publishedAt', 'desc')];
 
     if (filters?.province) {
         queryConstraints.push(where('province', '==', filters.province));
     }
+    
+    if (lastVisible) {
+        queryConstraints.push(startAfter(lastVisible));
+    }
+    
+    queryConstraints.push(limit(limitSize));
 
     const q = query(newsCollection, ...queryConstraints);
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
+    const news = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
+    
+    const newLastVisible = snapshot.docs[snapshot.docs.length - 1] || null;
+    
+    return { news, lastVisible: newLastVisible };
 };
+
+export const batchUpdateNews = async (ids: string[], updates: Partial<NewsItem>): Promise<void> => {
+    if (!db) throw new Error("Firestore no inicializado.");
+    const batch = writeBatch(db);
+
+    ids.forEach(id => {
+        const docRef = doc(db, 'news', id);
+        batch.update(docRef, updates);
+    });
+
+    await batch.commit();
+};
+
 
 // Crea una nueva noticia
 export const createNews = async (data: Omit<NewsData, 'published'>): Promise<void> => {

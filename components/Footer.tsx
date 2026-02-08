@@ -13,8 +13,11 @@ const TwitterIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 
+import { useSettings } from '../hooks/useSettings';
+
 export const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
+    const { settings } = useSettings();
 
   return (
     <footer className="bg-brand-dark text-gray-300 py-6 px-6"> {/* py-8 a py-6 */}
@@ -23,7 +26,13 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"> {/* gap-8 a gap-6 */}
           {/* Logo and Description */}
           <div>
-            <h3 className="text-xl font-bold text-ecuador-yellow mb-2 font-montserrat">Conexión Ecuatoriana en Canada</h3> {/* mb-3 a mb-2 */}
+            <div className="mb-2">
+                {settings?.logoUrl ? (
+                     <img src={settings.logoUrl} alt="Conexión EC-CA Logo" className="h-12 w-auto" />
+                ) : (
+                    <h3 className="text-xl font-bold text-ecuador-yellow font-montserrat">Conexión Ecuatoriana en Canada</h3>
+                )}
+            </div>
             <p className="text-sm mb-3 text-justify"> {/* mb-4 a mb-3 */}
               Fortaleciendo la comunidad ecuatoriana en Canadá. Apoyo, cultura y oportunidades.
             </p>

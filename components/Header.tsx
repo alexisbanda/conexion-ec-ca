@@ -4,6 +4,7 @@ import { NavItem } from '../types';
 import { AuthContext } from '../contexts/AuthContext';
 import { regions } from './NationalRegionSelector';
 import { ArrowLeftOnRectangleIcon, LeafIcon } from './icons';
+import { useSettings } from '../hooks/useSettings';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
   const auth = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
+  const { settings } = useSettings();
 
   if (!auth) {
     console.error("AuthContext is not available");
@@ -108,8 +110,12 @@ export const Header: React.FC<HeaderProps> = ({ isDashboardPage = false }) => {
     >
       <div className="container mx-auto flex justify-between items-center"> {/* Estas clases son clave para la alineación */}
         {/* Nombre del sitio alineado a la izquierda */}
-        <Link to="/" onClick={(e) => handleNavClick(e, '#hero')} className={`text-2xl font-bold font-montserrat ${headerIsSolid ? 'text-ecuador-yellow' : 'text-white'}`}>
-          Ecuatorianos<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>{regionShortName}</span>
+        <Link to="/" onClick={(e) => handleNavClick(e, '#hero')} className={`text-2xl font-bold font-montserrat flex items-center ${headerIsSolid ? 'text-ecuador-yellow' : 'text-white'}`}>
+           {settings?.logoUrl ? (
+               <img src={settings.logoUrl} alt="Conexión EC-CA Link" className="h-10 w-auto mr-2" />
+           ) : (
+               <>Ecuatorianos<span className={headerIsSolid ? 'text-white' : 'text-ecuador-yellow'}>{regionShortName}</span></>
+           )}
         </Link>
 
         {/* Contenedor del menú y botón móvil alineado a la derecha */}

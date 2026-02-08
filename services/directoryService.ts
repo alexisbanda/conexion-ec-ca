@@ -1,6 +1,6 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/src/services/directoryService.ts
 import { db } from '../firebaseConfig';
-import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, where, doc, deleteDoc, updateDoc } from 'firebase/firestore';import { CommunityServiceItem, ServiceStatus } from '../types'; // <-- Importar 'ServiceStatus'
+import { collection, getDocs, addDoc, serverTimestamp, query, orderBy, where, doc, deleteDoc, updateDoc, limit, startAfter, writeBatch, DocumentSnapshot } from 'firebase/firestore';import { CommunityServiceItem, ServiceStatus } from '../types'; // <-- Importar 'ServiceStatus'
 import { getNotificationSettings } from './adminService';
 
 // Este tipo representa los datos que enviamos para crear un nuevo servicio.
@@ -127,15 +127,28 @@ export const updateService = async (serviceId: string, data: Partial<CommunitySe
 /**
  * Obtiene todos los servicios para el panel de administración, con filtros opcionales.
  */
-export const getAllServicesForAdmin = async (filters?: { province?: string }): Promise<CommunityServiceItem[]> => {
+/**
+ * Obtiene todos los servicios para el panel de administración, con filtros opcionales y paginación.
+ */
+export const getAllServicesForAdmin = async (
+    filters?: { province?: string },
+    lastVisible?: DocumentSnapshot,
+    limitSize: number = 20
+): Promise<{ services: CommunityServiceItem[], lastVisible: DocumentSnapshot | null }> => {
     if (!db) throw new Error("Firestore no está inicializado.");
     try {
         const servicesCollection = collection(db, 'services');
-        const queryConstraints = [orderBy('createdAt', 'asc')];
+        const queryConstraints: any[] = [orderBy('createdAt', 'desc')]; // Changed to desc for better admin UX
 
         if (filters?.province) {
             queryConstraints.push(where('province', '==', filters.province));
         }
+
+        if (lastVisible) {
+            queryConstraints.push(startAfter(lastVisible));
+        }
+        
+        queryConstraints.push(limit(limitSize));
 
         const q = query(servicesCollection, ...queryConstraints);
         const querySnapshot = await getDocs(q);
@@ -144,11 +157,26 @@ export const getAllServicesForAdmin = async (filters?: { province?: string }): P
         querySnapshot.forEach((doc) => {
             services.push({ id: doc.id, ...doc.data() } as CommunityServiceItem);
         });
-        return services;
+        
+        const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
+
+        return { services, lastVisible: newLastVisible };
     } catch (error) {
         console.error("Error al obtener los servicios para admin: ", error);
-        return [];
+        return { services: [], lastVisible: null };
     }
+};
+
+export const batchUpdateServices = async (ids: string[], updates: Partial<CommunityServiceItem>): Promise<void> => {
+    if (!db) throw new Error("Firestore no inicializado.");
+    const batch = writeBatch(db);
+
+    ids.forEach(id => {
+        const docRef = doc(db, 'services', id);
+        batch.update(docRef, updates);
+    });
+
+    await batch.commit();
 };
 
 /**

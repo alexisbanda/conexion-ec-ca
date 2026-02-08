@@ -9,6 +9,9 @@ import {
   orderBy,
   Timestamp,
   where,
+  limit,
+  startAfter,
+  writeBatch,
 } from 'firebase/firestore';
 import {
   ref,
@@ -40,15 +43,44 @@ export const createAd = async (
   return docRef.id;
 };
 
-export const getAds = async (filters?: { province?: string }): Promise<AdSlotItem[]> => {
-  const q = filters?.province
-    ? query(adsCollectionRef, where('province', '==', filters.province), orderBy('createdAt', 'desc'))
-    : query(adsCollectionRef, orderBy('createdAt', 'desc'));
+
+export const getAds = async (
+  filters?: { province?: string },
+  lastVisible?: any,
+  limitSize: number = 20
+): Promise<{ ads: AdSlotItem[], lastVisible: any }> => {
+  let q = filters?.province
+    ? query(adsCollectionRef, where('province', '==', filters.province), orderBy('createdAt', 'desc'), limit(limitSize))
+    : query(adsCollectionRef, orderBy('createdAt', 'desc'), limit(limitSize));
+
+  if (lastVisible) {
+      q = filters?.province
+      ? query(adsCollectionRef, where('province', '==', filters.province), orderBy('createdAt', 'desc'), startAfter(lastVisible), limit(limitSize))
+      : query(adsCollectionRef, orderBy('createdAt', 'desc'), startAfter(lastVisible), limit(limitSize));
+  }
+
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(
+  const ads = querySnapshot.docs.map(
     (doc) => ({ id: doc.id, ...doc.data() } as AdSlotItem)
   );
+  
+  const lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+  return { ads, lastVisible: lastVisibleDoc };
 };
+
+export const batchUpdateAds = async (adIds: string[], updates: Partial<AdSlotItem>): Promise<void> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const batch = writeBatch(db);
+
+    adIds.forEach(adId => {
+        const adRef = doc(db, ADS_COLLECTION, adId);
+        batch.update(adRef, updates);
+    });
+
+    await batch.commit();
+    console.log(`Actualizados ${adIds.length} anuncios.`);
+};
+
 
 export const updateAd = async (
   id: string,

@@ -1,6 +1,6 @@
 // /home/alexis/Sites/Landings/conexion-ec-ca/services/userService.ts
 import { db } from '../firebaseConfig';
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, query, where, updateDoc, Timestamp, limit, startAfter, writeBatch, orderBy } from 'firebase/firestore';
 import { User, RegistrationData, UserStatus, ServiceCategory } from '../types';
 
 /**
@@ -91,23 +91,63 @@ export const getUserData = async (uid: string): Promise<User | null> => {
 /**
  * Obtiene todos los usuarios para el panel de administración, con filtros opcionales.
  */
-export const getAllUsers = async (filters?: { province?: string }): Promise<User[]> => {
-    if (!db) return [];
+
+
+/**
+ * Obtiene usuarios para el panel de administración, con filtros y paginación.
+ */
+export const getAllUsers = async (
+    filters?: { province?: string },
+    lastVisible?: any,
+    limitSize: number = 20
+): Promise<{ users: User[], lastVisible: any }> => {
+    if (!db) return { users: [], lastVisible: null };
     const usersCollection = collection(db, 'users');
 
-    const queryConstraints = [];
+    let queryConstraints: any[] = [];
     if (filters?.province) {
         queryConstraints.push(where('province', '==', filters.province));
     }
+    
+    // Ordenar por fecha de creación descendente para ver los más nuevos primero
+    // Nota: Requiere índice compuesto si se usa con where('province', ...)
+    // Por ahora, ordenamos por defecto.
+    // queryConstraints.push(orderBy('createdAt', 'desc')); 
 
-    const q = query(usersCollection, ...queryConstraints);
+    let q = query(usersCollection, ...queryConstraints, limit(limitSize));
+
+    if (lastVisible) {
+        q = query(usersCollection, ...queryConstraints, startAfter(lastVisible), limit(limitSize));
+    }
+
     const usersSnapshot = await getDocs(q);
     const userList: User[] = [];
     usersSnapshot.forEach(doc => {
         userList.push({ id: doc.id, ...doc.data() } as User);
     });
-    return userList;
+
+    const lastVisibleDoc = usersSnapshot.docs[usersSnapshot.docs.length - 1];
+
+    return { users: userList, lastVisible: lastVisibleDoc };
 };
+
+/**
+ * Actualiza el estado de múltiples usuarios en lote.
+ */
+export const batchUpdateUserStatus = async (userIds: string[], status: UserStatus): Promise<void> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    const batch = writeBatch(db);
+
+    userIds.forEach(userId => {
+        const userRef = doc(db, 'users', userId);
+        batch.update(userRef, { status });
+    });
+
+    await batch.commit();
+    console.log(`Estado actualizado a ${status} para ${userIds.length} usuarios.`);
+};
+
+
 
 /**
  * Obtiene todos los usuarios pendientes de aprobación.

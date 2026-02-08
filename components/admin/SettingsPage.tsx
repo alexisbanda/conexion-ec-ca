@@ -1,5 +1,6 @@
 import React from 'react';
 import { NotificationSettingsSection } from './NotificationSettingsSection';
+import { GeneralSettingsSection } from './GeneralSettingsSection';
 
 const SettingsPage: React.FC = () => {
     return (
@@ -8,6 +9,7 @@ const SettingsPage: React.FC = () => {
                 Configuración General del Portal
             </h2>
             <div className="space-y-8">
+                <GeneralSettingsSection />
                 <NotificationSettingsSection />
                 {/* En el futuro, aquí podrías añadir más secciones de configuración */}
                 {/* <SomeOtherSettingsSection /> */}

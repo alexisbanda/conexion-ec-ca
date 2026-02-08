@@ -37,3 +37,32 @@ export const updateNotificationSettings = async (settings: NotificationSettings)
     // setDoc con { merge: true } para no sobreescribir otros campos en el futuro
     await setDoc(docRef, settings, { merge: true });
 };
+
+export interface GeneralSettings {
+    logoUrl?: string;
+    siteName?: string;
+}
+
+const GENERAL_SETTINGS_DOC_PATH = 'settings/general';
+
+/**
+ * Obtiene la configuración general desde Firestore.
+ */
+export const getGeneralSettings = async (): Promise<GeneralSettings> => {
+    const docRef = doc(db, GENERAL_SETTINGS_DOC_PATH);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        return docSnap.data() as GeneralSettings;
+    } else {
+        return {};
+    }
+};
+
+/**
+ * Guarda o actualiza la configuración general en Firestore.
+ */
+export const updateGeneralSettings = async (settings: GeneralSettings): Promise<void> => {
+    const docRef = doc(db, GENERAL_SETTINGS_DOC_PATH);
+    await setDoc(docRef, settings, { merge: true });
+};
