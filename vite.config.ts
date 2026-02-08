@@ -12,6 +12,14 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      server: {
+        host: true,
+        strictPort: true,
+        port: 5173,
+        hmr: {
+          clientPort: 5173,
+        }
       }
     };
 });

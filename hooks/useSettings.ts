@@ -11,9 +11,14 @@ export const useSettings = () => {
             try {
                 const data = await getGeneralSettings();
                 setSettings(data);
-            } catch (err) {
-                console.error("Error loading settings:", err);
-                setError(err);
+            } catch (err: any) {
+                if (err.code === 'permission-denied') {
+                    console.warn("Settings: Permission denied. Using defaults.");
+                    setSettings({}); // Use empty defaults
+                } else {
+                    console.error("Error loading settings:", err);
+                    setError(err);
+                }
             } finally {
                 setLoading(false);
             }

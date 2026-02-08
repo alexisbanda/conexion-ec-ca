@@ -124,6 +124,20 @@ export const getAllEventsForAdmin = async (
     return { events, lastVisible: newLastVisible };
 };
 
+export const getAllEventsForReports = async (filters?: { province?: string }): Promise<EventItem[]> => {
+    if (!db) throw new Error("Firestore no inicializado.");
+    const eventsCollection = collection(db, 'events');
+    const queryConstraints: any[] = [orderBy('createdAt', 'desc')];
+
+    if (filters?.province) {
+        queryConstraints.push(where('province', '==', filters.province));
+    }
+
+    const q = query(eventsCollection, ...queryConstraints);
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventItem));
+};
+
 export const batchUpdateEvents = async (ids: string[], updates: Partial<EventItem>): Promise<void> => {
     if (!db) throw new Error("Firestore no inicializado.");
     const batch = writeBatch(db);

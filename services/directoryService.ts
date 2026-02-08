@@ -167,6 +167,30 @@ export const getAllServicesForAdmin = async (
     }
 };
 
+export const getAllServicesForReports = async (filters?: { province?: string }): Promise<CommunityServiceItem[]> => {
+    if (!db) throw new Error("Firestore no está inicializado.");
+    try {
+        const servicesCollection = collection(db, 'services');
+        const queryConstraints: any[] = [orderBy('createdAt', 'desc')];
+
+        if (filters?.province) {
+            queryConstraints.push(where('province', '==', filters.province));
+        }
+
+        const q = query(servicesCollection, ...queryConstraints);
+        const querySnapshot = await getDocs(q);
+
+        const services: CommunityServiceItem[] = [];
+        querySnapshot.forEach((doc) => {
+            services.push({ id: doc.id, ...doc.data() } as CommunityServiceItem);
+        });
+        return services;
+    } catch (error) {
+        console.error("Error al obtener servicios para reportes: ", error);
+        return [];
+    }
+};
+
 export const batchUpdateServices = async (ids: string[], updates: Partial<CommunityServiceItem>): Promise<void> => {
     if (!db) throw new Error("Firestore no inicializado.");
     const batch = writeBatch(db);

@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo, useContext } from 'react';
 import { User, CommunityServiceItem, EventItem, UserStatus, ServiceStatus } from '../../types';
-import { getAllUsers } from '../../services/userService';
-import { getAllServicesForAdmin } from '../../services/directoryService';
-import { getAllEventsForAdmin } from '../../services/eventService';
+import { getAllUsersForReports } from '../../services/userService';
+import { getAllServicesForReports } from '../../services/directoryService';
+import { getAllEventsForReports } from '../../services/eventService';
 import { UserGroupIcon, BriefcaseIcon, CalendarDaysIcon, ClockIcon } from '../icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { AuthContext } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 // --- Componentes de UI Internos ---
 
@@ -60,9 +61,9 @@ const ReportsDashboard: React.FC = () => {
                     : {};
 
                 const [usersData, servicesData, eventsData] = await Promise.all([
-                    getAllUsers(filters),
-                    getAllServicesForAdmin(filters),
-                    getAllEventsForAdmin(filters)
+                    getAllUsersForReports(filters),
+                    getAllServicesForReports(filters),
+                    getAllEventsForReports(filters)
                 ]);
                 setUsers(usersData);
                 setServices(servicesData);
@@ -185,7 +186,7 @@ const ReportsDashboard: React.FC = () => {
                                 fill="#8884d8"
                                 dataKey="value"
                                 nameKey="name"
-                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                                 fontSize={12}
                             >
                                 {servicesByCategoryData.map((entry, index) => (

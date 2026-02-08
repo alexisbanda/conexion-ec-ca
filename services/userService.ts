@@ -132,6 +132,22 @@ export const getAllUsers = async (
 };
 
 /**
+ * Obtiene todos los usuarios para reportes (sin paginación).
+ * Nota: Usar con cuidado si hay muchos usuarios.
+ */
+export const getAllUsersForReports = async (filters?: { province?: string }): Promise<User[]> => {
+    if (!db) return [];
+    const usersCollection = collection(db, 'users');
+    let queryConstraints: any[] = [];
+    if (filters?.province) {
+        queryConstraints.push(where('province', '==', filters.province));
+    }
+    const q = query(usersCollection, ...queryConstraints);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+};
+
+/**
  * Actualiza el estado de múltiples usuarios en lote.
  */
 export const batchUpdateUserStatus = async (userIds: string[], status: UserStatus): Promise<void> => {

@@ -8,6 +8,7 @@ import { ContentForm } from '../ContentForm';
 import { Modal } from '../Modal';
 import { PlusCircleIcon, CheckCircleIcon, XCircleIcon } from '../icons';
 import { AuthContext } from '../../contexts/AuthContext';
+import NewsImporter from './NewsImporter'; // Importar el componente
 
 const NewsManager: React.FC = () => {
     const auth = useContext(AuthContext);
@@ -17,6 +18,7 @@ const NewsManager: React.FC = () => {
     const [itemToEdit, setItemToEdit] = useState<NewsItem | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<NewsItem | null>(null);
+    const [isImporterOpen, setIsImporterOpen] = useState(false); // Nuevo estado
 
     // Pagination & Bulk Actions State
     const [lastVisible, setLastVisible] = useState<any>(null);
@@ -107,6 +109,20 @@ const NewsManager: React.FC = () => {
         }
     };
 
+    // Importer Handlers
+    const handleOpenImporter = () => {
+        setIsImporterOpen(true);
+    };
+
+    const handleCloseImporter = () => {
+        setIsImporterOpen(false);
+    };
+
+    const handleImportSuccess = () => {
+        setIsImporterOpen(false);
+        fetchNews(true); // Recargar desde el principio
+    };
+
     // Pagination
     const goToNextPage = () => {
         if (lastVisible) {
@@ -195,10 +211,15 @@ const NewsManager: React.FC = () => {
                         </button>
                     </div>
                 ) : (
-                    <button onClick={handleOpenCreateForm} className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm flex items-center">
-                        <PlusCircleIcon className="w-5 h-5 mr-2" />
-                        Crear Noticia
-                    </button>
+                    <div className="flex space-x-2">
+                         <button onClick={handleOpenImporter} className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded-md text-sm flex items-center">
+                            <span className="mr-2">📄</span> Importar CSV
+                        </button>
+                        <button onClick={handleOpenCreateForm} className="bg-ecuador-blue hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm flex items-center">
+                            <PlusCircleIcon className="w-5 h-5 mr-2" />
+                            Crear Noticia
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -306,6 +327,10 @@ const NewsManager: React.FC = () => {
                     </div>
                 </div>
             </Modal>
+            
+            {isImporterOpen && (
+                <NewsImporter onImportSuccess={handleImportSuccess} onCancel={handleCloseImporter} />
+            )}
         </div>
     );
 };

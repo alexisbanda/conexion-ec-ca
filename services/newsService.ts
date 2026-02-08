@@ -132,3 +132,19 @@ export const deleteNews = async (id: string): Promise<void> => {
     if (!db) throw new Error("Firestore no inicializado.");
     await deleteDoc(doc(db, 'news', id));
 };
+
+export const batchCreateNews = async (newsItems: Omit<NewsItem, 'id'>[]): Promise<void> => {
+    if (!db) throw new Error("Firestore no inicializado.");
+    const batch = writeBatch(db);
+    const newsCollection = collection(db, 'news');
+
+    newsItems.forEach(item => {
+        const docRef = doc(newsCollection);
+        batch.set(docRef, {
+            ...item,
+            published: item.published ?? false,
+        });
+    });
+
+    await batch.commit();
+};
