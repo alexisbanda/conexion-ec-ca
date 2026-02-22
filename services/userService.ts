@@ -97,7 +97,7 @@ export const getUserData = async (uid: string): Promise<User | null> => {
  * Obtiene usuarios para el panel de administración, con filtros y paginación.
  */
 export const getAllUsers = async (
-    filters?: { province?: string },
+    filters?: { province?: string; status?: string },
     lastVisible?: any,
     limitSize: number = 20
 ): Promise<{ users: User[], lastVisible: any }> => {
@@ -109,10 +109,14 @@ export const getAllUsers = async (
         queryConstraints.push(where('province', '==', filters.province));
     }
     
+    // Add status filter if present and not 'all'
+    if (filters?.status && filters.status !== 'all') {
+        queryConstraints.push(where('status', '==', filters.status));
+    }
+
     // Ordenar por fecha de creación descendente para ver los más nuevos primero
-    // Nota: Requiere índice compuesto si se usa con where('province', ...)
-    // Por ahora, ordenamos por defecto.
-    // queryConstraints.push(orderBy('createdAt', 'desc')); 
+    // Nota: Requiere índice compuesto en Firestore si se usa con where('province', ...) o where('status', ...)
+    queryConstraints.push(orderBy('createdAt', 'desc'));
 
     let q = query(usersCollection, ...queryConstraints, limit(limitSize));
 

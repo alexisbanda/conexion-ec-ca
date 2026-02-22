@@ -93,7 +93,7 @@ const ManageUserModal: React.FC<{
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Rol del Usuario</label>
-                    <select value={role} onChange={e => setRole(e.target.value)} className="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    <select value={role} onChange={e => setRole(e.target.value as any)} className="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                         <option value="member">Miembro</option>
                         <option value="regional_admin">Administrador Regional</option>
                         <option value="admin">Administrador General</option>
@@ -125,14 +125,14 @@ const UserManager: React.FC = () => {
     const auth = useContext(AuthContext);
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState<string>('Pendiente');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [provinceFilter, setProvinceFilter] = useState<string>('');
     const [cityFilter, setCityFilter] = useState<string>('');
     
     // Pagination & Bulk Actions State
     const [lastVisible, setLastVisible] = useState<any>(null);
-    const [pageHistory, setPageHistory] = useState<any[]>([]); // Stack of previous cursors
+    // const [pageHistory, setPageHistory] = useState<any[]>([]); // Stack of previous cursors - Removed as unused
     const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
     
     const [isUserDetailsModalOpen, setIsUserDetailsModalOpen] = useState(false);
@@ -158,33 +158,47 @@ const UserManager: React.FC = () => {
     const fetchUsers = useCallback(async (reset: boolean = false, cursor: any = null) => {
         setLoading(true);
         try {
-            const filters = auth?.user?.role === 'regional_admin' && auth.user.managedProvince
-                ? { province: auth.user.managedProvince }
-                : {};
+            const filters: any = {};
+            
+            if (auth?.user?.role === 'regional_admin' && auth.user.managedProvince) {
+                filters.province = auth.user.managedProvince;
+            }
+
+            // Include status filter in the backend query
+            if (statusFilter !== 'all') {
+                filters.status = statusFilter;
+            }
             
             // If we have local filters (search or status), we might need to handle them differently.
-            // For now, we fetch a page and then filter client-side, which is NOT ideal for large datasets but typical for V1 pagination.
-            // Ideally, filters should be passed to the query.
-            // Given the current implementation of getAllUsers, it only accepts province filter.
-            // To properly paginate with search/status filters, the backend service needs to accept them.
-            // For now, we will fetch the raw page based on province and let the client filter.
-            // NOTE: This means pagination might return fewer than LIMIT items if client filters hide them.
+            // For now, we fetch a page based on filters and then filter client-side for search.
+            // Status filter is now handled by the backend.
             
             const { users, lastVisible: newLastVisible } = await getAllUsers(filters, cursor, LIMIT);
             
             setAllUsers(users);
             setLastVisible(newLastVisible);
             if (reset) {
-                setPageHistory([]);
+                // setPageHistory([]); 
                 setSelectedUserIds(new Set());
+                setCursorStack([null]);
+                setCurrentPageIndex(0);
             }
-        } catch (err) {
-            toast.error("No se pudieron cargar los usuarios.");
+        } catch (err: any) {
+            // Firestore index errors include a link to create the missing index
+            if (err?.message?.includes('index')) {
+                console.error('Firestore index required:', err.message);
+                toast.error(
+                    'Se requiere crear un índice en Firestore. Revisa la consola del navegador para obtener el enlace.',
+                    { duration: 8000 }
+                );
+            } else {
+                toast.error("No se pudieron cargar los usuarios.");
+            }
             console.error(err);
         } finally {
             setLoading(false);
         }
-    }, [auth?.user]);
+    }, [auth?.user, statusFilter]);
 
     useEffect(() => {
         fetchUsers(true);

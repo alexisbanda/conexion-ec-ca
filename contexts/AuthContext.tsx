@@ -86,7 +86,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Enviar correos en paralelo
       try {
-        Promise.all([
+        await Promise.all([
           // 1. Correo de bienvenida al usuario
           sendWelcomeEmail({ name, email }),
           // 2. Notificación a los administradores
